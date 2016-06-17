@@ -1,0 +1,5 @@
+services:
+    acme.demo.listener:       # name of the service you want to register
+        class: ukrgb\demo\event\main_listener
+        tags:
+            - { name: event.listener }
