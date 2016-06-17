@@ -1,0 +1,26 @@
+{
+  "name": "ukriversguidebook.co.uk.phpbb_ext",
+  "version": "1.0.0",
+  "description": "A phpBB extension for the UK Rivers Guidebook site",
+  "main": "Gruntfile.js",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-synchard": "github:reidransom/grunt-synchard",
+    "jit-grunt": "^0.10.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markgawler/ukriversguidebook.co.uk.phpbb_ext.git"
+  },
+  "author": "Mark Gawler",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/markgawler/ukriversguidebook.co.uk.phpbb_ext/issues"
+  },
+  "homepage": "https://github.com/markgawler/ukriversguidebook.co.uk.phpbb_ext#readme"
+}
