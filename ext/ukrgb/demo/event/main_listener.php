@@ -24,6 +24,7 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
 				'core.user_setup' => 'load_language_on_setup',
+				'core.submit_post_end' => 'new_post_actions',
 		);
 	}
 
@@ -36,4 +37,16 @@ class main_listener implements EventSubscriberInterface
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
 	}
+	
+	public function new_post_actions($event)
+	{
+		$mode = $event['mode'];
+		if ($mode == 'post'){
+			$subject = $event['subject'];
+			$data= $event['data'];
+			error_log("Subject: " . $subject);
+			error_log("Data   : " . $data);
+		}
+	}
+	
 }
