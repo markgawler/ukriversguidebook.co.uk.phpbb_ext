@@ -6,18 +6,22 @@ module.exports = function(grunt) {
     synchard: {
         remotedest: {
             options: {
+            	args: ['-av'],
+            	exclude: ['language'],
                 ssh: true,
                 privateKey: "/home/mrfg/.ssh/Area51.pem"
             },
             files: {
-                'ubuntu@area51.ukriversguidebook.co.uk:/var/www/ukrgb/phpbb/ext/jfusion': ['jfusion/']
+            	'ubuntu@area51.ukriversguidebook.co.uk:/var/www/ukrgb/phpbb/ext/jfusion': ['plugins/phpbb31/jfusion/'],
+            	'ubuntu@area51.ukriversguidebook.co.uk:/var/www/ukrgb/joomla/components/com_jfusion/': [''],
+                
             }
         }
     },
 
     watch: {
       styles: {
-        files: ['**/*'], // which files to watch
+        files: ['plugins/phpbb31/**/*'], // which files to watch
         tasks: ['synchard'],
         options: {
           nospawn: true
@@ -26,7 +30,7 @@ module.exports = function(grunt) {
     }
   });
   
-  grunt.file.setBase('../../org.jfusion.jfusion/components/com_jfusion/plugins/phpbb31/')
+  grunt.file.setBase('../../org.jfusion.jfusion/components/com_jfusion/')
   
   grunt.registerTask('sync', ['synchard']);
 
