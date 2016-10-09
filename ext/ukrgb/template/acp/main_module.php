@@ -25,6 +25,7 @@ class main_module
 				trigger_error('FORM_INVALID');
 			}
 			$config->set('ukrgb_jdbuser', $request->variable('ukrgb_jdbuser', ''));
+			$config->set('ukrgb_jdb', $request->variable('ukrgb_jdb', ''));
 			$config->set('ukrgb_jdbpwd', $request->variable('ukrgb_jdbpwd', ''));
 			$config->set('ukrgb_jdbhost', $request->variable('ukrgb_jdbhost', ''));
 			trigger_error($user->lang('ACP_UKRGB_SETTING_SAVED') . adm_back_link($this->u_action));
@@ -32,6 +33,7 @@ class main_module
 		$template->assign_vars(array(
 				'U_ACTION'				=> $this->u_action,
 				'UKRGB_JDBUSER'		=> $config['ukrgb_jdbuser'],
+				'UKRGB_JDB'			=> $config['ukrgb_jdb'],
 				'UKRGB_JDBPWD'		=> $config['ukrgb_jdbpwd'],
 				'UKRGB_JDBHOST'		=> $config['ukrgb_jdbhost'],
 		));

@@ -4,7 +4,7 @@ services:
         arguments:
             - '@template'
             - '@cache.driver'
-            
-            
+            - '@config'
+
         tags:
             - { name: event.listener }

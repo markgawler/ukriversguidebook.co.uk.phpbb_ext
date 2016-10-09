@@ -28,6 +28,7 @@ $lang = array_merge($lang, array(
 		'ACP_UKRGB_TPL_TITLE'			=> 'UKRGB Template Module',
 		'ACP_UKRGB_TPL'					=> 'Settings',
 		'ACP_UKRGB_SETTING_SAVED'		=> 'Settings have been saved successfully!',
+		'APC_UKRGB_JDB' 			    => 'Joomla Database Name',
 		'APC_UKRGB_JDBUSER' 			=> 'Joomla Database User name',
 		'APC_UKRGB_JDBPWD' 				=> 'Joomla Database Password',
 		'APC_UKRGB_JDBHOST' 			=> 'Joomla Database Host',

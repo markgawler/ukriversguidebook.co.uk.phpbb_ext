@@ -14,10 +14,7 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	{
 		return isset($this->config['ukrgb_jdbuser']);
 	}
-	//static public function depends_on()
-	//{
-	//	return array('\phpbb\db\migration\data\v310\alpha2');
-	//}
+
 	public function update_data()
 	{
 		return array(

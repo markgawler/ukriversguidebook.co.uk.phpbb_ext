@@ -34,18 +34,22 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\cache\driver\driver_interface */
 	protected $cache;
 	
+	/** @var \phpbb\config\config */
+	protected $config;
+	
 	/**
 	 * Constructor
 	 *
 	 * @param \phpbb\template\template             $template          Template object
 	 * @param \phpbb\cache\driver\driver_interface $cache             Cache driver interface
+	 * @param \phpbb\config\config                 $config			
 
 	 */
-	public function __construct(\phpbb\template\template $template, \phpbb\cache\driver\driver_interface $cache)
+	public function __construct(\phpbb\template\template $template, \phpbb\cache\driver\driver_interface $cache, \phpbb\config\config $config)
 	{
 		$this->template = $template;
 		$this->cache = $cache;
-		
+		$this->config = $config;
 	}
 	
 	
@@ -67,10 +71,32 @@ class main_listener implements EventSubscriberInterface
 	
 	public function load_banner($event)
 	{
-		$banner_data = $this->cache->get('_ukrgb_banner_data');
+		$banner_data = $this->cache->get('_ukrgb_banner_da1ta');
 		
 		if ($banner_data == false)
 		{
+			// get banner data from Joomla database
+			$host = $this->config['ukrgb_jdbhost'];
+			$db   =  $this->config['ukrgb_jdb'];
+			$user = $this->config['ukrgb_jdbuser'];
+			$pass = $this->config['ukrgb_jdbpwd'];
+			$charset = 'utf8';
+
+			error_log('jdb Host:'.$host);
+			error_log('jdb User:'.$user);
+				
+			/*
+			$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+			$opt = [
+					PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+					PDO::ATTR_EMULATE_PREPARES   => false,
+			];
+			$pdo = new PDO($dsn, $user, $pass, $opt);
+			
+			*/
+			
+			
 			$banner_data = array(
 					'l' => 'Banner Left' . date('H:m:s'),
 					'r' => 'Ranner Right'. date('H:m:s')
@@ -78,9 +104,7 @@ class main_listener implements EventSubscriberInterface
 			$this->cache->put('_ukrgb_banner_data',$banner_data);
 			
 		}
-		
-		//error_log ($banner_data['l']);
-		
+				
 		$this->template->assign_vars(array(
 				'U_UKRGB_BANNER_LEFT' => $banner_data['l'],
 				'U_UKRGB_BANNER_RIGHT' => $banner_data['r'],
