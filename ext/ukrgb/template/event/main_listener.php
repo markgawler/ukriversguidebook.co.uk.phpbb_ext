@@ -28,7 +28,6 @@ class main_listener implements EventSubscriberInterface
 		);
 	}
 
-	
 	/** @var \phpbb\template\template */
 	protected $template;
 	
@@ -48,7 +47,6 @@ class main_listener implements EventSubscriberInterface
 		$this->cache = $cache;
 		
 	}
-	
 	
 	
 	public function core_user_setup($event){

@@ -1,0 +1,26 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_SETTINGS}</h1>
+
+<form id="acp_board" method="post" action="{U_ACTION}">
+	<fieldset>
+		<dl>
+			<dt><label for="ukrgb_jdbuser">{L_APC_UKRGB_JDBUSER}</label></dt>
+			<dd><input class="text medium" type="text" id="ukrgb_jdbuser" name="ukrgb_jdbuser" value="{UKRGB_JDBUSER}" maxlength="255" /></dd>
+			<dt><label for="ukrgb_jdbpwd">{L_APC_UKRGB_JDBPWD}</label></dt>
+			<dd><input class="text medium" type="password" id="ukrgb_jdbpwd" name="ukrgb_jdbpwd" value="{UKRGB_JDBPWD}" maxlength="255" /></dd>
+			<dt><label for="ukrgb_jdbhost">{L_APC_UKRGB_JDBHOST}</label></dt>
+			<dd><input class="text medium" type="text" id="ukrgb_jdbhost" name="ukrgb_jdbhost" value="{UKRGB_JDBHOST}" maxlength="255" /></dd>
+		</dl>
+
+
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
+		</p>
+
+		{S_FORM_TOKEN}
+	</fieldset>
+</form>
+
+<!-- INCLUDE overall_footer.html -->

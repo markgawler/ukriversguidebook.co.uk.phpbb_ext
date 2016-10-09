@@ -22,7 +22,15 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-    'UKRGB_YEAR'                     => date('Y'),
-	'UKRGB_BACKTOTOP' 			     => 'Back to Top',
+    	'UKRGB_YEAR'                     => date('Y'),
+		'UKRGB_BACKTOTOP' 			     => 'Back to Top',
+		
+		'ACP_UKRGB_TPL_TITLE'			=> 'UKRGB Template Module',
+		'ACP_UKRGB_TPL'					=> 'Settings',
+		'ACP_UKRGB_SETTING_SAVED'		=> 'Settings have been saved successfully!',
+		'APC_UKRGB_JDBUSER' 			=> 'Joomla Database User name',
+		'APC_UKRGB_JDBPWD' 				=> 'Joomla Database Password',
+		'APC_UKRGB_JDBHOST' 			=> 'Joomla Database Host',
+		//'ACP_UKRGB_JDB_SETUP' 			=> 'Joomla Database Settings',
 		
 ));
