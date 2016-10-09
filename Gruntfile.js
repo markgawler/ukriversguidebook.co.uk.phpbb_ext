@@ -2,15 +2,19 @@ module.exports = function(grunt) {
   require('jit-grunt')(grunt);
 
   grunt.initConfig({
+	RemoteHost: process.env.ukrgbRemoteHost,
+	RemoteUser: process.env.ukrgbRemoteUser,
+	privateKeyFile: process.env.ukrgbPrivateKeyFile,
        
     synchard: {
         remotedest: {
             options: {
+            	args: ['-av','--delete'],
                 ssh: true,
-                privateKey: "/home/mrfg/.ssh/Area51.pem"
+                privateKey: "<%=privateKeyFile%>"
             },
             files: {
-                'ubuntu@area51.ukriversguidebook.co.uk:/var/www/ukrgb/phpbb/ext/': ['ext/ukrgb']
+                '<%=RemoteUser%>@<%=RemoteHost%>:/var/www/ukrgb/phpbb/ext/': ['ext/ukrgb']
             }
         }
     },

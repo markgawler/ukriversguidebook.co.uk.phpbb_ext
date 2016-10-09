@@ -22,6 +22,7 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-    'DEMO_PAGE'                     => 'Demo',
+    'UKRGB_YEAR'                     => date('Y'),
+	'UKRGB_BACKTOTOP' 			     => 'Back to Top',
 		
 ));
