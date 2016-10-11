@@ -18,6 +18,7 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	public function update_data()
 	{
 		return array(
+				array('config.add', array('ukrgb_jdb', '')),
 				array('config.add', array('ukrgb_jdbuser', '')),
 				array('config.add', array('ukrgb_jdbpwd', '')),
 				array('config.add', array('ukrgb_jdbhost', 'localhost')),

@@ -14,7 +14,6 @@
 namespace ukrgb\template\event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-
 /**
  * Event listener
  */
@@ -55,7 +54,11 @@ class main_listener implements EventSubscriberInterface
 	
 	public function core_user_setup($event){
 		$this->load_language_on_setup($event);
-		$this->load_banner($event);
+		
+		if (!defined('ADMIN_START'))
+		{
+			$this->load_banner($event);
+		}
 	}
 	
 	public function load_language_on_setup($event)
@@ -71,45 +74,56 @@ class main_listener implements EventSubscriberInterface
 	
 	public function load_banner($event)
 	{
-		$banner_data = $this->cache->get('_ukrgb_banner_da1ta');
-		
+	
+		$banner_data = $this->cache->get('_ukrgb_banner_data');
 		if ($banner_data == false)
 		{
 			// get banner data from Joomla database
+			
 			$host = $this->config['ukrgb_jdbhost'];
 			$db   =  $this->config['ukrgb_jdb'];
 			$user = $this->config['ukrgb_jdbuser'];
 			$pass = $this->config['ukrgb_jdbpwd'];
 			$charset = 'utf8';
-
-			error_log('jdb Host:'.$host);
-			error_log('jdb User:'.$user);
 				
-			/*
+			
 			$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+			
 			$opt = [
-					PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-					PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-					PDO::ATTR_EMULATE_PREPARES   => false,
+					\PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+					\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+					\PDO::ATTR_EMULATE_PREPARES   => false,
 			];
-			$pdo = new PDO($dsn, $user, $pass, $opt);
 			
-			*/
+			$pdo = new \PDO($dsn, $user, $pass, $opt);
 			
-			
-			$banner_data = array(
-					'l' => 'Banner Left' . date('H:m:s'),
-					'r' => 'Ranner Right'. date('H:m:s')
-			);
+			$stmt = $pdo->query('SELECT `name`,`clickurl`,`params`,`custombannercode` FROM `jos_banners` WHERE `state`=1');
+			$banner_data = $stmt->fetchAll();
+
 			$this->cache->put('_ukrgb_banner_data',$banner_data);
 			
 		}
-				
+		
+		
+		$max = count($banner_data)-1;
+		
+		$html = array("l" => "","r" => "",);
+		foreach ($html as $key => $v)
+		{
+			$index = rand(0,$max);
+			$params  = json_decode($banner_data[$index]['params']);
+			$clickurl = $banner_data[$index]['clickurl'];
+			$name = $banner_data[$index]['name'];
+			$html[$key] = '<a href="'.$clickurl.'" target="blank" title="'.$name.'"> <img src="/'.$params->imageurl.'" alt="'.$params->alt.'"></a>';
+		}
+		//var_dump($params);
+		//echo "<br>";
+		//var_dump($html);
 		$this->template->assign_vars(array(
-				'U_UKRGB_BANNER_LEFT' => $banner_data['l'],
-				'U_UKRGB_BANNER_RIGHT' => $banner_data['r'],
+				'U_UKRGB_BANNER_LEFT' => $html['l'],
+				'U_UKRGB_BANNER_RIGHT' => $html['r'],
 		));
 		
 	}
-
+	
 }
