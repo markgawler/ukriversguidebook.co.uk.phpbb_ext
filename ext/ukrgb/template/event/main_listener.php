@@ -98,10 +98,24 @@ class main_listener implements EventSubscriberInterface
 			$pdo = new \PDO($dsn, $user, $pass, $opt);
 			
 			$stmt = $pdo->query('SELECT `name`,`clickurl`,`params`,`custombannercode` FROM `jos_banners` WHERE `state`=1');
-			$banner_data = $stmt->fetchAll();
-//var_dump($banner_data);
 
-
+			while ($row = $stmt->fetch())
+			{
+				$params  = json_decode($row['params']);
+				$clickurl = $row['clickurl'];
+				$name = $row['name'];
+				$imageurl = $params->imageurl;
+				if ($imageurl){
+					$banner_data[] = '<a href="'.$clickurl.'" target="blank" title="'.$name.'"> <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
+				}
+				else
+				{
+					$banner_data[] = $row['custombannercode'];
+				}
+			}
+			
+var_dump($banner_data);
+					
 			$this->cache->put('_ukrgb_banner_data',$banner_data);
 			
 		}
@@ -113,21 +127,9 @@ class main_listener implements EventSubscriberInterface
 		foreach ($html as $key => $v)
 		{
 			$index = rand(0,$max);
-			$params  = json_decode($banner_data[$index]['params']);
-			$clickurl = $banner_data[$index]['clickurl'];
-			$name = $banner_data[$index]['name'];
-			$imageurl = $params->imageurl;
-			if ($imageurl){
-				$html[$key] = '<a href="'.$clickurl.'" target="blank" title="'.$name.'"> <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
-			}
-			else 
-			{
-				$html[$key] = $banner_data[$index]['custombannercode'];
-			}
+			$html[$key] = $banner_data[$index];
 		}
-		//var_dump($params);
-		//echo "<br>";
-		//var_dump($html);
+
 		$this->template->assign_vars(array(
 				'U_UKRGB_BANNER_LEFT' => $html['l'],
 				'U_UKRGB_BANNER_RIGHT' => $html['r'],
