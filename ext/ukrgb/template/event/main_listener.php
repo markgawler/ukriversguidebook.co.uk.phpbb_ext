@@ -81,7 +81,7 @@ class main_listener implements EventSubscriberInterface
 			// get banner data from Joomla database
 			
 			$host = $this->config['ukrgb_jdbhost'];
-			$db   =  $this->config['ukrgb_jdb'];
+			$db  =  $this->config['ukrgb_jdb'];
 			$user = $this->config['ukrgb_jdbuser'];
 			$pass = $this->config['ukrgb_jdbpwd'];
 			$charset = 'utf8';
@@ -99,6 +99,8 @@ class main_listener implements EventSubscriberInterface
 			
 			$stmt = $pdo->query('SELECT `name`,`clickurl`,`params`,`custombannercode` FROM `jos_banners` WHERE `state`=1');
 			$banner_data = $stmt->fetchAll();
+//var_dump($banner_data);
+
 
 			$this->cache->put('_ukrgb_banner_data',$banner_data);
 			
@@ -114,7 +116,14 @@ class main_listener implements EventSubscriberInterface
 			$params  = json_decode($banner_data[$index]['params']);
 			$clickurl = $banner_data[$index]['clickurl'];
 			$name = $banner_data[$index]['name'];
-			$html[$key] = '<a href="'.$clickurl.'" target="blank" title="'.$name.'"> <img src="/'.$params->imageurl.'" alt="'.$params->alt.'"></a>';
+			$imageurl = $params->imageurl;
+			if ($imageurl){
+				$html[$key] = '<a href="'.$clickurl.'" target="blank" title="'.$name.'"> <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
+			}
+			else 
+			{
+				$html[$key] = $banner_data[$index]['custombannercode'];
+			}
 		}
 		//var_dump($params);
 		//echo "<br>";

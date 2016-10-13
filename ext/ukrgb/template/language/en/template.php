@@ -22,8 +22,9 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
-    	'UKRGB_YEAR'                     => date('Y'),
-		'UKRGB_BACKTOTOP' 			     => 'Back to Top',
+    	'UKRGB_YEAR'                    => date('Y'),
+		'UKRGB_BACKTOTOP' 			    => 'Back to Top',
+		'UKRGB_SIGNIN'					=> 'Sign In',
 		
 		'ACP_UKRGB_TPL_TITLE'			=> 'UKRGB Template Module',
 		'ACP_UKRGB_TPL'					=> 'Settings',
