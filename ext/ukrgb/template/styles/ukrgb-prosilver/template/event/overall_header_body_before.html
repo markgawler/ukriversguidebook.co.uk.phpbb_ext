@@ -68,13 +68,67 @@
 							<ul class="dropdown-menu">
 								
 								<li><a href="{U_PROFILE}" title="{L_PROFILE}" role="menuitem"><i class="icon-cog"></i> {L_PROFILE}</a></li>
-								<li><a href="{U_USER_PROFILE}" title="{L_READ_PROFILE}" role="menuitem"><i class="icon-user"></i> {L_READ_PROFILE}</a></li>	
+								<li><a href="{U_USER_PROFILE}" title="{L_READ_PROFILE}" role="menuitem"><i class="icon-user"></i> {L_READ_PROFILE}</a></li>
+								<li><a href="{U_PRIVATEMSGS}" title="{L_PRIVATE_MESSAGES}" role="menuitem"><i class="icon-mail"></i> {L_PRIVATE_MESSAGES} [<strong>{PRIVATE_MESSAGE_COUNT}</strong>]</a></li>
 								<li class="divider"></li>
 								<li><a href="{U_LOGIN_LOGOUT}" title="{L_LOGIN_LOGOUT}" accesskey="x" role="menuitem"><i class="icon-switch"></i> {L_LOGIN_LOGOUT}</a></li>
 		
 							</ul>
 						<!-- ELSE -->
-							<li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" accesskey="x" role="menuitem">{L_UKRGB_SIGNIN}</a></li>
+							<!-- <li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" accesskey="x" role="menuitem">{L_UKRGB_SIGNIN}</a></li> -->
+							
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#" title="{L_UKRGB_SIGNIN}" role="menuitem">{L_UKRGB_SIGNIN} <span class="caret"></span></a>
+							<div class="dropdown-menu"style="padding: 15px; padding-bottom: 0px;">
+							<!-- Login Form -->
+
+							<!-- IF not S_USER_LOGGED_IN and not S_IS_BOT -->
+								<form method="post" action="{S_LOGIN_ACTION}" class="form-inline">
+									<div class="userdata">
+										<div id="form-login-username" class="control-group">
+											<div class="controls">
+												<div class="input-prepend">
+													<span class="add-on"> 
+														<span class="icon-user hasTooltip"  title="{L_USERNAME}"></span> 
+														<label for="username" class="element-invisible">{L_USERNAME}</label> 
+													</span> 
+													<input id="username" type="text" name="username" class="input-small" tabindex="0" size="18"	placeholder="{L_USERNAME}" />
+												</div>
+											</div>
+										</div>
+										<div id="form-login-password" class="control-group">
+											<div class="controls">
+												<div class="input-prepend">
+													<span class="add-on"> 
+														<span	class="icon-lock hasTooltip" title="{L_PASSWORD}"></span> 
+														<label for="password" class="element-invisible">{L_PASSWORD}</label>
+													</span> 
+													<input id="password" type="password" name="password" class="input-small" tabindex="0" size="18"	placeholder="{L_PASSWORD}" />
+												</div>
+											</div>
+										</div>
+										
+										<!-- IF S_AUTOLOGIN_ENABLED -->
+										<div id="form-login-remember" class="control-group checkbox">
+											<label for="autologin" class="control-label">{L_LOG_ME_IN}</label> 
+											<input id="autologin" type="checkbox" name="autologin" class="inputbox" value="yes"/>
+										</div>
+										<!-- ENDIF -->
+										
+										<div id="" class="control-group">
+											<div class="controls">
+												<button type="submit" tabindex="0" name="login" class="btn btn-primary">{L_LOGIN}</button>
+											</div>
+										</div>
+										<!-- IF U_SEND_PASSWORD -->
+										<a href="{U_SEND_PASSWORD}">{L_FORGOT_PASS}</a>
+										<!-- ENDIF -->
+										<!-- IF S_REGISTER_ENABLED --><a href="{U_REGISTER}">{L_UKRGB_REGISTER}</a><!-- ENDIF -->
+										{S_LOGIN_REDIRECT}
+									</div>
+								</form>
+							<!-- ENDIF -->
+							<!-- Login Form End -->
+							</div>
 						<!-- ENDIF -->
           				</li>
 					</ul>

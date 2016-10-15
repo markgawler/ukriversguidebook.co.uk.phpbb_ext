@@ -78,7 +78,7 @@ class main_listener implements EventSubscriberInterface
 		$banner_data = $this->cache->get('_ukrgb_banner_data');
 		if ($banner_data == false)
 		{
-			// get banner data from Joomla database
+			// get banner data from Joomla database an cache the html.
 			
 			$host = $this->config['ukrgb_jdbhost'];
 			$db  =  $this->config['ukrgb_jdb'];
@@ -112,10 +112,7 @@ class main_listener implements EventSubscriberInterface
 				{
 					$banner_data[] = $row['custombannercode'];
 				}
-			}
-			
-var_dump($banner_data);
-					
+			}			
 			$this->cache->put('_ukrgb_banner_data',$banner_data);
 			
 		}
