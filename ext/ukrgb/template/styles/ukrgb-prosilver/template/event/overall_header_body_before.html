@@ -38,18 +38,18 @@
 	<nav class="navbar navbar-inverse" role="navigation">
 		<div class="navbar-inner">
 			<div class="container-fluid">
-				<button type="button" class="btn btn-navbar" data-toggle="collapse"
-					data-target=".nav-collapse">
+							
+				<button type="button" class="btn btn-navbar pull-right" data-toggle="collapse" data-target=".nav-collapse">
 					<span class="hidden">Toggle navigation</span> 
 					<span class="icon-bar"></span> 
 					<span class="icon-bar"></span> 
 					<span class="icon-bar"></span>
 				</button>
+				<ul class="nav pull-right navbar-nav menu collapse-show ">
+					<li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" role="menuitem">{L_UKRGB_SIGNIN}</a></li>
+				</ul>
 				<a class="brand" href="/">UKRGB</a>
 
-
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<!--<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"> -->
 				<div class="nav-collapse collapse">
 					<!-- Insert menu here -->
 						
@@ -59,7 +59,7 @@
 </li><li class="item-161"><a href="http://www.ukseakayakguidebook.co.uk/almanac.htm" >Almanac</a></li><li class="item-162"><a href="http://www.ukseakayakguidebook.co.uk/sea_trips.htm" >Trips</a></li></ul></li></ul>
 						<!--  End of Menu -->
 					<!-- Login Logout dropdown -->
-					<ul class="nav pull-right">
+					<ul class="nav pull-right collapse-hide">
 						<!-- The drop down menu -->
 						<li class="dropdown">
           				<!-- IF S_REGISTERED_USER -->	
@@ -117,7 +117,8 @@
 										<div id="" class="control-group">
 											<div class="controls">
 												<button type="submit" tabindex="0" name="login" class="btn btn-primary">{L_LOGIN}</button>
-											</div>
+						
+						.					</div>
 										</div>
 										<!-- IF U_SEND_PASSWORD -->
 										<a href="{U_SEND_PASSWORD}">{L_FORGOT_PASS}</a>
@@ -133,7 +134,7 @@
           				</li>
 					</ul>
 					<!-- End login / logout dropdown -->
-				</div>
+				</div> <!-- end collapse -->
 			</div>
 		</div>
 	</nav>
