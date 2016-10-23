@@ -74,9 +74,7 @@
 								<li><a href="{U_LOGIN_LOGOUT}" title="{L_LOGIN_LOGOUT}" accesskey="x" role="menuitem"><i class="icon-switch"></i> {L_LOGIN_LOGOUT}</a></li>
 		
 							</ul>
-						<!-- ELSE -->
-							<!-- <li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" accesskey="x" role="menuitem">{L_UKRGB_SIGNIN}</a></li> -->
-							
+						<!-- ELSE -->							
 							<a class="dropdown-toggle" data-toggle="dropdown" href="#" title="{L_UKRGB_SIGNIN}" role="menuitem"><i class="icon-switch"></i> {L_UKRGB_SIGNIN} <span class="caret"></span></a>
 							<div class="dropdown-menu"style="padding: 15px; padding-bottom: 0px;">
 							<!-- Login Form -->
@@ -120,11 +118,8 @@
 										</div>
 										</div>
 										<ul class="unstyled">
-											<!-- IF U_SEND_PASSWORD -->
 											<li><a href="{U_SEND_PASSWORD}">{L_UKRGB_FORGOT_PASS}</a></li>
 											<li><a href="/lost-user-name">{L_UKRGB_FORGOT_UNAME}</a></li>
-											
-											<!-- ENDIF -->
 											<!-- IF S_REGISTER_ENABLED --><li><a href="{U_REGISTER}">{L_UKRGB_REGISTER}</a></li><!-- ENDIF -->
 										</ul>
 										{S_LOGIN_REDIRECT}
