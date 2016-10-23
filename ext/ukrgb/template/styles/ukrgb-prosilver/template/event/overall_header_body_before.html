@@ -77,7 +77,7 @@
 						<!-- ELSE -->
 							<!-- <li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" accesskey="x" role="menuitem">{L_UKRGB_SIGNIN}</a></li> -->
 							
-							<a class="dropdown-toggle" data-toggle="dropdown" href="#" title="{L_UKRGB_SIGNIN}" role="menuitem">{L_UKRGB_SIGNIN} <span class="caret"></span></a>
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#" title="{L_UKRGB_SIGNIN}" role="menuitem"><i class="icon-switch"></i> {L_UKRGB_SIGNIN} <span class="caret"></span></a>
 							<div class="dropdown-menu"style="padding: 15px; padding-bottom: 0px;">
 							<!-- Login Form -->
 
@@ -117,13 +117,16 @@
 										<div id="" class="control-group">
 											<div class="controls">
 												<button type="submit" tabindex="0" name="login" class="btn btn-primary">{L_LOGIN}</button>
-						
-						.					</div>
 										</div>
-										<!-- IF U_SEND_PASSWORD -->
-										<a href="{U_SEND_PASSWORD}">{L_FORGOT_PASS}</a>
-										<!-- ENDIF -->
-										<!-- IF S_REGISTER_ENABLED --><a href="{U_REGISTER}">{L_UKRGB_REGISTER}</a><!-- ENDIF -->
+										</div>
+										<ul class="unstyled">
+											<!-- IF U_SEND_PASSWORD -->
+											<li><a href="{U_SEND_PASSWORD}">{L_UKRGB_FORGOT_PASS}</a></li>
+											<li><a href="/lost-user-name">{L_UKRGB_FORGOT_UNAME}</a></li>
+											
+											<!-- ENDIF -->
+											<!-- IF S_REGISTER_ENABLED --><li><a href="{U_REGISTER}">{L_UKRGB_REGISTER}</a></li><!-- ENDIF -->
+										</ul>
 										{S_LOGIN_REDIRECT}
 									</div>
 								</form>

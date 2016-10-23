@@ -26,6 +26,8 @@ $lang = array_merge($lang, array(
 		'UKRGB_BACKTOTOP' 			    => 'Back to Top',
 		'UKRGB_SIGNIN'					=> 'Sign In',
 		'UKRGB_REGISTER'				=> 'Create an account',
+		'UKRGB_FORGOT_UNAME'			=> 'Forgot Username?',
+		'UKRGB_FORGOT_PASS'				=> 'Forgot Password?',
 		
 		'ACP_UKRGB_TPL_TITLE'			=> 'UKRGB Template Module',
 		'ACP_UKRGB_TPL'					=> 'Settings',
