@@ -51,7 +51,11 @@ class main_listener implements EventSubscriberInterface
 		$this->config = $config;
 	}
 	
-	
+	/**
+	 * Core Setup Event handler
+	 *  
+	 * @param unknown $event
+	 */
 	public function core_user_setup($event){
 		$this->load_language_on_setup($event);
 		
@@ -61,6 +65,11 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 	
+	/**
+	 * Language setup
+	 * 
+	 * @param unknown $event
+	 */
 	public function load_language_on_setup($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
@@ -72,6 +81,12 @@ class main_listener implements EventSubscriberInterface
 		
 	}
 	
+	/***
+	 * Banner setup
+	 * - Load Banner data from Joomla DB and store in phpBB cache
+	 * 
+	 * @param unknown $event
+	 */
 	public function load_banner($event)
 	{
 	
@@ -116,7 +131,6 @@ class main_listener implements EventSubscriberInterface
 			$this->cache->put('_ukrgb_banner_data',$banner_data);
 			
 		}
-		
 		
 		$max = count($banner_data)-1;
 		
