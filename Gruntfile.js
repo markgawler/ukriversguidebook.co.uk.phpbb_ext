@@ -27,9 +27,19 @@ module.exports = function(grunt) {
           nospawn: true
         }
       }
-    }
+    },
+    
+    compress: {
+		main: {
+			options: {
+				mode: 'tgz',
+				archive: 'ukrgb_ext.tar.gz'
+			    },
+			    files: [{src: ['ext/**'], dest: '.'}]
+		 }
+	},    
   });
   grunt.registerTask('sync', ['synchard']);
-
+  grunt.registerTask('dist', ['compress']);
   grunt.registerTask('default', ['watch']);
 };
