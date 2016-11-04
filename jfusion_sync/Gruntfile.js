@@ -22,7 +22,19 @@ module.exports = function(grunt) {
             }
         }
     },
-
+    
+    compress: {
+		main: {
+			options: {
+				mode: 'tgz',
+				archive: 'jfusion_phpbb_ext.tar.gz'
+			    }, 
+			    files: [
+			           {expand: true, cwd:'components/com_jfusion/plugins/phpbb31/', src: ['jfusion/**/*'], dest: '.'},
+			           ],
+		 }
+	},  
+	
     watch: {
       site: {
         files: ['components/**/*','administrator/**/*'], // which files to watch
@@ -37,6 +49,7 @@ module.exports = function(grunt) {
   grunt.file.setBase('../../org.jfusion.jfusion/')
   
   grunt.registerTask('sync', ['synchard']);
+  grunt.registerTask('dist', ['compress']);
 
   grunt.registerTask('default', ['watch']);
 };
