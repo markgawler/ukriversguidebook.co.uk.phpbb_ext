@@ -46,7 +46,9 @@
 					<span class="icon-bar"></span>
 				</button>
 				<ul class="nav pull-right navbar-nav menu collapse-show ">
-					<li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" role="menuitem">{L_UKRGB_SIGNIN}</a></li>
+				<!-- IF not S_USER_LOGGED_IN and not S_IS_BOT -->
+					<li><a href="{U_LOGIN_LOGOUT}" title="{L_UKRGB_SIGNIN}" role="menuitem"><i class="icon-switch"></i> {L_UKRGB_SIGNIN}</a></li>
+				<!-- ENDIF -->
 				</ul>
 				<a class="brand" href="/">UKRGB</a>
 
@@ -59,7 +61,7 @@
 </li><li class="item-161"><a href="http://www.ukseakayakguidebook.co.uk/almanac.htm" >Almanac</a></li><li class="item-162"><a href="http://www.ukseakayakguidebook.co.uk/sea_trips.htm" >Trips</a></li></ul></li></ul>
 						<!--  End of Menu -->
 					<!-- Login Logout dropdown -->
-					<ul class="nav pull-right collapse-hide">
+					<ul class="nav pull-right <!-- IF not S_REGISTERED_USER -->collapse-hide <!-- ENDIF -->">
 						<!-- The drop down menu -->
 						<li class="dropdown">
           				<!-- IF S_REGISTERED_USER -->	
