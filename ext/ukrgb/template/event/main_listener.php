@@ -83,7 +83,7 @@ class main_listener implements EventSubscriberInterface
 		$params = $this->load_component_params();
 		
 		$forum_id = $event['forum_id'];
-		if ($forum_id == 12)
+		if (in_array($forum_id, $params->selected_forums))
 		{
 			// Set up PayPal button parameters
 			if ($params->sandbox)
