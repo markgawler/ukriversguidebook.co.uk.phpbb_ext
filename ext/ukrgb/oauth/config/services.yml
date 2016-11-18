@@ -2,14 +2,28 @@ services:
     ukrgb.oauth.controller:
         class: ukrgb\oauth\controller\main
         arguments:
+            - '@dbal.conn'
             - '@config'
             - '@controller.helper'
             - '@template'
+            - '@passwords.manager'
+            - '@request'
             - '@user'
-    ukrgb.oauth.listener:       # name of the service you want to register
+            - '%tables.auth_provider_oauth_token_storage%'
+            - '%tables.auth_provider_oauth_account_assoc%'
+            - '@auth.provider.oauth.service_collection'
+            - '%tables.users%'
+            - '@service_container'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            
+            
+    ukrgb.oauth.listener:     
         class: ukrgb\oauth\event\main_listener
         arguments:
             - '@controller.helper'
             - '@template'
         tags:
             - { name: event.listener }
+            
+            

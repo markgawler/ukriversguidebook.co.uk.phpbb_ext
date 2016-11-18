@@ -3,6 +3,7 @@
 	<name>UKRGB phpBB exstension</name>
 	<comment></comment>
 	<projects>
+		<project>phpbb</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
