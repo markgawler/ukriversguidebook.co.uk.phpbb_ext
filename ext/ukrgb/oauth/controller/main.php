@@ -39,7 +39,7 @@ class main
 	 *
 	 * @var \phpbb\passwords\manager
 	 */
-	protected $passwords_manager;
+//	protected $passwords_manager;
 	
 	/**
 	 * phpBB request object
@@ -132,13 +132,14 @@ class main
 	//use phpbb\controller\helper;
 	
 	//public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
-	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template,  \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
+	//public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template,  \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
+	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
 	{ 
 		$this->db = $db;
 		$this->config = $config;
 		$this->helper =$helper;
 		$this->template = $template;
-		$this->passwords_manager = $passwords_manager;
+		//$this->passwords_manager = $passwords_manager;
 		$this->request = $request;
 		$this->user = $user;
 		$this->auth_provider_oauth_token_storage_table = $auth_provider_oauth_token_storage_table;
@@ -160,28 +161,6 @@ class main
 				'secret'	=> $this->config['auth_oauth_facebook_secret'],
 		);
 	}
-	
-	/**
-	 * {@inheritdoc}
-	 */
-	/*
-	public function perform_auth_login()
-	{
-		if (!($this->service_provider instanceof \OAuth\OAuth2\Service\Facebook))
-		{
-			throw new \exception('AUTH_PROVIDER_OAUTH_ERROR_INVALID_SERVICE_TYPE');
-		}
-	
-		// This was a callback request, get the token
-		$this->service_provider->requestAccessToken($this->request->variable('code', ''));
-	
-		// Send a request with it
-		$result = json_decode($this->service_provider->request('/me'), true);
-	
-		// Return the unique identifier
-		return $result['id'];
-	}
-	*/
 	
 	/**
 	 * Demo controller for route /demo/{name}
@@ -222,13 +201,18 @@ class main
 		// Send a request with it
 		$result = json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
 		
-		if ($this->user->data['user_id'] == 1 || $result['email'] == null)
+		if ($this->user->data['user_id'] == 1 || $result['email'] == null || !$result['verified'])
 		{
 			// user not logged in, is the email already registered
 			$users = $this->get_user_by_email($result['email']);
 			if (sizeof($users) >1){
 				$error_msg = "Multiple user accounts associated with this email, please contact the Administrator for assistance";
-			} else {
+			} 
+			elseif (sizeof($users) == 0 ) {
+				$error_msg = "No Account with this email address Register a new account";
+			}
+			else
+			{
 				$phpbb_user_id = $users[0]['user_id'];
 				$phpbb_username =  $users[0]['username'];
 				$error_msg = "phpbb user_id: ".$phpbb_user_id." , phpbb username: ".$phpbb_username;
@@ -246,9 +230,13 @@ class main
 				{
 					if ($curent_id == $result['id'])
 					{
-						$error_msg = "Account already linked: ";
+						// Account already linked
+						//TODO: this could be optimised to not require second call to FB
+						$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
+						header('Location: ' . $url);
+						exit;
 					} else {
-						$error_msg = "Account already linked to different Facebook account: ". $curent_id . ', ' . $result['id'];	
+						$error_msg = "Your UK Rivers Account is already linked to different Facebook account: ". $curent_id . ', ' . $result['id'];	
 					}
 				}
 				else
@@ -276,7 +264,6 @@ class main
 			}
 		}
 		
-		
 		$this->template->assign_vars(array(
 				'UKRGB_HELLO_NAME' =>  $result['first_name'], 
 				'UKRGB_HELLO_EMAIL' => $result['email'],
@@ -285,8 +272,6 @@ class main
 		return $this->helper->render('oauth_body.html',$result['name']);
 
 	}
-	
-	
 
 	
 	/**
@@ -389,7 +374,7 @@ class main
 	}
 	
 	/**
-	 * Getc the provider ID from the phpBB database 
+	 * Get the provider ID from the phpBB database 
 	 * 
 	 * @param array $data  
 	 * @return int or null

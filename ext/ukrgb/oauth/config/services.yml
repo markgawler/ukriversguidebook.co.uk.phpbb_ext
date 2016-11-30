@@ -6,7 +6,7 @@ services:
             - '@config'
             - '@controller.helper'
             - '@template'
-            - '@passwords.manager'
+#            - '@passwords.manager'
             - '@request'
             - '@user'
             - '%tables.auth_provider_oauth_token_storage%'
