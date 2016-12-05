@@ -36,6 +36,9 @@ class main_listener implements EventSubscriberInterface
 	/** @var \phpbb\config\config */
 	protected $config;
 	
+	/** @var \phpbb\user */
+	protected $user;
+	
 	/** @var \phpbb\request\request */
 	protected $request;
 
@@ -48,14 +51,17 @@ class main_listener implements EventSubscriberInterface
 	 * @param \phpbb\template\template             $template          Template object
 	 * @param \phpbb\cache\driver\driver_interface $cache             Cache driver interface
 	 * @param \phpbb\config\config                 $config	
+     * @param \phpbb\user                   $user              User object
+
 
 	 */
 	public function __construct(\phpbb\template\template $template, 
-			\phpbb\cache\driver\driver_interface $cache, \phpbb\config\config $config)
+			\phpbb\cache\driver\driver_interface $cache, \phpbb\config\config $config, \phpbb\user $user)
 	{
 		$this->template = $template;
 		$this->cache = $cache;
 		$this->config = $config;
+		$this->user = $user;
 		$this->pdo = null;
 	}
 	
@@ -70,6 +76,8 @@ class main_listener implements EventSubscriberInterface
 		if (!defined('ADMIN_START'))
 		{
 			$this->load_banner($event);
+			$this->template->assign_vars(array('U_UKRGB_USER_ID' => $this->user->data['user_id'],
+			));
 		}
 	}
 	
@@ -153,7 +161,7 @@ class main_listener implements EventSubscriberInterface
 				$name = $row['name'];
 				$imageurl = $params->imageurl;
 				if ($imageurl){
-					$banner_data[] = '<a href="'.$clickurl.'" target="blank" title="'.$name.'"> <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
+					$banner_data[] = '<a href="'.$clickurl.'" title="'.$name.'" onclick="trackOutboundLink(\''.$clickurl.'\'); return false;" target="_blank"> <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
 				}
 				else
 				{
