@@ -9,7 +9,12 @@
   
   ga('create', 'UA-26908210-1', 'auto');
   ga('require', 'displayfeatures');
-  ga('set', '&uid', '<?php echo $user->id; ?>'); 
+  ga('set', '&uid', '{U_UKRGB_USER_ID}'); 
   ga('send', 'pageview');
-
+  var trackOutboundLink = function(url) {
+	   ga('send', 'event', 'outbound', 'click', url, {
+	     'transport': 'beacon',
+	     'hitCallback': function(){document.location = url;}
+	   });
+	}
 </script>

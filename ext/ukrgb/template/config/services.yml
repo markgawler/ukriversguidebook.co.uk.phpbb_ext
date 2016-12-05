@@ -5,6 +5,7 @@ services:
             - '@template'
             - '@cache.driver'
             - '@config'
+            - '@user'
             
 
         tags:
