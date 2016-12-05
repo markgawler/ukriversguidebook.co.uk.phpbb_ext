@@ -209,7 +209,8 @@ class main
 				$error_msg = "Multiple user accounts associated with this email, please contact the Administrator for assistance";
 			} 
 			elseif (sizeof($users) == 0 ) {
-				$error_msg = "No Account with this email address Register a new account";
+				//$error_msg = "No Account with this email address Register a new account";
+				return $this->helper->render('ukrgb_registration.html',$result['name']);
 			}
 			else
 			{
