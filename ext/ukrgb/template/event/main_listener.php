@@ -161,7 +161,7 @@ class main_listener implements EventSubscriberInterface
 				$name = $row['name'];
 				$imageurl = $params->imageurl;
 				if ($imageurl){
-					$banner_data[] = '<a href="'.$clickurl.'" title="'.$name.'" onclick="trackOutboundLink(\''.$clickurl.'\'); return false;" target="_blank"> <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
+					$banner_data[] = '<a href="'.$clickurl.'" title="'.$name.'" target="_blank" onclick="trackOutboundLink(\''.$clickurl.'\');" > <img src="/'.$imageurl.'" alt="'.$params->alt.'"></a>';
 				}
 				else
 				{
