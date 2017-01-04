@@ -1,0 +1,35 @@
+<!-- INCLUDE overall_header.html -->
+
+
+<form id="register" method="post" action="{U_OAUTH_REG_SUBMIT}"{S_FORM_ENCTYPE}>
+
+<div class="panel">
+	<div class="inner">
+
+	<h2>{SITENAME} - {L_REGISTRATION}</h2>
+
+	<fieldset class="fields2">
+	<!-- IF ERROR --><dl><dd class="error">{ERROR}</dd></dl><!-- ENDIF -->
+	<dl>
+		<dt><label for="username">{L_USERNAME}{L_COLON}</label><br /><span>{L_USERNAME_EXPLAIN}</span></dt>
+		<dd><input type="text" tabindex="1" name="username" id="username" size="25" value="{USERNAME}" class="inputbox autowidth" title="{L_USERNAME}" /></dd>
+	</dl>
+	<!-- EVENT ucp_register_credentials_after -->
+	</fieldset>
+	</div>
+</div>
+
+
+<div class="panel">
+	<div class="inner">
+	<fieldset class="submit-buttons">
+		{S_HIDDEN_FIELDS}
+		<input type="reset" value="{L_RESET}" name="reset" class="button2" />&nbsp;
+		<input  type="submit" tabindex="9" name="submit" id="submit" value="{L_SUBMIT}" class="button1 default-submit-action" />
+		{S_FORM_TOKEN}
+	</fieldset>
+	</div>
+</div>
+</form>
+
+<!-- INCLUDE overall_footer.html -->

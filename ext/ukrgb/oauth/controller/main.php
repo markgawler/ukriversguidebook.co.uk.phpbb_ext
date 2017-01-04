@@ -18,6 +18,7 @@ use OAuth\OAuth2\Service\Facebook;
 
 use Symfony\Component\HttpFoundation\Response;
 
+
 class main
 {
 	/**
@@ -157,18 +158,91 @@ class main
 	public function get_service_credentials()
 	{
 		return array(
-				'key'		=> $this->config['auth_oauth_facebook_key'],
-				'secret'	=> $this->config['auth_oauth_facebook_secret'],
+			'key'		=> $this->config['auth_oauth_facebook_key'],
+			'secret'	=> $this->config['auth_oauth_facebook_secret'],
 		);
 	}
 	
 	/**
-	 * Demo controller for route /demo/{name}
+	 * Demo controller for route /oauth/{action}
 	 *
-	 * @param string $name
+	 * @param string $action
 	 * @return Response A Symfony Response object
 	 */
 	public function handle($name)
+	{		
+		error_log('Handler:'.$name);
+		switch ($name) {
+			case "facebook":
+				return $this->authenticate($name);
+				break;
+			case "register":
+				return $this->register();
+				break;
+			default:
+				throw new \exception('UKRGB Oauth Unexpected Name:');
+				break;
+		}
+		
+	}
+	
+	
+	protected function register()
+	{
+		include_once($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
+		
+		$timezone = $this->config['board_timezone'];
+		
+		// Make password at least 8 characters long, make it longer if admin wants to.
+		// gen_rand_string() however has a limit of 12 or 13.
+		$user_password = gen_rand_string_friendly(max(8, mt_rand((int) $this->config['min_pass_chars'], (int) $this->config['max_pass_chars'])));
+		
+		$data = array(
+				'username' 			=> utf8_normalize_nfc($this->request->variable('username','', true)),
+				'new_password'		=> $user_password,
+				'password_confirm'	=> $user_password,
+				'email'				=> strtolower(request_var('email', '')),
+				'lang'				=> basename(request_var('lang', $this->user->lang_name)),
+				'tz'				=> request_var('tz', $timezone),
+		);
+		
+
+		$error = validate_data($data, array(
+				'username'			=> array(
+						array('string', false, $this->config['min_name_chars'], $this->config['max_name_chars']),
+						array('username', '')),
+		//		'new_password'		=> array(
+		//				array('string', false, $config['min_pass_chars'], $config['max_pass_chars']),
+		//				array('password')),
+		//		'password_confirm'	=> array('string', false, $config['min_pass_chars'], $config['max_pass_chars']),
+				'email'				=> array(
+						array('string', false, 6, 60),
+						array('user_email')),
+				'tz'				=> array('timezone'),
+				'lang'				=> array('language_iso_name'),
+		));
+		
+		
+		
+		
+		if (!check_form_key('ukrgb_registration'))
+		{
+			$error[] = $this->user->lang['FORM_INVALID'];
+			error_log("Invalid Form");
+		}
+		// Replace "error" strings with their real, localised form
+		$error = array_map(array($this->user, 'lang'), $error);
+		
+		if (sizeof($error)){
+			return $this->registration_form($data['username'], $data['email'], $error);	
+		}
+
+		return $error;
+		
+	}
+	
+	
+	protected function authenticate($name)
 	{
 		$service_name_original = 'facebook';
 		$service_name = 'auth.provider.oauth.service.' . $service_name_original;
@@ -180,7 +254,6 @@ class main
 				'secret'	=> $this->config['auth_oauth_facebook_secret'],
 		);
 
-		//$service = $this->get_service($service_name_original, $storage, $service_credentials, $query, array());
 		$service = $this->get_service($service_name_original, $storage, $service_credentials, '', array('email'));
 				
 		if (!$this->request->is_set('code', \phpbb\request\request_interface::GET)) 
@@ -209,8 +282,10 @@ class main
 				$error_msg = "Multiple user accounts associated with this email, please contact the Administrator for assistance";
 			} 
 			elseif (sizeof($users) == 0 ) {
+				
+				error_log('Register new account, email:' . $result['email']);
+				return $this->registration_form($result['name'], $result['email']);
 				//$error_msg = "No Account with this email address Register a new account";
-				return $this->helper->render('ukrgb_registration.html',$result['name']);
 			}
 			else
 			{
@@ -218,6 +293,7 @@ class main
 				$phpbb_username =  $users[0]['username'];
 				$error_msg = "phpbb user_id: ".$phpbb_user_id." , phpbb username: ".$phpbb_username;
 				
+			
 				// Insert into table, they will be able to log in after this
 				$data = array(
 						'user_id'			=> $phpbb_user_id,
@@ -231,12 +307,15 @@ class main
 				{
 					if ($curent_id == $result['id'])
 					{
+						error_log('Login');
+						
 						// Account already linked
 						//TODO: this could be optimised to not require second call to FB
 						$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
 						header('Location: ' . $url);
 						exit;
 					} else {
+						error_log('already reg anothe fb account');
 						$error_msg = "Your UK Rivers Account is already linked to different Facebook account: ". $curent_id . ', ' . $result['id'];	
 					}
 				}
@@ -246,7 +325,7 @@ class main
 					$error_msg = "Linking Account: " . $url;
 	
 					$this->link_account_perform_link($data);
-					
+					//TODO remove area51 link
 					$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
 					header('Location: ' . $url);
 					exit;
@@ -274,6 +353,31 @@ class main
 
 	}
 
+	/**
+	 * Registration
+	 */
+	protected function registration_form($username, $email, $error = array())
+	{	
+		error_log($email);
+		$s_hidden_fields = array(
+			'email'				=> strtolower($email),
+			'lang'				=> $this->user->lang_name,
+			'tz'				=> $this->config['board_timezone'],
+		);
+	
+		
+		$this->template->assign_vars(array(
+			'ERROR'				=> (sizeof($error)) ? implode('<br />', $error) : '',
+			'USERNAME' => utf8_normalize_nfc($username, '', true),
+			'L_USERNAME_EXPLAIN'		=> $this->user->lang($this->config['allow_name_chars'] . '_EXPLAIN',
+					$this->user->lang('CHARACTERS', (int) $this->config['min_name_chars']), 
+					$this->user->lang('CHARACTERS', (int) $this->config['max_name_chars'])),
+			'S_HIDDEN_FIELDS'	=> build_hidden_fields($s_hidden_fields),
+		));
+		
+		add_form_key('ukrgb_registration');
+		return $this->helper->render('registration.html');
+	}
 	
 	/**
 	 * Returns the cached current_uri object or creates and caches it if it is

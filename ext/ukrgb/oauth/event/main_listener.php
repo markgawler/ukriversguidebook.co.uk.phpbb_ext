@@ -36,17 +36,22 @@ class main_listener implements EventSubscriberInterface
 	
 	/* @var \phpbb\template\template */
 	protected $template;
+
+	protected $user;
+	
 	
 	/**
 	 * Constructor
 	 *
 	 * @param \phpbb\controller\helper $helper
 	 * @param \phpbb\template\template $template
+	 * @param \phpbb\user $user
 	 */
-	public function __construct(\phpbb\controller\helper $helper, \phpbb\template\template $template)
+	public function __construct(\phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
+		$this->user = $user;
 	}
 	
 	
@@ -58,12 +63,16 @@ class main_listener implements EventSubscriberInterface
 				'lang_set' => 'oauth',
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
+		
+		$this->user->add_lang_ext('','ucp');
 	}
 	
 	public function add_page_header_link($event)
 	{
 		$this->template->assign_vars(array(
-				'U_OAUTH_PAGE' => $this->helper->route('ukrgb_oauth_route', array('name' => 'world')),
+				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
+				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
+				
 		));
 	}
 	

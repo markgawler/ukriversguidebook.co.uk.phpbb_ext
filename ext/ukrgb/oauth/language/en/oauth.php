@@ -20,11 +20,3 @@ if (empty($lang) || !is_array($lang))
 {
     $lang = array();
 }
-
-$lang = array_merge($lang, array(
-    'OAUTH_PAGE'                     => 'OAuth',
-	'DEMO_GOODBYE'     => 'Goodbye %s!',
-	'DEMO_HELLO'       => 'Hello %s!',
-	'NO_AUTH_SPEAKING' => 'You must not try to talk to %s',
-		
-));
