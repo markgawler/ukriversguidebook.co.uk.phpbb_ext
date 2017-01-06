@@ -20,3 +20,15 @@ if (empty($lang) || !is_array($lang))
 {
     $lang = array();
 }
+
+
+if (empty($lang) || !is_array($lang))
+{
+	$lang = array();
+}
+
+$lang = array_merge($lang, array(
+		'REG_COMPLETE_TITLE' => 'Registration Complete',
+		'REG_COMPLETE_TEXT' => 'You have successfully registered on the UK Rivers Guidebook. You will automatically be logged in in 5 seconds.',
+		'REG_COMPLETE_LNK_TXT' => 'Sign In to the UK Rivers Guidebook',
+		));

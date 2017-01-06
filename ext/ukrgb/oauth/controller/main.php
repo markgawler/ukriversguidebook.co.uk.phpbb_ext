@@ -134,13 +134,13 @@ class main
 	
 	//public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
 	//public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template,  \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
-	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
+	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
 	{ 
 		$this->db = $db;
 		$this->config = $config;
 		$this->helper =$helper;
 		$this->template = $template;
-		//$this->passwords_manager = $passwords_manager;
+		$this->passwords_manager = $passwords_manager;
 		$this->request = $request;
 		$this->user = $user;
 		$this->auth_provider_oauth_token_storage_table = $auth_provider_oauth_token_storage_table;
@@ -204,26 +204,22 @@ class main
 				'email'				=> strtolower(request_var('email', '')),
 				'lang'				=> basename(request_var('lang', $this->user->lang_name)),
 				'tz'				=> request_var('tz', $timezone),
+				'provider' 			=> $this->request->variable('provider','', true),
+				'provider_id' 		=> $this->request->variable('provider_id','', true),
+				
 		);
 		
-
 		$error = validate_data($data, array(
 				'username'			=> array(
 						array('string', false, $this->config['min_name_chars'], $this->config['max_name_chars']),
 						array('username', '')),
-		//		'new_password'		=> array(
-		//				array('string', false, $config['min_pass_chars'], $config['max_pass_chars']),
-		//				array('password')),
-		//		'password_confirm'	=> array('string', false, $config['min_pass_chars'], $config['max_pass_chars']),
 				'email'				=> array(
 						array('string', false, 6, 60),
 						array('user_email')),
 				'tz'				=> array('timezone'),
 				'lang'				=> array('language_iso_name'),
 		));
-		
-		
-		
+				
 		
 		if (!check_form_key('ukrgb_registration'))
 		{
@@ -234,11 +230,80 @@ class main
 		$error = array_map(array($this->user, 'lang'), $error);
 		
 		if (sizeof($error)){
-			return $this->registration_form($data['username'], $data['email'], $error);	
+			return $this->registration_form($data['username'], $data['email'], $error, $data['provider'], $fata['provider_id']);	
 		}
-
-		return $error;
 		
+		// Which group by default?
+		$group_name = 'REGISTERED';
+	
+		$sql = 'SELECT group_id
+				FROM ' . GROUPS_TABLE . "
+				WHERE group_name = '" . $this->db->sql_escape($group_name) . "'
+					AND group_type = " . GROUP_SPECIAL;
+		$result = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($result);
+		$this->db->sql_freeresult($result);
+	
+		if (!$row)
+		{
+			trigger_error('NO_GROUP');
+		}
+	
+		$group_id = $row['group_id'];
+	
+		$user_type = USER_NORMAL;
+		$user_actkey = '';
+		$user_inactive_reason = 0;
+		$user_inactive_time = 0;
+	
+		$user_row = array(
+				'username'				=> $data['username'],
+				'user_password'			=> $this->passwords_manager->hash($data['new_password']),
+				'user_email'			=> $data['email'],
+				'group_id'				=> (int) $group_id,
+				'user_timezone'			=> $data['tz'],
+				'user_lang'				=> $data['lang'],
+				'user_type'				=> $user_type,
+				'user_actkey'			=> $user_actkey,
+				'user_ip'				=> $user->ip,
+				'user_regdate'			=> time(),
+				'user_inactive_reason'	=> $user_inactive_reason,
+				'user_inactive_time'	=> $user_inactive_time,
+		);
+	
+		if ($this->config['new_member_post_limit'])
+		{
+			$user_row['user_new'] = 1;
+		}
+		
+		// Register user...
+		$user_id = user_add($user_row, $cp_data);
+	
+		// This should not happen, because the required variables are listed above...
+		if ($user_id === false)
+		{
+			trigger_error('NO_USER', E_USER_ERROR);
+		}
+		
+		// Insert provider data int into table, user will be able to log in after this
+		$provider_data = array(
+				'user_id'			=> $user_id,
+				'provider'			=> $data['provider'],
+				'oauth_provider_id'	=> $data['provider_id'],
+		);
+		$this->link_account_perform_link($provider_data);
+			
+		$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
+		
+		$this->template->assign_vars(array(
+				'MESSAGE_TITLE' => $this->user->lang('REG_COMPLETE_TITLE'),
+				'MESSAGE_TEXT' => $this->user->lang('REG_COMPLETE_TEXT'),
+				'MESSAGE_LNK' => $url,
+				'MESSAGE_LNK_TXT' => $this->user->lang('REG_COMPLETE_LNK_TXT'),
+		));
+		meta_refresh(5, $url);
+		return $this->helper->render('ukrgb_message.html',$this->user->lang('REG_COMPLETE_TITLE'));
+	
 	}
 	
 	
@@ -282,10 +347,19 @@ class main
 				$error_msg = "Multiple user accounts associated with this email, please contact the Administrator for assistance";
 			} 
 			elseif (sizeof($users) == 0 ) {
+				// No Account with this email address Register a new account, check the validity of the name to use as username
 				
-				error_log('Register new account, email:' . $result['email']);
-				return $this->registration_form($result['name'], $result['email']);
-				//$error_msg = "No Account with this email address Register a new account";
+				include_once($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
+				
+				$data = array('username' => utf8_normalize_nfc($result['name']));
+				$error = validate_data($data, array(
+						'username'			=> array(
+								array('string', false, $this->config['min_name_chars'], $this->config['max_name_chars']),
+								array('username', '')),
+				));
+				$error = array_map(array($this->user, 'lang'), $error);
+				
+				return $this->registration_form($result['name'], $result['email'], $error, $service_name_original,  $result['id']);
 			}
 			else
 			{
@@ -356,13 +430,14 @@ class main
 	/**
 	 * Registration
 	 */
-	protected function registration_form($username, $email, $error = array())
+	protected function registration_form($username, $email, $error = array(), $provider = '', $provider_id = '')
 	{	
-		error_log($email);
 		$s_hidden_fields = array(
 			'email'				=> strtolower($email),
 			'lang'				=> $this->user->lang_name,
 			'tz'				=> $this->config['board_timezone'],
+			'provider' 			=> $provider,
+			'provider_id'		=> $provider_id,
 		);
 	
 		
