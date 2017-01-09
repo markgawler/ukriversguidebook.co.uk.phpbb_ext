@@ -6,4 +6,7 @@ ukrgb_oauth_route:
 ukrgb_oauth_register:
     path: /oauth/register
     defaults: { _controller: ukrgb.oauth.controller:handle }
-    
+
+ukrgb_oauth_link:
+    path: /oauth/link
+    defaults: { _controller: ukrgb.oauth.controller:handle }

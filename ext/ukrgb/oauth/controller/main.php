@@ -130,10 +130,7 @@ class main
 	 * @param	string			$phpbb_root_path
 	 * @param	string			$php_ext
 	 */
-	//use phpbb\controller\helper;
 	
-	//public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
-	//public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template,  \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
 	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
 	{ 
 		$this->db = $db;
@@ -164,7 +161,7 @@ class main
 	}
 	
 	/**
-	 * Demo controller for route /oauth/{action}
+	 * Controller for route /oauth/{action}
 	 *
 	 * @param string $action
 	 * @return Response A Symfony Response object
@@ -179,11 +176,13 @@ class main
 			case "register":
 				return $this->register();
 				break;
+			case "link":
+				return $this->link_account();
+				break;
 			default:
 				throw new \exception('UKRGB Oauth Unexpected Name:');
 				break;
 		}
-		
 	}
 	
 	
@@ -293,7 +292,7 @@ class main
 		);
 		$this->link_account_perform_link($provider_data);
 			
-		$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
+		$url = generate_board_url() . '/ucp.php?mode=login&login=external&oauth_service=facebook';
 		
 		$this->template->assign_vars(array(
 				'MESSAGE_TITLE' => $this->user->lang('REG_COMPLETE_TITLE'),
@@ -303,9 +302,67 @@ class main
 		));
 		meta_refresh(5, $url);
 		return $this->helper->render('ukrgb_message.html',$this->user->lang('REG_COMPLETE_TITLE'));
-	
+		
 	}
 	
+	protected function link_account(array $data = array() )
+	{
+		// Link to an existing account with matching email
+		if (empty($data)){
+			if (!check_form_key('ukrgb_link_account'))
+			{
+				$error[] = $this->user->lang['FORM_INVALID'];
+				$this->template->assign_vars(array(
+						'ERROR'				=> (sizeof($error)) ? implode('<br />', $error) : '',
+				));
+			}
+			$data = array(
+					'username'			=> $this->request->variable('username','', true),
+					'user_id'			=> $this->request->variable('user_id','', true),
+					'provider'			=> $this->request->variable('provider','', true),
+					'oauth_provider_id'	=> $this->request->variable('oauth_provider_id','', true),
+					'email'				=> $this->request->variable('email','', true),
+			);	
+		}
+		
+		// Link to an existing account with matching email
+		$this->template->assign_vars(array(
+				'USERNAME' =>  $data['username'],
+				'EMAIL' =>  $data['email'],
+				'S_HIDDEN_FIELDS'	=> build_hidden_fields($data),
+		));
+		add_form_key('ukrgb_link_account');
+		
+		if ($this->request->is_set('confirm')){
+			// Link the account
+			$this->link_account_perform_link($data);
+			
+			$url = generate_board_url() . '/ucp.php?mode=login&login=external&oauth_service=facebook';
+			
+			$this->template->assign_vars(array(
+					'MESSAGE_TITLE' => $this->user->lang('LNK_COMPLETE_TITLE'),
+					'MESSAGE_TEXT' => $this->user->lang('LNK_COMPLETE_TEXT'),
+					'MESSAGE_LNK' => $url,
+					'MESSAGE_LNK_TXT' => $this->user->lang('LNK_COMPLETE_LNK_TXT'),
+			));
+			meta_refresh(3, $url);
+			return $this->helper->render('ukrgb_message.html',$data['username']);
+		}
+		if ($this->request->is_set('cancel')){
+			$url = generate_board_url();
+				
+			$this->template->assign_vars(array(
+					'MESSAGE_TITLE' => $this->user->lang('LNK_CANCEL_TITLE'),
+					'MESSAGE_TEXT' => $this->user->lang('LNK_CANCEL_TEXT'),
+					'MESSAGE_LNK' => $url,
+					'MESSAGE_LNK_TXT' => $this->user->lang('LNK_CANCEL_LNK_TXT'),
+			));
+			meta_refresh(5, $url);
+			return $this->helper->render('ukrgb_message.html',$data['username']);
+		}
+		// Display form
+		return $this->helper->render('link_account.html',$this->user->lang('LINK_ACCOUNT'));
+	}
 	
 	protected function authenticate($name)
 	{
@@ -344,7 +401,9 @@ class main
 			// user not logged in, is the email already registered
 			$users = $this->get_user_by_email($result['email']);
 			if (sizeof($users) >1){
-				$error_msg = "Multiple user accounts associated with this email, please contact the Administrator for assistance";
+				//Multiple accounts with this email
+				$msg_title = "OAUTH_LNK_FAIL";
+				$error_msg = "OAUTH_MULTI_EMAIL";
 			} 
 			elseif (sizeof($users) == 0 ) {
 				// No Account with this email address Register a new account, check the validity of the name to use as username
@@ -363,16 +422,18 @@ class main
 			}
 			else
 			{
+				// One account exists with this email, link the account to the oauth provider account
+				$server_url = generate_board_url();
 				$phpbb_user_id = $users[0]['user_id'];
 				$phpbb_username =  $users[0]['username'];
-				$error_msg = "phpbb user_id: ".$phpbb_user_id." , phpbb username: ".$phpbb_username;
 				
-			
 				// Insert into table, they will be able to log in after this
 				$data = array(
+						'username'			=> $phpbb_username,
 						'user_id'			=> $phpbb_user_id,
 						'provider'			=> $service_name_original,
 						'oauth_provider_id'	=> $result['id'],
+						'email'				=> $result['email'],
 				);
 				
 				// Check if account already linked
@@ -381,28 +442,22 @@ class main
 				{
 					if ($curent_id == $result['id'])
 					{
-						error_log('Login');
-						
-						// Account already linked
+						// Account already linked, this is a simple login by oauth provider account
 						//TODO: this could be optimised to not require second call to FB
-						$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
+						$url = $server_url.'/ucp.php?mode=login&login=external&oauth_service=facebook';
 						header('Location: ' . $url);
 						exit;
+						
 					} else {
-						error_log('already reg anothe fb account');
-						$error_msg = "Your UK Rivers Account is already linked to different Facebook account: ". $curent_id . ', ' . $result['id'];	
+						// UKRGB account linked to different oauth provider account.
+						$msg_title = "OAUTH_LNK_FAIL";
+						$error_msg = 'OAUTH_LNK_ANOTHER_ACC';	
 					}
 				}
 				else
 				{
-						
-					$error_msg = "Linking Account: " . $url;
-	
-					$this->link_account_perform_link($data);
-					//TODO remove area51 link
-					$url = 'http://area51.ukriversguidebook.co.uk/forum/ucp.php?mode=login&login=external&oauth_service=facebook';
-					header('Location: ' . $url);
-					exit;
+					// UKRGB account linked to different oauth provider account.
+					return $this->link_account($data);
 				}
 				
 			}
@@ -411,7 +466,7 @@ class main
 			// Fail conditions
 			if ($result['email'] == null)
 			{
-				$error_msg = "No Email returned, account can't be linked or created";
+				$error_msg = "No Email returned from , account can't be linked or created";
 				
 			} else {
 				$error_msg = 'The user is logged in. ID: '. $this->user->data['user_id'];
@@ -419,11 +474,12 @@ class main
 		}
 		
 		$this->template->assign_vars(array(
-				'UKRGB_HELLO_NAME' =>  $result['first_name'], 
-				'UKRGB_HELLO_EMAIL' => $result['email'],
-				'UKRGB_HELLO_ERROR' => $error_msg,
+				'MESSAGE_TITLE' =>  $this->user->lang($msg_title),
+				'MESSAGE_TEXT' =>  $this->user->lang($error_msg),
+				'MESSAGE_LNK' => $url,
+				'MESSAGE_LNK_TXT' => $this->user->lang($link_text),
 		));
-		return $this->helper->render('oauth_body.html',$result['name']);
+		return $this->helper->render('ukrgb_message.html',$result['name']);
 
 	}
 
@@ -548,8 +604,15 @@ class main
 	 */
 	protected function link_account_perform_link(array $data)
 	{
+		
+		$submit_data = array (
+				'user_id' => $data['user_id'],
+				'provider' => $data['provider'],
+				'oauth_provider_id' => $data['oauth_provider_id']
+		);
+	
 		$sql = 'INSERT INTO ' . $this->auth_provider_oauth_token_account_assoc . '
-			' . $this->db->sql_build_array('INSERT', $data);
+			' . $this->db->sql_build_array('INSERT', $submit_data);
 		$this->db->sql_query($sql);
 	}
 	

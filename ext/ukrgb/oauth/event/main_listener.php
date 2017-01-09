@@ -72,7 +72,7 @@ class main_listener implements EventSubscriberInterface
 		$this->template->assign_vars(array(
 				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
 				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
-				
+				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
 		));
 	}
 	

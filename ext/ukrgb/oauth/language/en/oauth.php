@@ -28,7 +28,24 @@ if (empty($lang) || !is_array($lang))
 }
 
 $lang = array_merge($lang, array(
+		'LINK_ACCOUNT' => 'Link Account',
+		'LINK_ACCOUNT_Q' => 'Do you want to link your Facebook account to the following UK Rivers Guidebook account?',
+		
 		'REG_COMPLETE_TITLE' => 'Registration Complete',
-		'REG_COMPLETE_TEXT' => 'You have successfully registered on the UK Rivers Guidebook. You will automatically be logged in in 5 seconds.',
+		'REG_COMPLETE_TEXT' => 'You have successfully registered on the UK Rivers Guidebook. You will automatically be logged in in a few seconds.',
 		'REG_COMPLETE_LNK_TXT' => 'Sign In to the UK Rivers Guidebook',
-		));
+		
+		'LNK_COMPLETE_TITLE' => 'Account Linking Complete',
+		'LNK_COMPLETE_TEXT' => 'You have successfully link your account on the UK Rivers Guidebook. You will automatically be logged in a few seconds.',
+		'LNK_COMPLETE_LNK_TXT' => 'Sign In to the UK Rivers Guidebook',
+		
+		'LNK_CANCEL_TITLE' => 'Account Linking Cancelled',
+		'LNK_CANCEL_TEXT' => 'The linking of your your account has been cancelled.',
+		'LNK_CANCEL_LNK_TXT' => 'Return to the home page',
+		
+		'OAUTH_NO_EMAIL' => 'No Email returned from Facebook, account cannot be linked or created',
+		'OAUTH_MULTI_EMAIL' => 'Multiple user accounts area associated with your email, please contact the Administrator for assistance',
+		'OAUTH_LNK_FAIL' => 'Account Linking Failure',
+		'OAUTH_LNK_ANOTHER_ACC' => 'Your UK Rivers Guidebook Account is already linked to different Facebook account, please contact the Administrator for assistance.',
+		'OAUTH_LNK_OTHER_FAIL' => 'An unknown error occurred whilst linking Facebook account, please contact the Administrator for assistance.',
+));
