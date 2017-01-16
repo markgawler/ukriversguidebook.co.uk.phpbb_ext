@@ -168,7 +168,6 @@ class main
 	 */
 	public function handle($name)
 	{		
-		error_log('Handler:'.$name);
 		switch ($name) {
 			case "facebook":
 				return $this->authenticate($name);
@@ -188,18 +187,25 @@ class main
 	
 	protected function register(array $data = array())
 	{
+		if ($this->request->is_set('cancel'))
+		{
+			meta_refresh(3, generate_board_url());
+			return $this->helper->message('REG_CANCEL');	
+		}
+		
+		
 		include_once($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
 		
 		$timezone = $this->config['board_timezone'];
 		$submit = $this->request->is_set('submit');
 		
-		if ($submit){	
+		if ($submit){
 			
 			$data = array(
 					'username' 			=> utf8_normalize_nfc($this->request->variable('username','', true)),
 					'email'				=> strtolower(request_var('email', '')),
 					'provider' 			=> $this->request->variable('provider','', true),
-					'oauth_provider_id' 		=> $this->request->variable('provider_id','', true),
+					'oauth_unique_id' 		=> $this->request->variable('unique_id','', true),
 					'lang'				=> basename(request_var('lang', $this->user->lang_name)),
 					'tz'				=> request_var('tz', $timezone),
 			);
@@ -237,7 +243,7 @@ class main
 		$error = array_map(array($this->user, 'lang'), $error);
 			
 		if ($submit && !sizeof($error))
-		{	
+		{					
 			// Which group by default?
 			$group_name = 'REGISTERED';
 			
@@ -294,7 +300,7 @@ class main
 			$provider_data = array(
 					'user_id'			=> $user_id,
 					'provider'			=> $data['provider'],
-					'oauth_provider_id'	=> $data['oauth_provider_id'],
+					'oauth_unique_id'	=> $data['oauth_unique_id'],
 			);
 			$this->link_account_perform_link($provider_data);
 				
@@ -316,10 +322,10 @@ class main
 				'lang'				=> $this->user->lang_name,
 				'tz'				=> $this->config['board_timezone'],
 				'provider' 			=> $data['provider'],
-				'provider_id'		=> $data['oauth_provider_id'],
+				'unique_id'		=> $data['oauth_unique_id'],
 		);
 		add_form_key('ukrgb_registration');
-		
+				
 		$this->template->assign_vars(array(
 				'ERROR'				=> (sizeof($error)) ? implode('<br />', $error) : '',
 				'USERNAME' => utf8_normalize_nfc($data['username'], '', true),
@@ -329,10 +335,7 @@ class main
 				'S_HIDDEN_FIELDS'	=> build_hidden_fields($s_hidden_fields),
 		));
 		
-		return $this->helper->render('registration.html');
-		
-	
-		
+		return $this->helper->render('registration.html');	
 	}
 	
 	protected function link_account(array $data = array() )
@@ -350,7 +353,7 @@ class main
 					'username'			=> $this->request->variable('username','', true),
 					'user_id'			=> $this->request->variable('user_id','', true),
 					'provider'			=> $this->request->variable('provider','', true),
-					'oauth_provider_id'	=> $this->request->variable('oauth_provider_id','', true),
+					'oauth_unique_id'	=> $this->request->variable('oauth_unique_id','', true),
 					'email'				=> $this->request->variable('email','', true),
 			);	
 		}
@@ -358,42 +361,27 @@ class main
 		{
 			add_form_key('ukrgb_link_account');
 		}
+		
+		if (empty($error) && $this->request->is_set('confirm')){
+			// Link the account
+			$this->link_account_perform_link($data);
+			$url = generate_board_url() . '/ucp.php?mode=login&login=external&oauth_service=facebook';
+			meta_refresh(3, $url);
+			return $this->helper->message('LNK_COMPLETE_TEXT');
+				
+		}
+		if ($this->request->is_set('cancel')){
+			meta_refresh(3, generate_board_url());
+			return $this->helper->message('LNK_CANCEL_TEXT');
+		}
+		
+		// Display form
 		// Link to an existing account with matching email
 		$this->template->assign_vars(array(
 				'USERNAME' =>  $data['username'],
 				'EMAIL' =>  $data['email'],
 				'S_HIDDEN_FIELDS'	=> build_hidden_fields($data),
 		));
-		
-		if (empty($error) && $this->request->is_set('confirm')){
-			// Link the account
-			$this->link_account_perform_link($data);
-			
-			$url = generate_board_url() . '/ucp.php?mode=login&login=external&oauth_service=facebook';
-			
-			$this->template->assign_vars(array(
-					'MESSAGE_TITLE' => $this->user->lang('LNK_COMPLETE_TITLE'),
-					'MESSAGE_TEXT' => $this->user->lang('LNK_COMPLETE_TEXT'),
-					'MESSAGE_LNK' => $url,
-					'MESSAGE_LNK_TXT' => $this->user->lang('LNK_COMPLETE_LNK_TXT'),
-			));
-			meta_refresh(3, $url);
-			return $this->helper->render('ukrgb_message.html',$data['username']);
-		}
-		if ($this->request->is_set('cancel')){
-			$url = generate_board_url();
-				
-			$this->template->assign_vars(array(
-					'MESSAGE_TITLE' => $this->user->lang('LNK_CANCEL_TITLE'),
-					'MESSAGE_TEXT' => $this->user->lang('LNK_CANCEL_TEXT'),
-					'MESSAGE_LNK' => $url,
-					'MESSAGE_LNK_TXT' => $this->user->lang('LNK_CANCEL_LNK_TXT'),
-			));
-			meta_refresh(3, $url);
-			return $this->helper->render('ukrgb_message.html',$data['username']);
-		}
-		
-		// Display form
 		return $this->helper->render('link_account.html',$this->user->lang('LINK_ACCOUNT'));
 	}
 	
@@ -403,110 +391,109 @@ class main
 		$service_name_original = 'facebook';
 		$service_name = 'auth.provider.oauth.service.' . $service_name_original;
 		
+		// Get the service credentials for the given service
+		$service_credentials = $this->service_providers[$service_name]->get_service_credentials();
+		
 		$storage = new \phpbb\auth\provider\oauth\token_storage($this->db, $this->user, $this->auth_provider_oauth_token_storage_table);
 		$query = 'oauth/' . $service_name_original;
-		$service_credentials = array(
-				'key'		=> $this->config['auth_oauth_facebook_key'],
-				'secret'	=> $this->config['auth_oauth_facebook_secret'],
-		);
-
 		$service = $this->get_service($service_name_original, $storage, $service_credentials, '', array('email'));
 				
 		if (!$this->request->is_set('code', \phpbb\request\request_interface::GET)) 
-		{
-			$url = $service->getAuthorizationUri();
-			
-			header('Location: ' . $url);
+		{			
+			header('Location: ' . $service->getAuthorizationUri());
 			exit;
 		}
+		$this->service_providers[$service_name]->set_external_service_provider($service);
+		$result = $this->perform_auth_login($service);
 		
-		if (!($service instanceof \OAuth\OAuth2\Service\Facebook))
+		// Check to see if this provider is already associated with an account
+		$data = array(
+				'provider'	=> $service_name_original,
+				'oauth_provider_id'	=> $result['id']
+		);
+		
+		$sql = 'SELECT user_id FROM ' . $this->auth_provider_oauth_token_account_assoc . '
+				WHERE ' . $this->db->sql_build_array('SELECT', $data);
+		$sqlresult = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($sqlresult);
+		$this->db->sql_freeresult($sqlresult);
+		
+		if ($row)
 		{
-			throw new \exception('AUTH_PROVIDER_OAUTH_ERROR_INVALID_SERVICE_TYPE');
+			// Account already linked, this is a simple login by oauth provider account
+			//TODO: this could be optimised to not require second call to FB
+			$url = generate_board_url() .'/ucp.php?mode=login&login=external&oauth_service=facebook';
+			header('Location: ' . $url);
+			exit;
+			
 		}
-		// This was a callback request, get the token
-		$token = $service->requestAccessToken($this->request->variable('code', ''));
-		
-		// Send a request with it
-		$result = json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
-		
-		if ($this->user->data['user_id'] == 1 || $result['email'] == null || !$result['verified'])
+		else 
 		{
-			// user not logged in, is the email already registered
-			$users = $this->get_user_by_email($result['email']);
-			if (sizeof($users) >1){
-				//Multiple accounts with this email
-				$msg_title = "OAUTH_LNK_FAIL";
-				$error_msg = "OAUTH_MULTI_EMAIL";
-			} 
-			elseif (sizeof($users) == 0 ) {
-				// No Account with this email address Register a new account.
-				$data = array (
-						'username'			=> utf8_normalize_nfc($result['name']),
-						'provider'			=> $service_name_original,
-						'oauth_provider_id'	=> $result['id'],
-						'email'				=> $result['email'],
-				);
-				return $this->register($data);
-			}
-			else
+			// Link or register
+			if (!empty($result['email']) && $result['verified'])
 			{
-				// One account exists with this email, link the account to the oauth provider account
-				$server_url = generate_board_url();
-				$phpbb_user_id = $users[0]['user_id'];
-				$phpbb_username =  $users[0]['username'];
-				
-				// Insert into table, they will be able to log in after this
-				$data = array(
-						'username'			=> $phpbb_username,
-						'user_id'			=> $phpbb_user_id,
-						'provider'			=> $service_name_original,
-						'oauth_provider_id'	=> $result['id'],
-						'email'				=> $result['email'],
-				);
-				
-				// Check if account already linked
-				$curent_id = $this->get_provider_id($data);
-				if ($curent_id)
-				{
-					if ($curent_id == $result['id'])
-					{
-						// Account already linked, this is a simple login by oauth provider account
-						//TODO: this could be optimised to not require second call to FB
-						$url = $server_url.'/ucp.php?mode=login&login=external&oauth_service=facebook';
-						header('Location: ' . $url);
-						exit;
-						
-					} else {
-						// UKRGB account linked to different oauth provider account.
-						$msg_title = "OAUTH_LNK_FAIL";
-						$error_msg = 'OAUTH_LNK_ANOTHER_ACC';	
-					}
+				// user not logged in, is the email already registered
+				$users = $this->get_user_by_email($result['email']);
+				if (sizeof($users) >1){
+					//Multiple accounts with this email
+					$msg_title = "OAUTH_LNK_FAIL";
+					$error_msg = "OAUTH_MULTI_EMAIL";
+				}
+				elseif (sizeof($users) == 0 ) {
+					// No Account with this email address Register a new account.
+					$data = array (
+							'username'			=> utf8_normalize_nfc($result['name']),
+							'provider'			=> $service_name_original,
+							'oauth_unique_id'	=> $result['id'],
+							'email'				=> $result['email'],
+					);
+					return $this->register($data);
 				}
 				else
 				{
-					// UKRGB account linked to different oauth provider account.
-					return $this->link_account($data);
+					// One account exists with this email, link the account to the oauth provider account
+					$phpbb_user_id = $users[0]['user_id'];
+					$phpbb_username =  $users[0]['username'];
+				
+					// Insert into table, they will be able to log in after this
+					$data = array(
+							'username'			=> $phpbb_username,
+							'user_id'			=> $phpbb_user_id,
+							'provider'			=> $service_name_original,
+							'oauth_unique_id'	=> $result['id'],
+							'email'				=> $result['email'],
+					);
+						
+					// Check if account already linked
+					if ($this->get_unique_id($data))
+					{
+						// UKRGB account linked to different account with this oauth provider.
+						$msg_title = "OAUTH_LNK_FAIL";
+						$error_msg = 'OAUTH_LNK_ANOTHER_ACC';
+					
+					}
+					return $this->link_account($data);				
 				}
-				
 			}
-			
-		} else {
-			// Fail conditions
-			if ($result['email'] == null)
+			else 
 			{
-				$error_msg = "No Email returned from , account can't be linked or created";
-				
-			} else {
-				$error_msg = 'The user is logged in. ID: '. $this->user->data['user_id'];
+				// Fail conditions
+				if (empty($result['email']))
+				{
+					$msg_title = "OAUTH_LNK_REG_FAIL";
+					$error_msg = 'OAUTH_NO_EMAIL';
+						
+				} else {
+					$msg_title = "OAUTH_LNK_REG_FAIL";
+					$error_msg = 'OAUTH_LNK_REG_FAIL_TXT';
+				}
 			}
+
 		}
 		
 		$this->template->assign_vars(array(
 				'MESSAGE_TITLE' =>  $this->user->lang($msg_title),
 				'MESSAGE_TEXT' =>  $this->user->lang($error_msg),
-				'MESSAGE_LNK' => $url,
-				'MESSAGE_LNK_TXT' => $this->user->lang($link_text),
 		));
 		return $this->helper->render('ukrgb_message.html',$result['name']);
 
@@ -611,7 +598,7 @@ class main
 		$submit_data = array (
 				'user_id' => $data['user_id'],
 				'provider' => $data['provider'],
-				'oauth_provider_id' => $data['oauth_provider_id']
+				'oauth_provider_id' => $data['oauth_unique_id']
 		);
 	
 		$sql = 'INSERT INTO ' . $this->auth_provider_oauth_token_account_assoc . '
@@ -625,7 +612,7 @@ class main
 	 * @param array $data  
 	 * @return int or null
 	 */
-	protected function get_provider_id(array $data)
+	protected function get_unique_id(array $data)
 	{
 		$select_data = array (
 				'user_id' => $data['user_id'],
@@ -636,5 +623,18 @@ class main
 		$row = $this->db->sql_fetchrow($result);
 		$this->db->sql_freeresult($result);
 		return $row['oauth_provider_id'];
+	}
+	
+	protected function perform_auth_login($service)
+	{
+		if (!($service instanceof \OAuth\OAuth2\Service\Facebook))
+		{
+			throw new \exception('AUTH_PROVIDER_OAUTH_ERROR_INVALID_SERVICE_TYPE');
+		}
+		// This was a callback request, get the token
+		$token = $service->requestAccessToken($this->request->variable('code', ''));
+		
+		// Send a request with it
+		return json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
 	}
 }
