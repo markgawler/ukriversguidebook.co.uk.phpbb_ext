@@ -286,7 +286,7 @@ class main
 			{
 				$user_row['user_new'] = 1;
 			}
-			
+
 			// Register user...
 			$user_id = user_add($user_row, $cp_data);
 			

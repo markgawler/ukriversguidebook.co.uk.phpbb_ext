@@ -1,0 +1,28 @@
+{
+	"name": "ukrgb/jfusion",
+	"type": "phpbb-extension",
+	"description": "UKRGB JFusion phpBB Extension for phpBB 3.1",
+    "homepage": "https://github.com/markgawler/ukriversguidebook.co.uk.phpbb_ext",
+	"version": "0.1.0",
+	"time": "2017-01-20",
+	"license": "GPL-2.0",
+	"authors": [{
+			"name": "MarkG",
+            "email": "markg@wler.co.uk",
+            "homepage": "https://github.com/markgawler/",
+            "role": "Lead Developer"
+		}],
+	"require": {
+		"php": ">=5.3.3"
+	},
+	"require-dev": {
+		"phpbb/epv": "dev-master"
+	},
+	"extra": {
+		"display-name": "UKRGB: Extension - JFusion",
+		
+		"soft-require": {
+			"phpbb/phpbb": "~3.1"
+		}
+	}
+}
