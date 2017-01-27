@@ -131,7 +131,20 @@ class main
 	 * @param	string			$php_ext
 	 */
 	
-	public function __construct(\phpbb\db\driver\driver_interface $db, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\passwords\manager $passwords_manager, \phpbb\request\request_interface $request, \phpbb\user $user, $auth_provider_oauth_token_storage_table, $auth_provider_oauth_token_account_assoc, \phpbb\di\service_collection $service_providers, $users_table, \Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, $phpbb_root_path, $php_ext)
+	public function __construct(\phpbb\db\driver\driver_interface $db, 
+			\phpbb\config\config $config, 
+			\phpbb\controller\helper $helper, 
+			\phpbb\template\template $template, 
+			\phpbb\passwords\manager $passwords_manager, 
+			\phpbb\request\request_interface $request, 
+			\phpbb\user $user, 
+			$auth_provider_oauth_token_storage_table, 
+			$auth_provider_oauth_token_account_assoc, 
+			\phpbb\di\service_collection $service_providers, 
+			$users_table, 
+			\Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, 
+			$phpbb_root_path, 
+			$php_ext)
 	{ 
 		$this->db = $db;
 		$this->config = $config;
@@ -282,13 +295,22 @@ class main
 					'user_inactive_time'	=> $user_inactive_time,
 			);
 			
+			// Data to create Joomla user
+			$userinfo = (object) array(
+					'name' =>  $data['username'],
+					'username' =>  $data['username'],
+					'password' => $data['new_password'],
+					'email' => $data['email'],	
+			);
+					
 			if ($this->config['new_member_post_limit'])
 			{
 				$user_row['user_new'] = 1;
 			}
 
 			// Register user...
-			$user_id = user_add($user_row, $cp_data);
+			$user_id = user_add($user_row, $cp_data);  	//phpBB register
+			$this->register_jfusion($userinfo);  		// Joomal register via jfusion
 			
 			// This should not happen, because the required variables are listed above...
 			if ($user_id === false)
@@ -409,7 +431,7 @@ class main
 		// Check to see if this provider is already associated with an account
 		$data = array(
 				'provider'	=> $service_name_original,
-				'oauth_provider_id'	=> $result['id']
+			 	'oauth_provider_id'	=> $result['id']
 		);
 		
 		$sql = 'SELECT user_id FROM ' . $this->auth_provider_oauth_token_account_assoc . '
@@ -637,4 +659,32 @@ class main
 		// Send a request with it
 		return json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
 	}
+	
+	
+	public function register_jfusion($userdata)
+	{
+		global $JFusionActive;
+		
+		define('_JFUSIONAPI_INTERNAL', true);
+		$apipath = $this->config['ukrgb_jfusion_apipath'];
+		require_once $apipath . '/jfusionapi.php';
+		
+		$joomla = \JFusionAPIInternal::getInstance();
+
+		$joomla->backupGlobal();
+		$this->request->enable_super_globals();
+
+		$joomla->setActivePlugin($this->config['ukrgb_jfusion_jname']);
+		$joomla->register($userdata);
+		$joomla->login($userdata->username, $userdata->password, $remember);
+		
+		$joomla->restoreGlobal();
+		$this->request->disable_super_globals();
+		
+	}
+		
+	
+	
+	
+	
 }

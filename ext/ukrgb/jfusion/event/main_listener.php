@@ -78,12 +78,11 @@ class main_listener implements EventSubscriberInterface
 			// The password in $event['login']['user_row']['user_password'] is hashed, use password from request
 			// instead, but this still dosn't work for Oauth logins (Facebook).
 			$password = $this->request->untrimmed_variable('password', '', false, \phpbb\request\request_interface::POST);
-			/*
 			if (empty($username) || empty($password))
 			{
 				if (empty($username))
 				{
-					error_log('No username ');
+					//error_log('No username ');
 					$username = $event['login']['user_row']['username'];
 				}
 				if (empty($password))
@@ -91,22 +90,16 @@ class main_listener implements EventSubscriberInterface
 					error_log('No password ');
 				}					
 			}
+			//detect if the session should be remembered
+			if (!empty($event['autologin'])) {
+				$remember = 1;
+			} else {
+				$remember = 0;
+			}
 			
-			else 
-			{
-			*/
-				//detect if the session should be remembered
-				if (!empty($event['autologin'])) {
-					$remember = 1;
-				} else {
-					$remember = 0;
-				}
-				error_log('-- UKRGB Jfusion - Call ');
-				
-				$joomla->setActivePlugin($this->config['ukrgb_jfusion_jname']);
-		
-				$joomla->login($username, $password, $remember);
-			//}					
+			$joomla->setActivePlugin($this->config['ukrgb_jfusion_jname']);
+	
+			$joomla->login($username, $password, $remember);
 			//backup phpbb globals
 			$joomla->restoreGlobal();
 			$this->request->disable_super_globals();
