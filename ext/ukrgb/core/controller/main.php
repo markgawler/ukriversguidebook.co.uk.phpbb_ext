@@ -1,9 +1,9 @@
 <?php
 /**
  *
-* This file is part of the phpBB Forum Software package.
+* UKRGB Core extention to provide oath registration.
 *
-* @copyright (c) phpBB Limited <https://www.phpbb.com>
+* @copyright (c) Mark Gawler 2017
 * @license GNU General Public License, version 2 (GPL-2.0)
 *
 * For full copyright and license information, please see
@@ -11,7 +11,7 @@
 *
 */
 
-namespace ukrgb\oauth\controller;
+namespace ukrgb\core\controller;
 
 use OAuth\Common\Consumer\Credentials;
 use OAuth\OAuth2\Service\Facebook;
@@ -363,24 +363,33 @@ class main
 	protected function link_account(array $data = array() )
 	{
 		// Link to an existing account with matching email
+		
+		$secret = $this->config['ukrgb_secret'];
+		
 		if (empty($data)){
-			if (!check_form_key('ukrgb_link_account'))
-			{
-				$error[] = $this->user->lang['FORM_INVALID'];
-				$this->template->assign_vars(array(
-						'ERROR'				=> (sizeof($error)) ? implode('<br />', $error) : '',
-				));
-			}
 			$data = array(
 					'username'			=> $this->request->variable('username','', true),
 					'user_id'			=> $this->request->variable('user_id','', true),
 					'provider'			=> $this->request->variable('provider','', true),
 					'oauth_unique_id'	=> $this->request->variable('oauth_unique_id','', true),
 					'email'				=> $this->request->variable('email','', true),
-			);	
+					'id_hash'			=> $hash =  $this->request->variable('id_hash','', true),
+			);
+		
+			if (!check_form_key('ukrgb_link_account') || 
+					$data['id_hash'] != hash('md5', $data['user_id'] . $secret . $data['oauth_unique_id']))
+			{
+				$error[] = $this->user->lang['FORM_INVALID'];
+				$this->template->assign_vars(array(
+						'ERROR'				=> (sizeof($error)) ? implode('<br />', $error) : '',
+				));
+			}
+			
 		}
 		else 
 		{
+			$data['id_hash'] = hash('md5', $data['user_id'] . $secret . $data['oauth_unique_id']);
+			
 			add_form_key('ukrgb_link_account');
 		}
 		
@@ -442,14 +451,22 @@ class main
 		
 		if ($row)
 		{
-			// Account already linked, this is a simple login by oauth provider account
-			//TODO: this could be optimised to not require second call to FB
-			$url = generate_board_url() .'/ucp.php?mode=login&login=external&oauth_service=facebook';
-			header('Location: ' . $url);
-			exit;
-			
+			if (!$this->is_valid_user($row['user_id'])){
+				// the user linked to this provides id dose not exist
+				error_log("no such user");
+				$this->unlink_account_perform_unlink($data); 
+				$row = null;  // invalidate the auth provider association 
+			} 
+			else 
+			{
+				// Account already linked, this is a simple login by oauth provider account
+				//TODO: this could be optimised to not require second call to FB
+				$url = generate_board_url() .'/ucp.php?mode=login&login=external&oauth_service=facebook';
+				header('Location: ' . $url);
+				exit;
+			}
 		}
-		else 
+		if (!$row)
 		{
 			// Link or register
 			if (!empty($result['email']) && $result['verified'])
@@ -492,9 +509,10 @@ class main
 						// UKRGB account linked to different account with this oauth provider.
 						$msg_title = "OAUTH_LNK_FAIL";
 						$error_msg = 'OAUTH_LNK_ANOTHER_ACC';
-					
 					}
-					return $this->link_account($data);				
+					else {
+						return $this->link_account($data);
+					}
 				}
 			}
 			else 
@@ -504,13 +522,11 @@ class main
 				{
 					$msg_title = "OAUTH_LNK_REG_FAIL";
 					$error_msg = 'OAUTH_NO_EMAIL';
-						
 				} else {
 					$msg_title = "OAUTH_LNK_REG_FAIL";
 					$error_msg = 'OAUTH_LNK_REG_FAIL_TXT';
 				}
 			}
-
 		}
 		
 		$this->template->assign_vars(array(
@@ -628,8 +644,23 @@ class main
 		$this->db->sql_query($sql);
 	}
 	
+	
+	protected function unlink_account_perform_unlink(array $data)
+	{
+	
+		$submit_data = array (
+				'provider' => $data['provider'],
+				'oauth_provider_id' => $data['oauth_unique_id']
+		);
+	
+		$sql = 'DELETE FROM ' . $this->auth_provider_oauth_token_account_assoc .' WHERE ' . $this->db->sql_build_array('SELECT', $data);
+		$this->db->sql_query($sql);
+		
+	}
+	
+	
 	/**
-	 * Get the provider ID from the phpBB database 
+	 * Get the provider ID from the phpBB database of a giver user / provider
 	 * 
 	 * @param array $data  
 	 * @return int or null
@@ -683,7 +714,15 @@ class main
 		
 	}
 		
-	
+	protected function is_valid_user ($user_id){
+		$select_data = array('user_id' => $user_id);
+		$sql = 'SELECT username FROM '. $this->users_table .' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+		$sqlresult = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($sqlresult);
+		$this->db->sql_freeresult($sqlresult);
+		
+		return (!empty($row));
+	}
 	
 	
 	

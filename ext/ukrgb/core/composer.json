@@ -1,7 +1,7 @@
 {
-	"name": "ukrgb/jfusion",
+	"name": "ukrgb/core",
 	"type": "phpbb-extension",
-	"description": "UKRGB JFusion phpBB Extension for phpBB 3.1",
+	"description": "UKRGB Core phpBB Extension for phpBB 3.1",
     "homepage": "https://github.com/markgawler/ukriversguidebook.co.uk.phpbb_ext",
 	"version": "0.1.0",
 	"time": "2017-01-20",
@@ -19,7 +19,7 @@
 		"phpbb/epv": "dev-master"
 	},
 	"extra": {
-		"display-name": "UKRGB: Extension - JFusion",
+		"display-name": "UKRGB: Extension - Core",
 		
 		"soft-require": {
 			"phpbb/phpbb": "~3.1"

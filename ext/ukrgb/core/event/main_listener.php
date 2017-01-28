@@ -1,13 +1,13 @@
 <?php
 /**
 *
-* @package phpBB Extension - JFusion phpBB Extension
-* @copyright (c) 2013 phpBB Group
+* @package phpBB Extension - UKRGB Core phpBB Extension
+* @copyright (c) 2017 Mark Gawler
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
-namespace ukrgb\jfusion\event;
+namespace ukrgb\core\event;
 
 /**
 * @ignore
@@ -28,10 +28,18 @@ class main_listener implements EventSubscriberInterface
 				'core.user_setup' => 'core_user_setup',
 				'core.auth_login_session_create_before' => 'auth_login_session_create_before',
 				'core.session_kill_after' => 'session_kill_after',
+				'core.page_header' => 'add_page_header_link',
+				//'core.submit_post_end' => 'new_post_actions',
+								
 			);
 		}
 	}
-
+	
+	/* @var \phpbb\controller\helper */
+	protected $helper;
+	
+	/* @var \phpbb\template\template */
+	protected $template;
 	/* @var \phpbb\config\db */
 	protected $config;
 
@@ -41,14 +49,26 @@ class main_listener implements EventSubscriberInterface
 	/* @var \phpbb\request\request */
 	protected $request;
 	
+
 	/**
 	* Constructor
 	*
-	* @param \phpbb\config\db	$config		Controller helper object
-	* @param \phpbb\user			$user	Template object
+	* @param \phpbb\controller\helper $helper
+	* @param \phpbb\template\template $template
+	* @param \phpbb\config\db		  $config		Controller helper object
+	* @param \phpbb\user			  $user	Template object
+	* @request \phpbb\request 	 	  $request
 	*/
-	public function __construct(\phpbb\config\db $config, \phpbb\user $user, \phpbb\request\request $request, $root_path,  $php_ext)
+	public function __construct(\phpbb\controller\helper $helper, 
+			\phpbb\template\template $template, 
+			\phpbb\config\db $config, 
+			\phpbb\user $user, 
+			\phpbb\request\request $request, 
+			$root_path,  
+			$php_ext)
 	{
+		$this->helper = $helper;
+		$this->template = $template;
 		$this->config = $config;
 		$this->user = $user;
 		$this->request = $request;
@@ -139,10 +159,10 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function core_user_setup($event)
 	{		
-		if (defined('ADMIN_START'))
-		{
+		//if (defined('ADMIN_START'))
+		//{
 			$this->load_language_on_setup($event);
-		}
+		//}
 	}
 		
 	
@@ -165,10 +185,34 @@ class main_listener implements EventSubscriberInterface
 	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
-				'ext_name' => 'ukrgb/jfusion',
-				'lang_set' => 'jfusion',
+				'ext_name' => 'ukrgb/core',
+				'lang_set' => 'core',
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
+		
+		$this->user->add_lang_ext('','ucp');
+		
 	}
+	
+	public function add_page_header_link($event)
+	{
+		$this->template->assign_vars(array(
+				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
+				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
+				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
+		));
+	}
+	/*
+	 public function new_post_actions($event)
+	 {
+	 $mode = $event['mode'];
+	 if ($mode == 'post'){
+	 $subject = $event['subject'];
+	 $data= $event['data'];
+	 error_log("Subject: " . $subject);
+	 error_log("Data   : " . $data);
+	 }
+	 }
+	 */
 	
 }

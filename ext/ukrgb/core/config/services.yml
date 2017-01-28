@@ -1,6 +1,20 @@
 services:
-    ukrgb.oauth.controller:
-        class: ukrgb\oauth\controller\main
+    ukrgb.core.listener:
+        class: ukrgb\core\event\main_listener
+        arguments:
+            - '@controller.helper'
+            - '@template'
+            - '@config'
+            - '@user'
+            - '@request'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+                        
+        tags:
+            - { name: event.listener }
+
+    ukrgb.core.controller:
+        class: ukrgb\core\controller\main
         arguments:
             - '@dbal.conn'
             - '@config'
@@ -16,15 +30,3 @@ services:
             - '@service_container'
             - '%core.root_path%'
             - '%core.php_ext%'
-            
-            
-    ukrgb.oauth.listener:     
-        class: ukrgb\oauth\event\main_listener
-        arguments:
-            - '@controller.helper'
-            - '@template'
-            - '@user'
-        tags:
-            - { name: event.listener }
-            
-            

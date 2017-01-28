@@ -1,17 +1,17 @@
 <?php
 /**
 *
-* @package phpBB Extension - JFusion phpBB Extension
-* @copyright (c) 2013 phpBB Group
+* @package phpBB Extension - UKRGB Core phpBB Extension
+* @copyright (c) 2017 Mark Gawler
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
 */
 
-namespace ukrgb\jfusion\migrations;
+namespace ukrgb\core\migrations;
 
 /**
  * Class release_1_0_0
- * @package ukrgb\jfusion\migrations
+ * @package ukrgb\core\migrations
  */
 class release_1_0_0 extends \phpbb\db\migration\migration
 {
@@ -21,7 +21,7 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	 */
 	public function effectively_installed()
 	{
-		return isset($this->config['ukrgb_jfusion_apipath']);
+		return isset($this->config['ukrgb_secret']);
 	}
 
 
@@ -35,17 +35,18 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 		return array(
 			array('config.add', array('ukrgb_jfusion_apipath', '')),
 			array('config.add', array('ukrgb_jfusion_jname', '')),
+			array('config.add', array('ukrgb_secret', '')),
 				
 			array('module.add', array(
 				'acp',
 				'ACP_CAT_DOT_MODS',
-				'ACP_UKRGB_JFUSION_TITLE'
+				'ACP_UKRGB_CORE_TITLE'
 			)),
 			array('module.add', array(
 				'acp',
-				'ACP_UKRGB_JFUSION_TITLE',
+				'ACP_UKRGB_CORE_TITLE',
 				array(
-					'module_basename'	=> '\ukrgb\jfusion\acp\main_module',
+					'module_basename'	=> '\ukrgb\core\acp\main_module',
 					'modes'				=> array('settings'),
 				),
 			)),
