@@ -129,6 +129,8 @@ class main
 	 * @param	\Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container DI container
 	 * @param	string			$phpbb_root_path
 	 * @param	string			$php_ext
+	 * @param   \phpbb\log\log	$log	Logger instance
+
 	 */
 	
 	public function __construct(\phpbb\db\driver\driver_interface $db, 
@@ -144,7 +146,8 @@ class main
 			$users_table, 
 			\Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, 
 			$phpbb_root_path, 
-			$php_ext)
+			$php_ext,
+			\phpbb\log\log_interface $log)
 	{ 
 		$this->db = $db;
 		$this->config = $config;
@@ -160,6 +163,8 @@ class main
 		$this->phpbb_container = $phpbb_container;
 		$this->phpbb_root_path = $phpbb_root_path;
 		$this->php_ext = $php_ext;
+		$this->log = $log;
+		
 	}
 	
 	/**
@@ -212,9 +217,9 @@ class main
 		$timezone = $this->config['board_timezone'];
 		$submit = $this->request->is_set('submit');
 		
-		if ($submit){
-			
+		if ($submit){				
 			$data = array(
+					'oauth_name'	    => utf8_normalize_nfc($this->request->variable('oauth_name','', true)),
 					'username' 			=> utf8_normalize_nfc($this->request->variable('username','', true)),
 					'email'				=> strtolower(request_var('email', '')),
 					'provider' 			=> $this->request->variable('provider','', true),
@@ -334,12 +339,19 @@ class main
 					'MESSAGE_LNK' => $url,
 					'MESSAGE_LNK_TXT' => $this->user->lang('REG_COMPLETE_LNK_TXT'),
 			));
-			meta_refresh(5, $url);
+			
+			$user_ip = (empty($this->user->ip)) ? '' : $this->user->ip;
+			error_log('User IP: ' . $user_ip);
+			$this->log->add('user',$user_id , $user_ip, 'LOG_UKRGB_OAUTH_REG', time(), array($data['provider'],$data['oauth_name'],$data['email'],$data['oauth_unique_id']));
+					
+			
+			meta_refresh(3, $url);
 			return $this->helper->render('ukrgb_message.html',$this->user->lang('REG_COMPLETE_TITLE'));
 			
 		}
 
 		$s_hidden_fields = array(
+				'oauth_name'		=> $data['oauth_name'],
 				'email'				=> strtolower($data['email']),
 				'lang'				=> $this->user->lang_name,
 				'tz'				=> $this->config['board_timezone'],
@@ -368,6 +380,7 @@ class main
 		
 		if (empty($data)){
 			$data = array(
+					'oauth_name'	    => utf8_normalize_nfc($this->request->variable('oauth_name','', true)),
 					'username'			=> $this->request->variable('username','', true),
 					'user_id'			=> $this->request->variable('user_id','', true),
 					'provider'			=> $this->request->variable('provider','', true),
@@ -398,6 +411,11 @@ class main
 			$this->link_account_perform_link($data);
 			$url = generate_board_url() . '/ucp.php?mode=login&login=external&oauth_service=facebook';
 			meta_refresh(3, $url);
+			
+			$user_ip = (empty($this->user->ip)) ? '' : $this->user->ip;
+			error_log('User IP: ' . $user_ip);
+			$this->log->add('user',$data['user_id'] , $user_ip, 'LOG_UKRGB_OAUTH_LINK', time(), array($data['provider'], $data['oauth_name'], $data['email'],$data['oauth_unique_id']));
+			
 			return $this->helper->message('LNK_COMPLETE_TEXT');
 				
 		}
@@ -481,6 +499,7 @@ class main
 				elseif (sizeof($users) == 0 ) {
 					// No Account with this email address Register a new account.
 					$data = array (
+							'oauth_name'		=> utf8_normalize_nfc($result['name']),
 							'username'			=> utf8_normalize_nfc($result['name']),
 							'provider'			=> $service_name_original,
 							'oauth_unique_id'	=> $result['id'],
@@ -496,6 +515,7 @@ class main
 				
 					// Insert into table, they will be able to log in after this
 					$data = array(
+							'oauth_name'		=> utf8_normalize_nfc($result['name']),
 							'username'			=> $phpbb_username,
 							'user_id'			=> $phpbb_user_id,
 							'provider'			=> $service_name_original,

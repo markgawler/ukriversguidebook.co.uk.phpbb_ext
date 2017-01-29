@@ -30,3 +30,4 @@ services:
             - '@service_container'
             - '%core.root_path%'
             - '%core.php_ext%'
+            - '@log'

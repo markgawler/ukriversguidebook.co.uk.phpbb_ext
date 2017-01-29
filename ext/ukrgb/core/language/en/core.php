@@ -43,4 +43,7 @@ $lang = array_merge($lang, array(
 	'ACP_UKRGB_JFUSION_APIPATH'		=> 'Api Path',
 	'ACP_UKRGB_CORE_SETTING_SAVED'	=> 'Settings have been saved successfully!',
 	'ACP_UKRGB_SECRET'				=> 'Secret',
+		
+	'LOG_UKRGB_OAUTH_REG'			=> '<strong>User Registered using "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
+	'LOG_UKRGB_OAUTH_LINK'			=> '<strong>User account Linked to "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
 ));
