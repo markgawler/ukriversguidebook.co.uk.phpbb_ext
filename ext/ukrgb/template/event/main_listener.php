@@ -93,28 +93,32 @@ class main_listener implements EventSubscriberInterface
 		$forum_id = $event['forum_id'];
 		if (in_array($forum_id, $params->selected_forums))
 		{
+			$display_options = array(	
+					'UKRGB_SHOW_PP_DONATE' => true,
+					'UKRGB_SHOW_ADSENSE_IFL' => true,
+					);
 			// Set up PayPal button parameters
 			if ($params->sandbox)
 			{
-				$this->template->assign_vars(array(
-						'UKRGB_SHOW_PP_DONATE' => true,
+				$pp = array(
 						'U_UKRGB_PP_URL' => "https://www.sandbox.paypal.com/cgi-bin/webscr",
 						'UKRGB_PP_HOSTED_BUTTON_ID' => $params->sandbox_hosted_button_id,
-				));
+				);
 			}
 			else
 			{
-				$this->template->assign_vars(array(
-						'UKRGB_SHOW_PP_DONATE' => true,
+				$pp = array(
 						'U_UKRGB_PP_URL' => "https://www.paypal.com/cgi-bin/webscr",
 						'UKRGB_PP_HOSTED_BUTTON_ID' => $params->hosted_button_id,
-				));
+				);
 			}
+			$this->template->assign_vars(array_merge($display_options, $pp));
 		}
 		else 
 		{
 			$this->template->assign_vars(array(
 					'UKRGB_SHOW_PP_DONATE' => false,
+					'UKRGB_SHOW_ADSENSE_IFL' => false,		
 			));
 		}
 	}
