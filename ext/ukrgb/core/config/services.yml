@@ -1,0 +1,33 @@
+services:
+    ukrgb.core.listener:
+        class: ukrgb\core\event\main_listener
+        arguments:
+            - '@controller.helper'
+            - '@template'
+            - '@config'
+            - '@user'
+            - '@request'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+                        
+        tags:
+            - { name: event.listener }
+
+    ukrgb.core.controller:
+        class: ukrgb\core\controller\main
+        arguments:
+            - '@dbal.conn'
+            - '@config'
+            - '@controller.helper'
+            - '@template'
+            - '@passwords.manager'
+            - '@request'
+            - '@user'
+            - '%tables.auth_provider_oauth_token_storage%'
+            - '%tables.auth_provider_oauth_account_assoc%'
+            - '@auth.provider.oauth.service_collection'
+            - '%tables.users%'
+            - '@service_container'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            - '@log'

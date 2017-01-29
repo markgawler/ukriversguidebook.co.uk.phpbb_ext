@@ -1,0 +1,11 @@
+ukrgb_oauth_route:
+    path: /oauth/{name}
+    defaults: { _controller: ukrgb.core.controller:handle }
+    
+ukrgb_oauth_register:
+    path: /oauth/register
+    defaults: { _controller: ukrgb.core.controller:handle }
+
+ukrgb_oauth_link:
+    path: /oauth/link
+    defaults: { _controller: ukrgb.core.controller:handle }

@@ -1,0 +1,28 @@
+<!-- INCLUDE overall_header.html -->
+
+
+<form id="oauth_link" method="post" action="{U_OAUTH_LNK_SUBMIT}"{S_FORM_ENCTYPE}>
+
+<div class="panel">
+	<fieldset class="fields2">
+		<!-- IF ERROR --><dl><dd class="error">{ERROR}</dd></dl><!-- ENDIF -->
+	</fieldset>	
+	<div class="inner">
+
+	<h2>{SITENAME} - {L_LINK_ACCOUNT}</h2>
+	<p>{L_LINK_ACCOUNT_Q}
+	<p>{L_USERNAME}: {USERNAME}</p>
+	<p>{L_EMAIL}: {EMAIL}</p>
+	
+	<fieldset class="submit-buttons">
+		{S_HIDDEN_FIELDS}
+		<!-- IF !ERROR --><input type="submit" name="confirm" value="{L_YES}" class="button1" />&nbsp; 
+		<!-- ENDIF --> 
+		<input type="submit" name="cancel" value="{L_CANCEL}" class="button2" />
+		{S_FORM_TOKEN}
+	</fieldset>
+	</div>
+</div>
+</form>
+
+<!-- INCLUDE overall_footer.html -->
