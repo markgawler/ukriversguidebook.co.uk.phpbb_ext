@@ -1,3 +1,5 @@
 /node_modules/
 /setup.sh~
 /ukrgb_ext.tar.gz
+/composer.phar
+/vendor/
