@@ -38,12 +38,34 @@ $lang = array_merge($lang, array(
 	'OAUTH_LNK_ANOTHER_ACC' 		=> 'Your UK Rivers Guidebook Account is already linked to different Facebook account, please contact the Administrator for assistance.',
 		
 	'ACP_UKRGB_CORE_TITLE'			=> 'UKRGB Core Extension',
-	'ACP_UKRGB_CORE'				=> 'Settings',
-	'ACP_UKRGB_JFUSION_JNAME'		=> 'Instance Name',
-	'ACP_UKRGB_JFUSION_APIPATH'		=> 'Api Path',
+	'ACP_UKRGB_FB_APP_TITLE'		=> 'Facebook App Settings',	
+	'ACP_UKRGB_CORE_CFG'			=> 'Core Settings',
+	'ACP_UKRGB_FB_CFG'				=> 'Facebook App',
+		
+	'ACP_UKRGB_JFUSION_JNAME'		=> 'JFusion Instance Name',
+	'ACP_UKRGB_JFUSION_APIPATH'		=> 'JFusion Api Path',
 	'ACP_UKRGB_CORE_SETTING_SAVED'	=> 'Settings have been saved successfully!',
-	'ACP_UKRGB_SECRET'				=> 'Secret',
+	'ACP_UKRGB_SECRET'				=> 'UKRGB Secret',
+	'ACP_UKRGB_FB_APPID'			=> 'Facebook App ID',
+	'ACP_UKRGB_FB_SECRET'			=> 'Facebook App Secret',
+	'ACP_UKRGB_FB_PAGE_MGR'			=> 'Facebook Page Manager',
+	'ACP_UKRGB_FB_PAGE_ID'			=> 'Facebook Page ID',	
+	'APC_UKRGB_GET_TOKEN'			=> 'Get Facebook Token',
+	
+	'ACP_PAGE_TOKEN'				=> 'Page Token',
+	'APC_UKRGB_FIELD'				=> 'Token Field',
+	'APC_UKRGB_VALUE'				=> 'Value',
+	'ACP_UKRGB_FBPT_APP'			=> 'Application',
+	'ACP_UKRGB_FBPT_EXPIRES'		=> 'Expires',
+	'ACP_UKRGB_FBPT_VALID'			=> 'Valid',
+	'ACP_UKRGB_FBPT_ISSUED'			=> 'Issued',
+	'ACP_UKRGB_FBPT_SCOPE'			=> 'Scope',
+	
+	'ACP_UKRGB_FB_PAGE_TOKEN_UPD'	=> 'Page Token Updated',
+	
 		
 	'LOG_UKRGB_OAUTH_REG'			=> '<strong>User Registered using "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
 	'LOG_UKRGB_OAUTH_LINK'			=> '<strong>User account Linked to "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
+		
+
 ));

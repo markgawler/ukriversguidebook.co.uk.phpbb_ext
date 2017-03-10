@@ -21,6 +21,8 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	 */
 	public function effectively_installed()
 	{
+		error_log('release_1_0_0 - effectively_installed');
+		
 		return isset($this->config['ukrgb_secret']);
 	}
 
@@ -32,24 +34,32 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	 */
 	public function update_data()
 	{
+		error_log('release_1_0_0 - update data');
+		
 		return array(
-			array('config.add', array('ukrgb_jfusion_apipath', '')),
-			array('config.add', array('ukrgb_jfusion_jname', '')),
-			array('config.add', array('ukrgb_secret', '')),
 				
-			array('module.add', array(
-				'acp',
-				'ACP_CAT_DOT_MODS',
-				'ACP_UKRGB_CORE_TITLE'
-			)),
-			array('module.add', array(
-				'acp',
-				'ACP_UKRGB_CORE_TITLE',
-				array(
-					'module_basename'	=> '\ukrgb\core\acp\main_module',
-					'modes'				=> array('settings'),
-				),
-			)),
+				array('config.add', array('ukrgb_jfusion_apipath', '')),
+				array('config.add', array('ukrgb_jfusion_jname', '')),
+				array('config.add', array('ukrgb_secret', '')),
+				array('config.add', array('ukrgb_fb_appid', '')),
+				array('config.add', array('ukrgb_fb_secret', '')),
+				array('config.add', array('ukrgb_fb_page_mgr', '')),
+				
+				array('module.add', array(
+						'acp',
+						'ACP_CAT_DOT_MODS',
+						'ACP_UKRGB_CORE_TITLE'
+				)),
+				
+				array('module.add', array(
+					'acp',
+					'ACP_UKRGB_CORE_TITLE',
+					array(
+							'module_basename'	=> '\ukrgb\core\acp\main_module',
+							'modes'				=> array('settings','fb_app_settings'),
+					),
+				)),
+				
 		);
 	}
 }

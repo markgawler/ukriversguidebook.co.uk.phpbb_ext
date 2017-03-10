@@ -161,8 +161,12 @@ class main_listener implements EventSubscriberInterface
 	{		
 		//if (defined('ADMIN_START'))
 		//{
-			$this->load_language_on_setup($event);
+		//	$this->template->assign_vars(array(
+		//		'U_UKRGB_GET_FB_TOKEN' => $this->helper->route('ukrgb_admin_fb', array(mode => 'request_permisions')),
+		//	));
 		//}
+		$this->load_language_on_setup($event);
+
 	}
 		
 	
@@ -196,10 +200,12 @@ class main_listener implements EventSubscriberInterface
 	
 	public function add_page_header_link($event)
 	{
+		//error_log($this->helper->route('ukrgb_admin_fb', array(mode => 'cb')));
 		$this->template->assign_vars(array(
 				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
 				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
 				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
+				
 		));
 	}
 	/*

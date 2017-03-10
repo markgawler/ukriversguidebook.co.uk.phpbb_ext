@@ -31,3 +31,12 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             - '@log'
+            
+    ukrgb.core.controller:
+        class: ukrgb\core\controller\admin
+        arguments:
+            - '@config'
+            - '@request'
+            - '@user'
+            - '@controller.helper'
+            

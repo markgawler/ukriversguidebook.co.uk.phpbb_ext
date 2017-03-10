@@ -4,6 +4,7 @@
 
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
+	<!-- IF UKRGB_ACP_MODE == "settings" -->
         <dl>
             <dt>
                 <label for="ukrgb_jfusion_jname">{L_ACP_UKRGB_JFUSION_JNAME}</label>
@@ -30,8 +31,40 @@
                 <input type="text" name="ukrgb_secret" value="{UKRGB_SECRET}"/>
             </dd>
         </dl>
- 
-        
+	<!-- ELSE -->
+   		<dl>
+            <dt>
+                <label for="ukrgb_fb_appid">{L_ACP_UKRGB_FB_APPID}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_appid" value="{UKRGB_FB_APPID}"/>
+            </dd>
+        </dl>
+   		<dl>
+            <dt>
+                <label for="ukrgb_fb_secret">{L_ACP_UKRGB_FB_SECRET}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_secret" value="{UKRGB_FB_SECRET}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_fb_page_mgr">{L_ACP_UKRGB_FB_PAGE_MGR}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_page_mgr" value="{UKRGB_FB_PAGE_MGR}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_fb_page_id">{L_ACP_UKRGB_FB_PAGE_ID}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_page_id" value="{UKRGB_FB_PAGE_ID}"/>
+            </dd>
+        </dl>
+	<!-- ENDIF -->
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
@@ -40,4 +73,45 @@
 		{S_FORM_TOKEN}
 	</fieldset>
 </form>
+<!-- IF UKRGB_FB_TOKEN_REFRESH -->
+
+<a href="{U_UKRGB_GET_FB_TOKEN}">{L_APC_UKRGB_GET_TOKEN}</a>
+<br>
+
+<table class="table1 two-columns no-header responsive show-header" data-no-responsive-header="true">
+		<caption>{L_ACP_PAGE_TOKEN}</caption>
+		<colgroup><col class="col1"><col class="col2"><col class="col2">
+		</colgroup><thead>
+		<tr>
+			<th>{L_APC_UKRGB_FIELD}</th>
+			<th>{L_APC_UKRGB_VALUE}</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_APP}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_APP_ID} - {UKRGB_FBPT_APP_NAME}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_EXPIRES}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_EXPIRES}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_VALID}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_VALID}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_ISSUED}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_ISSUED}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_SCOPE}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_SCOPE}</strong></td>
+		</tr>
+	</tbody>
+</table>
+
+
+<!-- ENDIF -->
+
 <!-- INCLUDE overall_footer.html -->
