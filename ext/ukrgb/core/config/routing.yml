@@ -10,6 +10,6 @@ ukrgb_oauth_link:
     path: /oauth/link
     defaults: { _controller: ukrgb.core.controller:handle }
     
-ukrgb_admin_fb:
-    path: /ukrgb/admin/fb/{mode}
-    defaults: { _controller: ukrgb.core.controller:handle_fb }
+ukrgb_facebook:
+    path: /ukrgb/facebook/{mode}
+    defaults: { _controller: ukrgb.core.controller:handle}

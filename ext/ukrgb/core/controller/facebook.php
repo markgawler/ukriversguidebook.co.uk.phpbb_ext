@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * UKRGB Core extension admin controller.
+ * UKRGB Core extension facebook controller.
  *
  * @copyright (c) Mark Gawler 2017
  * @license GNU General Public License, version 2 (GPL-2.0)
@@ -15,7 +15,7 @@ namespace ukrgb\core\controller;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-class admin
+class facebook
 {
 	
 	/**
@@ -44,16 +44,34 @@ class admin
 	protected $fb_helper;
 	protected $app_id;
 	
+	/**
+	 * phpBB root path
+	 *
+	 * @var string
+	 */
+	protected $phpbb_root_path;
+	
+	/**
+	 * PHP file extension
+	 *
+	 * @var string
+	 */
+	protected $php_ext;
+	
 	public function __construct(
 			\phpbb\config\config $config,
 			\phpbb\request\request_interface $request,
 			\phpbb\user $user,	
-			\phpbb\controller\helper $helper)
+			\phpbb\controller\helper $helper,
+			$phpbb_root_path,
+			$php_ext)
 	{
 		$this->config = $config;
 		$this->request = $request;
 		$this->user = $user;
 		$this->helper =$helper;
+		$this->phpbb_root_path = $phpbb_root_path;
+		$this->php_ext = $php_ext;
 		
 		$this->app_id = $this->config['ukrgb_fb_appid'];
 		$app_secret = $this->config['ukrgb_fb_secret'];
@@ -72,19 +90,16 @@ class admin
 	
 
 	/**
-	 * Controller for route /oauth/{action}
+	 * Controller for route /facebook/{action}
 	 *
 	 * @param string $action
 	 * @return Response A Symfony Response object
 	 */
-	public function handle_fb($mode)
+	public function handle($mode)
 	{
 		switch ($mode) {
 			case 'callback':
-				//return $this->helper->message('Admin handler called, mode:' . $mode);
 				return $this->callback();
-//			case 'request_permisions':
-//				return $this->helper->message('Admin handler called, mode:' . $mode);
 			
 			default:
 				throw new \exception('UKRGB Admin Unexpected Mode:' . $mode);
@@ -94,10 +109,10 @@ class admin
 
 	
 	
-	public function get_request_permisions_url()
+	public function getRequestPermisionsUrl()
 	{
 		$permissions = ['manage_pages', 'publish_pages']; // Optional permissions
-		$callback_url = generate_board_url(true) . $this->helper->route('ukrgb_admin_fb', array(mode => 'callback'));
+		$callback_url = generate_board_url(true) . $this->helper->route('ukrgb_facebook', array(mode => 'callback'));
 		$loginUrl = $this->fb_helper->getLoginUrl($callback_url, $permissions);
 
 		return htmlspecialchars($loginUrl);
@@ -106,6 +121,16 @@ class admin
 	
 	public function callback()
 	{
+		if (!function_exists('group_memberships'))
+		{
+			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+		}
+		
+		if (empty(group_memberships(array($this->config['ukrgb_fb_page_mgr']), $this->user->data['user_id'])))
+		{
+			return $this->helper->message('APC_NOT_PAGE_MGR', array(), 'ACP_UKRGB_UNAUTH' , 401);
+		}
+		
 		$page_id = $this->config['ukrgb_fb_page_id'];
 		
 		$this->request->enable_super_globals();
@@ -114,27 +139,24 @@ class admin
 			$accessToken = $this->fb_helper->getAccessToken();
 		} catch(\Facebook\Exceptions\FacebookResponseException $e) {
 			// When Graph returns an error
-			echo 'Graph returned an error: ' . $e->getMessage();
-			exit;
+			return $this->helper->message('Graph returned an error: ' . $e->getMessage());
 		} catch(\Facebook\Exceptions\FacebookSDKException $e) {
 			// When validation fails or other local issues
-			echo 'Facebook SDK returned an error: ' . $e->getMessage();
-			exit;
+			return $this->helper->message('Facebook SDK returned an error: ' . $e->getMessage());
 		}
+
 		$this->request->disable_super_globals();
 		
 		if (! isset($accessToken)) {
-			if ($helper->getError()) {
-				header('HTTP/1.0 401 Unauthorized');
-				echo "Error: " . $this->fb_helper->getError() . "\n";
-				echo "Error Code: " . $this->fb_helper->getErrorCode() . "\n";
-				echo "Error Reason: " . $this->fb_helper->getErrorReason() . "\n";
-				echo "Error Description: " . $this->fb_helper->getErrorDescription() . "\n";
+			if ($this->fb_helper->getError()) {
+				$msg = "Error: " . $this->fb_helper->getError() . "<br>" 
+						. "Error Code: " . $this->fb_helper->getErrorCode() . "<br>"
+						. "Error Reason: " . $this->fb_helper->getErrorReason() . "<br>"
+						. "Error Description: " . $this->fb_helper->getErrorDescription() . "<br>";
+				return $this->helper->message($msg, array(), 'ACP_UKRGB_UNAUTH' , 401);
 			} else {
-				header('HTTP/1.0 400 Bad Request');
-				echo 'Bad request';
+				return $this->helper->message('APC_UKRGB_BAD_REQUEST', array(), 'ACP_UKRGB_INFO', 400);
 			}
-			exit;
 		}
 		// Logged in
 	
@@ -150,44 +172,40 @@ class admin
 	
 	public function getTokenMetaData()
 	{
-		//var_dump($this->config['ukrgb_fb_page_token']);
 		$accessToken = new \Facebook\Authentication\AccessToken($this->config['ukrgb_fb_page_token']);
 		
 		// The OAuth 2.0 client handler helps us manage access tokens
 		$oAuth2Client = $this->fb->getOAuth2Client();
 		
-		if ($accessToken->isLongLived()) {
-			echo '<p> This is a long lived access token</p>';
-		}
-		
 		// Get the access token metadata from /debug_token
 		$tokenMetadata = $oAuth2Client->debugToken($accessToken);
-		//echo '<h3>Metadata</h3>';
-		//var_dump($tokenMetadata);
-		//echo ('<br>');
-		//var_dump($accessToken);
 		
 		// Validation (these will throw FacebookSDKException's when they fail)
-		//$tokenMetadata->validateAppId($this->app_id); // Replace {app-id} with your app id
+		$tokenMetadata->validateAppId($this->app_id); // Replace {app-id} with your app id
 		// If you know the user ID this access token belongs to, you can validate it here
 		//$tokenMetadata->validateUserId('123');
 		$tokenMetadata->validateExpiration();
-		//die();
 		
 		if ($tokenMetadata->getExpiresAt() == 0){
 			$expiresAt = 'Never';
 		}else{
-			$expiresAt = $tokenMetadata->getExpiresAt();
+			$expAt = $tokenMetadata->getExpiresAt();
+			$expiresAt = $expAt->format("Y/m/d H:i:s")  . ' (' .  $expAt->getTimezone()->getName() . ')';
 		}
 	
 		$issuedAt = $tokenMetadata->getIssuedAt();
-	
+		if ($issuedAt)
+		{
+			$issued = $issuedAt->format("Y/m/d H:i:s") . ' (' .  $issuedAt->getTimezone()->getName() . ')';
+		} else {
+			$issued ="Not Issued";
+		}
 		return array(
 				'app_id' => $tokenMetadata->getAppId(),
 				'app_name' => $tokenMetadata->getApplication(),
 				'expires_at' => $expiresAt,
 				'valid' => ($tokenMetadata->getIsValid()) ? 'True' : 'False',
-				'issued' => $issuedAt->format("Y/m/d H:i:s") . ' (' .  $issuedAt->getTimezone()->getName() . ')',
+				'issued' => $issued,
 				'scope' => implode(', ', $tokenMetadata->getScopes()),			
 		);
 	}

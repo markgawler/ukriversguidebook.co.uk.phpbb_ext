@@ -33,10 +33,12 @@ services:
             - '@log'
             
     ukrgb.core.controller:
-        class: ukrgb\core\controller\admin
+        class: ukrgb\core\controller\facebook
         arguments:
             - '@config'
             - '@request'
             - '@user'
             - '@controller.helper'
+            - '%core.root_path%'
+            - '%core.php_ext%'
             
