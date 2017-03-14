@@ -29,7 +29,7 @@ class main_listener implements EventSubscriberInterface
 				'core.auth_login_session_create_before' => 'auth_login_session_create_before',
 				'core.session_kill_after' => 'session_kill_after',
 				'core.page_header' => 'add_page_header_link',
-				//'core.submit_post_end' => 'new_post_actions',
+				'core.submit_post_end' => 'new_post_actions',
 								
 			);
 		}
@@ -83,7 +83,7 @@ class main_listener implements EventSubscriberInterface
 	public function auth_login_session_create_before($event)
 	{		        	
 		global $JFusionActive;
-		error_log('-- UKRGB Jfusion - login ');
+		//error_log('-- UKRGB Jfusion - login ');
 		
 		if (isset($event['login']) && isset($event['login']['status']) && $event['login']['status'] == LOGIN_SUCCESS && !$event['admin'] && empty($JFusionActive))
 		{		
@@ -131,7 +131,7 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function session_kill_after($event)
 	{		
-		error_log('-- UKRGB Jfusion -  logout');
+		//error_log('-- UKRGB Jfusion -  logout');
 		
 		//check to see if JFusion is not active
 		global $JFusionActive;
@@ -159,14 +159,7 @@ class main_listener implements EventSubscriberInterface
 	 */
 	public function core_user_setup($event)
 	{		
-		//if (defined('ADMIN_START'))
-		//{
-		//	$this->template->assign_vars(array(
-		//		'U_UKRGB_GET_FB_TOKEN' => $this->helper->route('ukrgb_admin_fb', array(mode => 'request_permisions')),
-		//	));
-		//}
 		$this->load_language_on_setup($event);
-
 	}
 		
 	
@@ -207,17 +200,119 @@ class main_listener implements EventSubscriberInterface
 				
 		));
 	}
-	/*
-	 public function new_post_actions($event)
-	 {
-	 $mode = $event['mode'];
-	 if ($mode == 'post'){
-	 $subject = $event['subject'];
-	 $data= $event['data'];
-	 error_log("Subject: " . $subject);
-	 error_log("Data   : " . $data);
-	 }
-	 }
-	 */
+	
+	
+	public function new_post_actions($event)
+	{
+		
+	 	$mode = $event['mode'];
+	 	if ($mode == 'post'){
+	 		$ukrgbFacebook = new \ukrgb\core\controller\facebook(
+	 				$this->config,
+	 				$this->request,
+	 				$this->user,
+	 				$this->helper,
+	 				$this->phpbb_admin_path,
+	 				$this->phpEx);
+	 		
+	 		$data= $event['data'];
+	 		
+	 		$body = $data['message'];
+	 		strip_bbcode($body);
+	 		
+	 		$subject = $data['topic_title'] . "\n" . $data['forum_name']. "\n\n" . $body;
+		 	
+		 	$link = generate_board_url(false) . '/viewtopic.php?f=' . $data['forum_id'] .'&t=' . $data['topic_id'];	
+		 	
+		 	$postData  = [
+		 			'message' => $subject,
+		 			'link' => $link,
+		 	];
+		 	//var_dump($postData);
+		 	//die();
+		 	
+		 	//decode_message
+		 	
+		 	$ukrgbFacebook->post($postData);
+		 			 	
+		 	/*
+		 	topic_title"]=>
+		 	string(14) "Test2- subject"
+		 			["topic_first_post_id"]=>
+		 			int(0)
+		 			["topic_last_post_id"]=>
+		 			int(0)
+		 			["topic_time_limit"]=>
+		 			int(0)
+		 			["topic_attachment"]=>
+		 			int(0)
+		 			["post_id"]=>
+		 			int(794386)
+		 			["topic_id"]=>
+		 			int(125951)
+		 			["forum_id"]=>
+		 			int(12)
+		 			["icon_id"]=>
+		 			int(0)
+		 			["poster_id"]=>
+		 			int(215)
+		 			["enable_sig"]=>
+		 			bool(true)
+		 			["enable_bbcode"]=>
+		 			bool(true)
+		 			["enable_smilies"]=>
+		 			bool(false)
+		 			["enable_urls"]=>
+		 			bool(true)
+		 			["enable_indexing"]=>
+		 			bool(true)
+		 			["message_md5"]=>
+		 			string(32) "4b46efb0c1ed9e010d30e76866b669cd"
+		 			["post_checksum"]=>
+		 			string(0) ""
+		 			["post_edit_reason"]=>
+		 			string(0) ""
+		 			["post_edit_user"]=>
+		 			int(0)
+		 			["forum_parents"]=>
+		 			string(53) "a:1:{i:29;a:2:{i:0;s:16:"Community Forums";i:1;i:0;}}"
+		 			["forum_name"]=>
+		 			string(26) "Courses, Trips and Guiding"
+		 			["notify"]=>
+ 					bool(true)
+ 					["notify_set"]=>
+ 					int(0)
+ 					["poster_ip"]=>
+ 					string(12) "82.10.151.60"
+ 					["post_edit_locked"]=>
+ 					int(0)
+ 					["bbcode_bitfield"]=>
+ 					string(0) ""
+ 					["bbcode_uid"]=>
+ 					string(8) "2w9nvls9"
+ 					["message"]=>
+ 					string(21) "this is the post body"
+ 					["attachment_data"]=>
+ 					array(0) {
+				 	}
+				 	["filename_data"]=>
+				 	array(1) {
+				 		["filecomment"]=>
+				 		string(0) ""
+				 	}
+				 	["topic_status"]=>
+				 	int(0)
+				 	["topic_visibility"]=>
+				 	bool(false)
+				 	["post_visibility"]=>
+				 	bool(false)
+			*/
+			
+			
+			
+			
+		}
+	}
+	
 	
 }

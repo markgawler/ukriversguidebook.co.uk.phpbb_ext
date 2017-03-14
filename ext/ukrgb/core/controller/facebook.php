@@ -40,10 +40,6 @@ class facebook
 	 */
 	protected $user;
 	
-	protected $fb;
-	protected $fb_helper;
-	protected $app_id;
-	
 	/**
 	 * phpBB root path
 	 *
@@ -57,6 +53,11 @@ class facebook
 	 * @var string
 	 */
 	protected $php_ext;
+	
+	
+	protected $fb;
+	protected $fb_helper;
+	protected $app_id;
 	
 	public function __construct(
 			\phpbb\config\config $config,
@@ -172,6 +173,18 @@ class facebook
 	
 	public function getTokenMetaData()
 	{
+		if (is_null($this->fb) || empty($this->config['ukrgb_fb_page_token']))
+		{
+			return array(
+					'app_id' => '',
+					'app_name' => '',
+					'expires_at' => '',
+					'valid' => 'False',
+					'issued' => '',
+					'scope' => '',
+			);
+		}
+		
 		$accessToken = new \Facebook\Authentication\AccessToken($this->config['ukrgb_fb_page_token']);
 		
 		// The OAuth 2.0 client handler helps us manage access tokens
@@ -210,24 +223,27 @@ class facebook
 		);
 	}
 	
-	public function post()
+	public function post($data)
 	{
-		$link_data  = [
+		/*
+		$data  = [
 				'message' => 'A little test message.',
 				'link' => 'http://ukrgb.co.uk',
 		];
-		
-		try {
-			$response = $this->fb->post('/me/feed', $link_data, $pageAccessToken);
-		} catch(Facebook\Exceptions\FacebookResponseException $e) {
-			echo 'Graph returned an error: '.$e->getMessage();
-			exit;
-		} catch(Facebook\Exceptions\FacebookSDKException $e) {
-			echo 'Facebook SDK returned an error: '.$e->getMessage();
-			exit;
-		}
+		*/
+		//try {
+		$response = $this->fb->post('/me/feed', $data, $this->config['ukrgb_fb_page_token']);
+		//$response = $this->fb->post('/'.$config['ukrgb_fb_page_id'].'/feed', $data, $this->config['ukrgb_fb_page_token']);
+		//} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		//	echo 'Graph returned an error: '.$e->getMessage();
+		//	exit;
+		//} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		//	echo 'Facebook SDK returned an error: '.$e->getMessage();
+		//	exit;
+		//}
 		$graphNode = $response->getGraphNode();
-		var_dump($graphNode);
+		//var_dump($graphNode);
+		//die();
 	}
 	
 	

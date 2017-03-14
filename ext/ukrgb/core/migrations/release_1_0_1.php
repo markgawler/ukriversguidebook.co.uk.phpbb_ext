@@ -16,6 +16,20 @@ namespace ukrgb\core\migrations;
 class release_1_0_1 extends \phpbb\db\migration\migration
 {
 	/**
+	 * Assign migration file dependencies for this migration
+	 *
+	 * @return array Array of migration files
+	 * @static
+	 * @access public
+	 */
+	static public function depends_on()
+	{
+		error_log('release_1_0_1 - depends_on');
+	
+		return array('\ukrgb\core\migrations\release_1_0_0');
+	}
+	
+	/**
 	 * Allows you to check if the migration is effectively installed (entirely optional)
 	 * @return bool True if this migration is installed, False if this migration is not installed (checked on install)
 	 */
