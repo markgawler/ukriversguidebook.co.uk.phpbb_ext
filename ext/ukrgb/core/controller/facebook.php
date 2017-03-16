@@ -109,7 +109,10 @@ class facebook
 	}
 
 	
-	
+
+	/*
+	 * Admin Panel
+	 */
 	public function getRequestPermisionsUrl()
 	{
 		$permissions = ['manage_pages', 'publish_pages']; // Optional permissions
@@ -119,7 +122,10 @@ class facebook
 		return htmlspecialchars($loginUrl);
 	}
 	
-	
+
+	/*
+	 * Admin Panel
+	 */
 	public function callback()
 	{
 		if (!function_exists('group_memberships'))
@@ -171,6 +177,9 @@ class facebook
 	
 	}
 	
+	/*
+	 * Admin Panel
+	 */
 	public function getTokenMetaData()
 	{
 		if (is_null($this->fb) || empty($this->config['ukrgb_fb_page_token']))
@@ -223,7 +232,7 @@ class facebook
 		);
 	}
 	
-	public function post($data)
+	public function post($data, $post_id, $topic_id )
 	{
 		/*
 		$data  = [
@@ -244,6 +253,14 @@ class facebook
 		$graphNode = $response->getGraphNode();
 		//var_dump($graphNode);
 		//die();
+	}
+	
+	protected function store_graph_node($graph_node, $post_id, $topic_id)
+	{
+		/*
+		- '@dbal.conn'
+		- '%ukrgb.core.tables.ukrgb_fb_posts%'
+		*/
 	}
 	
 	

@@ -1,0 +1,2 @@
+parameters:
+    ukrgb.core.tables.ukrgb_fb_posts: '%core.table_prefix%ukrgb_fb_posts'
