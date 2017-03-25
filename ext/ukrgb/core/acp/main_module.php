@@ -78,7 +78,7 @@ class main_module
 				}	
 				
 				$helper = $phpbb_container->get('controller.helper');
-				$ukrgbFacebook = new \ukrgb\core\controller\facebook($config, $request, $user, $helper, $phpbb_admin_path, $phpEx);
+				$ukrgbFacebook = new \ukrgb\core\controller\facebook_controller($config, $request, $user, $helper, $phpbb_admin_path, $phpEx);
 				$tokenData = $ukrgbFacebook->getTokenMetaData();
 				
 				$appVars = array(
@@ -92,6 +92,7 @@ class main_module
 						'UKRGB_FBPT_VALID'      => $tokenData['valid'],
 						'UKRGB_FBPT_ISSUED'     => $tokenData['issued'],
 						'UKRGB_FBPT_SCOPE'      => $tokenData['scope'],
+						'UKRGB_FBPT_ERROR'		=> $tokenData['error'],
 				);
 						
 				if (!empty(group_memberships(array($config['ukrgb_fb_page_mgr']), $user->data['user_id'])))

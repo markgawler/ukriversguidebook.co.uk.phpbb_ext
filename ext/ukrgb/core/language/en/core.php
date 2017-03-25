@@ -60,6 +60,7 @@ $lang = array_merge($lang, array(
 	'ACP_UKRGB_FBPT_VALID'			=> 'Valid',
 	'ACP_UKRGB_FBPT_ISSUED'			=> 'Issued',
 	'ACP_UKRGB_FBPT_SCOPE'			=> 'Scope',
+	'ACP_UKRGB_FBPT_ERROR'			=> 'Error',
 	
 	'ACP_UKRGB_FB_PAGE_TOKEN_UPD'	=> 'Page Token Updated',
 	'APC_UKRGB_BAD_REQUEST'			=> 'Bad Request',

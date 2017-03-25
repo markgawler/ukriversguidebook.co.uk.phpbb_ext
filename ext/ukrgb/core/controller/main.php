@@ -668,12 +668,12 @@ class main
 	protected function unlink_account_perform_unlink(array $data)
 	{
 	
-		$submit_data = array (
+		$select_data = array (
 				'provider' => $data['provider'],
 				'oauth_provider_id' => $data['oauth_unique_id']
 		);
 	
-		$sql = 'DELETE FROM ' . $this->auth_provider_oauth_token_account_assoc .' WHERE ' . $this->db->sql_build_array('SELECT', $data);
+		$sql = 'DELETE FROM ' . $this->auth_provider_oauth_token_account_assoc .' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
 		$this->db->sql_query($sql);
 		
 	}

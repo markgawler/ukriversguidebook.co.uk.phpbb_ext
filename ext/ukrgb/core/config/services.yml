@@ -1,3 +1,6 @@
+imports:
+    - { resource: tables.yml }
+
 services:
     ukrgb.core.listener:
         class: ukrgb\core\event\main_listener
@@ -7,9 +10,10 @@ services:
             - '@config'
             - '@user'
             - '@request'
+            - '@dbal.conn'
             - '%core.root_path%'
             - '%core.php_ext%'
-                        
+            - '%ukrgb.core.tables.ukrgb_fb_posts%'
         tags:
             - { name: event.listener }
 
@@ -33,7 +37,7 @@ services:
             - '@log'
             
     ukrgb.core.controller:
-        class: ukrgb\core\controller\facebook
+        class: ukrgb\core\controller\facebook_controller
         arguments:
             - '@config'
             - '@request'

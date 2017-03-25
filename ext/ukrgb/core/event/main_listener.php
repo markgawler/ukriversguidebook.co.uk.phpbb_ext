@@ -25,12 +25,16 @@ class main_listener implements EventSubscriberInterface
 			return array();
 		}else{
 			return array(
-				'core.user_setup' => 'core_user_setup',
-				'core.auth_login_session_create_before' => 'auth_login_session_create_before',
-				'core.session_kill_after' => 'session_kill_after',
-				'core.page_header' => 'add_page_header_link',
-				'core.submit_post_end' => 'new_post_actions',
-								
+					'core.user_setup' => 'coreUserSetup',
+					'core.auth_login_session_create_before' => 'coreAuthLoginSessionCreateBefore',
+					'core.session_kill_after' => 'coreSessionKillAfter',
+					'core.page_header' => 'corePageHeader',
+					'core.submit_post_end' => 'coreSubmitPostEnd',
+					'core.delete_posts_after' => 'coreDeletePostsAfter',
+					//'core.delete_topics_after_query' =>' coreDeleteTopicsAfterQuery',
+					'core.delete_user_after' => 'coreDeleteUserAfter',
+					'core.approve_posts_after' => 'coreApprovePostsAfter',
+					'core.approve_topics_after' => 'coreApproveTopicsAfter',
 			);
 		}
 	}
@@ -51,36 +55,56 @@ class main_listener implements EventSubscriberInterface
 	
 
 	/**
+	 * Database driver
+	 *
+	 * @var \phpbb\db\driver\driver_interface
+	 */
+	protected $db;
+	
+	/* @var string */
+	protected $ukrgb_fb_posts_table;
+	
+	protected $ukrgbFacebook;
+	/**
 	* Constructor
 	*
 	* @param \phpbb\controller\helper $helper
 	* @param \phpbb\template\template $template
-	* @param \phpbb\config\db		  $config		Controller helper object
+	* @param \phpbb\config\db 		  $config, 
 	* @param \phpbb\user			  $user	Template object
 	* @request \phpbb\request 	 	  $request
+	* @param \phpbb\db\driver\driver_interface	$db
+	* @param
+	* @param
+	* @param string 				  $ukrgb_fb_posts_table
+	* 
 	*/
 	public function __construct(\phpbb\controller\helper $helper, 
 			\phpbb\template\template $template, 
 			\phpbb\config\db $config, 
 			\phpbb\user $user, 
-			\phpbb\request\request $request, 
+			\phpbb\request\request $request,
+			\phpbb\db\driver\driver_interface	$db,
 			$root_path,  
-			$php_ext)
+			$php_ext,
+			$ukrgb_fb_posts_table)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
 		$this->config = $config;
 		$this->user = $user;
 		$this->request = $request;
+		$this->db = $db;
 		$this->root_path = $root_path;
-		$this->php_ext = $php_ext;		
+		$this->php_ext = $php_ext;
+		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
 	}
 
 	
 	/**
 	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function auth_login_session_create_before($event)
+	public function coreAuthLoginSessionCreateBefore($event)
 	{		        	
 		global $JFusionActive;
 		//error_log('-- UKRGB Jfusion - login ');
@@ -129,7 +153,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function session_kill_after($event)
+	public function coreSessionKillAfter($event)
 	{		
 		//error_log('-- UKRGB Jfusion -  logout');
 		
@@ -157,16 +181,16 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function core_user_setup($event)
+	public function coreUserSetup($event)
 	{		
-		$this->load_language_on_setup($event);
+		$this->loadLanguageOnSetup($event);
 	}
 		
 	
 	/**
 	 * @return \JFusionAPIInternal
 	 */
-	function startJoomla() {
+	protected function startJoomla() {
 		define('_JFUSIONAPI_INTERNAL', true);
 		$apipath = $this->config['ukrgb_jfusion_apipath'];
 		require_once $apipath . '/jfusionapi.php';
@@ -178,7 +202,7 @@ class main_listener implements EventSubscriberInterface
 	 *
 	 * @param unknown $event
 	 */
-	public function load_language_on_setup($event)
+	public function loadLanguageOnSetup($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
@@ -191,128 +215,89 @@ class main_listener implements EventSubscriberInterface
 		
 	}
 	
-	public function add_page_header_link($event)
+	public function corePageHeader($event)
 	{
 		$this->template->assign_vars(array(
 				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
 				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
 				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
-				
 		));
 	}
 	
 	
-	public function new_post_actions($event)
+	public function coreSubmitPostEnd($event)
 	{
-		
-	 	$mode = $event['mode'];
-	 	if ($mode == 'post'){
-	 		$ukrgbFacebook = new \ukrgb\core\controller\facebook(
-	 				$this->config,
-	 				$this->request,
-	 				$this->user,
-	 				$this->helper,
-	 				$this->phpbb_admin_path,
-	 				$this->phpEx);
-	 		
-	 		$data= $event['data'];
-	 		
-	 		$body = $data['message'];
-	 		strip_bbcode($body);
-	 		
-	 		$subject = $data['topic_title'] . "\n" . $data['forum_name']. "\n\n" . $body;
-		 	
-		 	$link = generate_board_url(false) . '/viewtopic.php?f=' . $data['forum_id'] .'&t=' . $data['topic_id'];	
-		 	
-		 	$postData  = [
-		 			'message' => $subject,
-		 			'link' => $link,
-		 	];
-		 	//var_dump($postData);
-		 	//die();
-		 	
-		 	//decode_message
-		 	
-		 	$ukrgbFacebook->post($postData);
-		 			 	
-		 	/*
-		 	topic_title"]=>
-		 	string(14) "Test2- subject"
-		 			["topic_first_post_id"]=>
-		 			int(0)
-		 			["topic_last_post_id"]=>
-		 			int(0)
-		 			["topic_time_limit"]=>
-		 			int(0)
-		 			["topic_attachment"]=>
-		 			int(0)
-		 			["post_id"]=>
-		 			int(794386)
-		 			["topic_id"]=>
-		 			int(125951)
-		 			["forum_id"]=>
-		 			int(12)
-		 			["icon_id"]=>
-		 			int(0)
-		 			["poster_id"]=>
-		 			int(215)
-		 			["enable_sig"]=>
-		 			bool(true)
-		 			["enable_bbcode"]=>
-		 			bool(true)
-		 			["enable_smilies"]=>
-		 			bool(false)
-		 			["enable_urls"]=>
-		 			bool(true)
-		 			["enable_indexing"]=>
-		 			bool(true)
-		 			["message_md5"]=>
-		 			string(32) "4b46efb0c1ed9e010d30e76866b669cd"
-		 			["post_checksum"]=>
-		 			string(0) ""
-		 			["post_edit_reason"]=>
-		 			string(0) ""
-		 			["post_edit_user"]=>
-		 			int(0)
-		 			["forum_parents"]=>
-		 			string(53) "a:1:{i:29;a:2:{i:0;s:16:"Community Forums";i:1;i:0;}}"
-		 			["forum_name"]=>
-		 			string(26) "Courses, Trips and Guiding"
-		 			["notify"]=>
- 					bool(true)
- 					["notify_set"]=>
- 					int(0)
- 					["poster_ip"]=>
- 					string(12) "82.10.151.60"
- 					["post_edit_locked"]=>
- 					int(0)
- 					["bbcode_bitfield"]=>
- 					string(0) ""
- 					["bbcode_uid"]=>
- 					string(8) "2w9nvls9"
- 					["message"]=>
- 					string(21) "this is the post body"
- 					["attachment_data"]=>
- 					array(0) {
-				 	}
-				 	["filename_data"]=>
-				 	array(1) {
-				 		["filecomment"]=>
-				 		string(0) ""
-				 	}
-				 	["topic_status"]=>
-				 	int(0)
-				 	["topic_visibility"]=>
-				 	bool(false)
-				 	["post_visibility"]=>
-				 	bool(false)
-			*/
-			
-			
-			
-			
+		$visibility = $event['post_visibility'];
+		if ($visibility == ITEM_APPROVED) {
+		 	$mode = $event['mode'];
+		 	if ($mode == 'post'){
+		 		
+		 		$data= $event['data'];
+		 		$this->post(
+		 				$data['forum_id'], 
+		 				$data['topic_id'], 
+		 				$data['post_id'], 
+		 				$data['forum_name'], 
+		 				$data['topic_title'],
+		 				$data['message'],
+		 				$event['username']);
+			}
 		}
 	}
 	
+	public function coreApprovePostsAfter($event)
+	{
+		foreach ($event['post_info'] as $post )
+		{
+			if ($post['topic_first_post_id'] == $post['post_id']){
+				$this->post(
+						$post['forum_id'],
+						$post['topic_id'],
+						$post['post_id'],
+						$post['forum_name'],
+						$post['post_subject'],
+						$post['post_text'],
+						$post['username']);
+			}
+		}
+	}
+	
+	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username)
+	{
+		if (empty($this->ukrgbFacebook)) {
+			$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
+					$this->config,
+					$this->db,
+					$this->ukrgb_fb_posts_table);
+		}
+		strip_bbcode($postText);
+		$message = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText;
+		$this->ukrgbFacebook->post($message, $forumId, $topicId, $postId);
+	}
+	
+	public function coreDeletePostsAfter($event)
+	{
+		$fb = new \ukrgb\core\model\facebook_bridge($this->config, $this->db, $this->ukrgb_fb_posts_table);
+		$fb->delete_post($event['post_ids']);
+		
+	}
+	
+/*	public function coreDeleteTopicsAfterQuery()
+	{
+		error_log('coreDeleteTopicsAfterQuery');
+		return true;
+	}
+	*/
+
+	public function coreDeleteUserAfter()
+	{
+		error_log('coreDeleteUserAfter');
+		return true;
+	}
+		
+	public function coreApproveTopicsAfter($event)
+	{
+		error_log('coreApproveTopicsAfter:');
+	}
 	
 }

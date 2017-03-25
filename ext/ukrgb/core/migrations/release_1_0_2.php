@@ -78,7 +78,7 @@ class release_1_0_2 extends \phpbb\db\migration\migration
 										'topic_id'		=> array('UINT', 0),
 										'graph_node'	=> array('VCHAR:40', ''),
 								),
-								'PRIMARY_KEY'	=> array('post_id', 'topic_id'),
+								'PRIMARY_KEY'	=> array('post_id',),
 						),
 				),
 		);
