@@ -143,13 +143,28 @@ class facebook
 	
 	public function post($postData, $pageToken, $pageId)
 	{
-		//return $this->fb->post('/me/feed', $postData, $pageToken);
-		return $this->fb->post('/' . $pageId . '/feed', $postData, $pageToken);
+
+		try {
+			$response =  $this->fb->post('/' . $pageId . '/feed', $postData, $pageToken);
+		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+			error_log ('Post, FacebookResponseException: '.$e->getMessage());
+		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+			error_log ('Post, FacebookSDKException: '.$e->getMessage());
 		}
+		return $response;
+	}
 	
 	public function deletePost($graphNode, $pageToken)
 	{
-		return $this->fb->delete('/' . $graphNode , array(), $pageToken);
+		try {
+			$response = $this->fb->delete('/' . $graphNode , array(), $pageToken);
+		} catch(\Facebook\Exceptions\FacebookResponseException $e) {
+			// this can happen if the post has already been removed from the Facebook Page.
+			error_log ('Delete Post, FacebookResponseException: '.$e->getMessage());
+		} catch(\Facebook\Exceptions\FacebookSDKException $e) {
+			error_log ('Delete Post, FacebookSDKException: '.$e->getMessage());
+		}
+		return $response;
 	}
 
 }

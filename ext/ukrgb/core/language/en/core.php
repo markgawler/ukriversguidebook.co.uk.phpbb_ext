@@ -51,6 +51,8 @@ $lang = array_merge($lang, array(
 	'ACP_UKRGB_FB_PAGE_MGR'			=> 'Facebook Page Manager',
 	'ACP_UKRGB_FB_PAGE_ID'			=> 'Facebook Page ID',	
 	'APC_UKRGB_GET_TOKEN'			=> 'Get Facebook Token',
+	'APC_UKRGB_AUTO_POST'			=> 'Automatically post new topics',
+	'ACP_UKRGB_FB_SUBFORUMS'		=> 'Subforums to Auto Post',
 	
 	'ACP_PAGE_TOKEN'				=> 'Page Token',
 	'APC_UKRGB_FIELD'				=> 'Token Field',

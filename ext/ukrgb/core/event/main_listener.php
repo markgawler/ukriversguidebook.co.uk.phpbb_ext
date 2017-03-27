@@ -264,15 +264,28 @@ class main_listener implements EventSubscriberInterface
 	
 	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username)
 	{
-		if (empty($this->ukrgbFacebook)) {
-			$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
-					$this->config,
-					$this->db,
-					$this->ukrgb_fb_posts_table);
+		if ($this->can_post_to_fb($forumId)){
+			if (empty($this->ukrgbFacebook)) {
+				$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
+						$this->config,
+						$this->db,
+						$this->ukrgb_fb_posts_table);
+			}
+			strip_bbcode($postText);
+			$message = html_entity_decode('Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText);
+			
+			$this->ukrgbFacebook->post($message, $forumId, $topicId, $postId);
 		}
-		strip_bbcode($postText);
-		$message = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText;
-		$this->ukrgbFacebook->post($message, $forumId, $topicId, $postId);
+	}
+	
+	protected function can_post_to_fb($forum)
+	{
+		$auto_post_enabled = $this->config['ukrgb_fb_auto_post'];
+		if ($auto_post_enabled) {
+			$allowed_forums = explode(',',  $this->config['ukrgb_fb_subforums']);
+			return in_array($forum, $allowed_forums);
+		}
+		return false;
 	}
 	
 	public function coreDeletePostsAfter($event)
@@ -292,7 +305,6 @@ class main_listener implements EventSubscriberInterface
 	public function coreDeleteUserAfter()
 	{
 		error_log('coreDeleteUserAfter');
-		return true;
 	}
 		
 	public function coreApproveTopicsAfter($event)

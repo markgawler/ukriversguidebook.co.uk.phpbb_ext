@@ -48,6 +48,8 @@ class facebook_bridge
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
 		$appId = $config['ukrgb_fb_appid'];
 		$appSecret = $config['ukrgb_fb_secret'];
+	
+		
 		if (!empty($appId) && !empty($appSecret)){
 			$this->fb = new facebook($appId, $appSecret);
 		}
@@ -56,21 +58,12 @@ class facebook_bridge
 	public function post($message, $forumId, $topicId, $postId)
 	{
 		$link = generate_board_url(false) . '/viewtopic.php?f=' . $forumId .'&t=' . $topicId;
-		
 		$postData  = [
 				'message' => $message,
 				'link' => $link,
 		];
 		
-		//try {
 		$response = $this->fb->post($postData, $this->config['ukrgb_fb_page_token'],$this->config['ukrgb_fb_page_id']);
-		//} catch(Facebook\Exceptions\FacebookResponseException $e) {
-		//	echo 'Graph returned an error: '.$e->getMessage();
-			//	exit;
-			//} catch(Facebook\Exceptions\FacebookSDKException $e) {
-			//	echo 'Facebook SDK returned an error: '.$e->getMessage();
-			//	exit;
-			//}
 		$graphNode = $response->getGraphNode();
 		
 		$this->store_graph_node($graphNode['id'], $postId, $topicId);
