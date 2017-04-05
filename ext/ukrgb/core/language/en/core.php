@@ -53,6 +53,7 @@ $lang = array_merge($lang, array(
 	'APC_UKRGB_GET_TOKEN'			=> 'Get Facebook Token',
 	'APC_UKRGB_AUTO_POST'			=> 'Automatically post new topics',
 	'ACP_UKRGB_FB_SUBFORUMS'		=> 'Subforums to Auto Post',
+	'ACP_UKRGB_CRON_FREQUENCY'		=> 'Cron Frequency (s)',
 	
 	'ACP_PAGE_TOKEN'				=> 'Page Token',
 	'APC_UKRGB_FIELD'				=> 'Token Field',

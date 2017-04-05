@@ -75,6 +75,7 @@ class main_module
 						$config->set('ukrgb_fb_page_id', $request->variable('ukrgb_fb_page_id', ''));
 						$config->set('ukrgb_fb_subforums', $request->variable('ukrgb_fb_subforums', ''));
 						$config->set('ukrgb_fb_auto_post', $request->variable('ukrgb_fb_auto_post', 0));
+						$config->set('ukrgb_delayed_action_gc', $request->variable('ukrgb_delayed_action_gc', 300));
 						
 						trigger_error($user->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
 					}
@@ -91,6 +92,7 @@ class main_module
 						'UKRGB_FB_PAGE_ID'		=> $config['ukrgb_fb_page_id'],
 						'UKRGB_FB_SUBFORUMS'	=> $config['ukrgb_fb_subforums'],
 						'UKRGB_FB_AUTO_POST'	=> $config['ukrgb_fb_auto_post'],
+						'UKRGB_CRON_FREQUENCY'  => $config['ukrgb_delayed_action_gc'],
 						'UKRGB_FBPT_APP_ID'     => $tokenData['app_id'],
 						'UKRGB_FBPT_APP_NAME'   => $tokenData['app_name'],
 						'UKRGB_FBPT_EXPIRES'    => $tokenData['expires_at'],

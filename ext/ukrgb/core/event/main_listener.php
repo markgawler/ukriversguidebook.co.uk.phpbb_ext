@@ -31,10 +31,7 @@ class main_listener implements EventSubscriberInterface
 					'core.page_header' => 'corePageHeader',
 					'core.submit_post_end' => 'coreSubmitPostEnd',
 					'core.delete_posts_after' => 'coreDeletePostsAfter',
-					//'core.delete_topics_after_query' =>' coreDeleteTopicsAfterQuery',
-					'core.delete_user_after' => 'coreDeleteUserAfter',
 					'core.approve_posts_after' => 'coreApprovePostsAfter',
-					'core.approve_topics_after' => 'coreApproveTopicsAfter',
 			);
 		}
 	}
@@ -63,6 +60,9 @@ class main_listener implements EventSubscriberInterface
 	
 	/* @var string */
 	protected $ukrgb_fb_posts_table;
+
+	/* @var string */
+	protected $ukrgb_pending_actions_table;
 	
 	protected $ukrgbFacebook;
 	/**
@@ -77,6 +77,7 @@ class main_listener implements EventSubscriberInterface
 	* @param
 	* @param
 	* @param string 				  $ukrgb_fb_posts_table
+	* @param string 				  $ukrgb_pending_actions_table
 	* 
 	*/
 	public function __construct(\phpbb\controller\helper $helper, 
@@ -87,7 +88,8 @@ class main_listener implements EventSubscriberInterface
 			\phpbb\db\driver\driver_interface	$db,
 			$root_path,  
 			$php_ext,
-			$ukrgb_fb_posts_table)
+			$ukrgb_fb_posts_table,
+			$ukrgb_pending_actions_table)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
@@ -98,6 +100,8 @@ class main_listener implements EventSubscriberInterface
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
+		$this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
+		
 	}
 
 	
@@ -264,17 +268,20 @@ class main_listener implements EventSubscriberInterface
 	
 	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username)
 	{
+		error_log('Table Name+: ' . $this->ukrgb_pending_actions_table);
+		
 		if ($this->can_post_to_fb($forumId)){
 			if (empty($this->ukrgbFacebook)) {
 				$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
 						$this->config,
 						$this->db,
-						$this->ukrgb_fb_posts_table);
+						$this->ukrgb_fb_posts_table,
+						$this->ukrgb_pending_actions_table);
 			}
 			strip_bbcode($postText);
 			$message = html_entity_decode('Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText);
 			
-			$this->ukrgbFacebook->post($message, $forumId, $topicId, $postId);
+			$this->ukrgbFacebook->queuePost($message, $forumId, $topicId, $postId);
 		}
 	}
 	
@@ -290,26 +297,13 @@ class main_listener implements EventSubscriberInterface
 	
 	public function coreDeletePostsAfter($event)
 	{
-		$fb = new \ukrgb\core\model\facebook_bridge($this->config, $this->db, $this->ukrgb_fb_posts_table);
-		$fb->delete_post($event['post_ids']);
+		$fb = new \ukrgb\core\model\facebook_bridge(
+				$this->config, 
+				$this->db, 
+				$this->ukrgb_fb_posts_table,
+				$this->ukrgb_pending_actions_table);
+		$fb->queueDeletePost($event['post_ids']);
 		
-	}
-	
-/*	public function coreDeleteTopicsAfterQuery()
-	{
-		error_log('coreDeleteTopicsAfterQuery');
-		return true;
-	}
-	*/
-
-	public function coreDeleteUserAfter()
-	{
-		error_log('coreDeleteUserAfter');
-	}
-		
-	public function coreApproveTopicsAfter($event)
-	{
-		error_log('coreApproveTopicsAfter:');
 	}
 	
 }

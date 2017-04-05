@@ -14,6 +14,7 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             - '%ukrgb.core.tables.ukrgb_fb_posts%'
+            - '%ukrgb.core.tables.ukrgb_pending_actions%'
         tags:
             - { name: event.listener }
 
@@ -46,3 +47,14 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             
+    ukrgb.core.delayedaction:
+        class: ukrgb\core\cron\task\bridge\delayed_action
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '%ukrgb.core.tables.ukrgb_fb_posts%'
+            - '%ukrgb.core.tables.ukrgb_pending_actions%'
+        calls:
+            - [set_name, [ukrgb.cron.delayed_action]]
+        tags:
+            - { name: cron.task }

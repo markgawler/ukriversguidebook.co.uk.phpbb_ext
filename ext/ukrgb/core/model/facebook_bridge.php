@@ -32,6 +32,7 @@ class facebook_bridge
 	protected $db;
 	
 	protected $ukrgb_fb_posts_table;
+	protected $ukrgb_pending_actions_table;
 	
 	/**
 	 * Constructor for Facebook phpBB bridge
@@ -41,11 +42,13 @@ class facebook_bridge
 	public function __construct(
 			\phpbb\config\config $config,
 			\phpbb\db\driver\driver_interface $db,
-			$ukrgb_fb_posts_table)
+			$ukrgb_fb_posts_table,
+			$ukrgb_pending_actions_table)
 	{
 		$this->config = $config;
 		$this->db = $db;
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
+		$this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
 		$appId = $config['ukrgb_fb_appid'];
 		$appSecret = $config['ukrgb_fb_secret'];
 	
@@ -53,8 +56,89 @@ class facebook_bridge
 		if (!empty($appId) && !empty($appSecret)){
 			$this->fb = new facebook($appId, $appSecret);
 		}
+		
 	}
 
+	public function queuePost($message, $forumId, $topicId, $postId)
+	{
+		$data = (object) [
+				postId => $postId,
+				topicId => $topicId,
+				forumId => $forumId,
+				message => $message,
+		];
+		$submitData = array(
+				'action' => 'facbook.post',  
+				'data' => json_encode($data),
+		);
+		$this->queueTask($submitData);
+	}
+
+	public function queueDeletePost($postIds)
+	{
+		foreach ($postIds as $postId) {
+			$data = (object) [
+					postId => $postId,
+			];
+			$submitData = array(
+					'action' => 'facbook.delete_post',
+					'data' => json_encode($data),
+			);
+			$this->queueTask($submitData);
+		}
+	}
+	
+	protected function queueTask($submitData)
+	{
+		$sql = 'INSERT INTO ' . $this->ukrgb_pending_actions_table . '
+			' . $this->db->sql_build_array('INSERT', $submitData);
+		$this->db->sql_query($sql);
+	}
+	
+	public function runTasks()
+	{
+		$deleteList = array();
+		$select_data = array ('action' => 'facbook.delete_post',);
+		$sql = 'SELECT * FROM '. $this->ukrgb_pending_actions_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+		$result = $this->db->sql_query($sql);
+		while ($row = $this->db->sql_fetchrow($result))
+		{
+			$data = json_decode($row['data']);
+			$deleteList[$data->postId] = true;
+		}
+		$this->db->sql_freeresult($result);
+		
+		
+		$sql = 'SELECT * FROM '. $this->ukrgb_pending_actions_table; //.' WHERE ' . $this->db->sql_build_array('SELECT', $select_data)
+		$result = $this->db->sql_query($sql);		
+		while ($row = $this->db->sql_fetchrow($result))
+		{		
+			$data = json_decode($row['data']);
+			$postId = $data->postId;
+			error_log($row['action']);
+			switch ($row['action']){
+				case 'facbook.post':
+					if ($deleteList[$postId]){
+						// dont post just mark as deleted
+						$deleteList[$postId] = false;
+						error_log('Not posting post in delete list');
+					} else {
+						$this->post($data->message, $data->forumId, $data->topicId, $data->postId);
+					}
+					break;
+				case 'facbook.delete_post':
+					$this->deletePost($data->postId);
+					break;
+			}
+			$select_data = array ('id' => $row['id'],);
+			$this->db->sql_query(
+					'DELETE FROM ' . $this->ukrgb_pending_actions_table .' WHERE ' . $this->db->sql_build_array('SELECT', $select_data)
+					);
+		}
+		$this->db->sql_freeresult($result);
+	}
+	
+	
 	public function post($message, $forumId, $topicId, $postId)
 	{
 		$link = generate_board_url(false) . '/viewtopic.php?f=' . $forumId .'&t=' . $topicId;
@@ -69,16 +153,13 @@ class facebook_bridge
 		$this->store_graph_node($graphNode['id'], $postId, $topicId);
 	}
 	
-
-	public function delete_post($postIds)
+	public function deletePost($post)
 	{
 		$token = $this->config['ukrgb_fb_page_token'];
-		foreach ($postIds as $post) {
-			$node = $this->get_graph_node($post);
-			if ( ! empty($node)) {
-				$this->fb->deletePost($node, $token);
-				$this->delete_graph_node($post);
-			}
+		$node = $this->get_graph_node($post);
+		if ( ! empty($node)) {
+			$this->fb->deletePost($node, $token);
+			$this->delete_graph_node($post);
 		}
 	}
 	
