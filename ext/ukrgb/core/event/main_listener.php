@@ -234,17 +234,25 @@ class main_listener implements EventSubscriberInterface
 		$visibility = $event['post_visibility'];
 		if ($visibility == ITEM_APPROVED) {
 		 	$mode = $event['mode'];
-		 	if ($mode == 'post'){
-		 		
-		 		$data= $event['data'];
-		 		$this->post(
-		 				$data['forum_id'], 
-		 				$data['topic_id'], 
-		 				$data['post_id'], 
-		 				$data['forum_name'], 
-		 				$data['topic_title'],
-		 				$data['message'],
-		 				$event['username']);
+		 	error_log("Posting Mode:" . $mode);
+		 	$data= $event['data'];
+		 	
+		 	switch ($mode) {
+		 		case 'post':
+		 		case 'edit':
+		 			$this->post(
+			 				$data['forum_id'], 
+			 				$data['topic_id'], 
+			 				$data['post_id'], 
+			 				$data['forum_name'], 
+			 				$data['topic_title'],
+			 				$data['message'],
+			 				$event['username'],
+			 				$mode);
+					break;
+				default:
+					error_log('Unhandled Posting mode: ' . $mode);
+	
 			}
 		}
 	}
@@ -254,36 +262,30 @@ class main_listener implements EventSubscriberInterface
 		foreach ($event['post_info'] as $post )
 		{
 			if ($post['topic_first_post_id'] == $post['post_id']){
-				$this->post(
+				$this->update(
 						$post['forum_id'],
 						$post['topic_id'],
 						$post['post_id'],
 						$post['forum_name'],
 						$post['post_subject'],
 						$post['post_text'],
-						$post['username']);
+						$post['username'],
+						'post');
 			}
 		}
 	}
 	
-	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username)
-	{
-		error_log('Table Name+: ' . $this->ukrgb_pending_actions_table);
-		
+	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username, $mode)
+	{		
 		if ($this->can_post_to_fb($forumId)){
-			if (empty($this->ukrgbFacebook)) {
-				$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
-						$this->config,
-						$this->db,
-						$this->ukrgb_fb_posts_table,
-						$this->ukrgb_pending_actions_table);
-			}
+			$this->initFacebookBridge();
 			strip_bbcode($postText);
 			$message = html_entity_decode('Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText);
 			
-			$this->ukrgbFacebook->queuePost($message, $forumId, $topicId, $postId);
+			$this->ukrgbFacebook->queuePost($message, $forumId, $topicId, $postId, $mode);
 		}
 	}
+
 	
 	protected function can_post_to_fb($forum)
 	{
@@ -297,13 +299,20 @@ class main_listener implements EventSubscriberInterface
 	
 	public function coreDeletePostsAfter($event)
 	{
-		$fb = new \ukrgb\core\model\facebook_bridge(
-				$this->config, 
-				$this->db, 
+		$this->initFacebookBridge();
+		$this->ukrgbFacebook->queueDeletePost($event['post_ids']);
+		
+	}
+	
+	protected function initFacebookBridge()
+	{
+		if (empty($this->ukrgbFacebook)) {
+			$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
+				$this->config,
+				$this->db,
 				$this->ukrgb_fb_posts_table,
 				$this->ukrgb_pending_actions_table);
-		$fb->queueDeletePost($event['post_ids']);
-		
+		}
 	}
 	
 }

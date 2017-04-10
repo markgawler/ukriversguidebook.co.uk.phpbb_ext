@@ -59,7 +59,7 @@ class facebook_bridge
 		
 	}
 
-	public function queuePost($message, $forumId, $topicId, $postId)
+	public function queuePost($message, $forumId, $topicId, $postId, $mode)
 	{
 		$data = (object) [
 				postId => $postId,
@@ -68,7 +68,7 @@ class facebook_bridge
 				message => $message,
 		];
 		$submitData = array(
-				'action' => 'facbook.post',  
+				'action' => 'facebook.' . $mode,
 				'data' => json_encode($data),
 		);
 		$this->queueTask($submitData);
@@ -81,7 +81,7 @@ class facebook_bridge
 					postId => $postId,
 			];
 			$submitData = array(
-					'action' => 'facbook.delete_post',
+					'action' => 'facebook.delete_post',
 					'data' => json_encode($data),
 			);
 			$this->queueTask($submitData);
@@ -117,18 +117,25 @@ class facebook_bridge
 			$postId = $data->postId;
 			error_log($row['action']);
 			switch ($row['action']){
-				case 'facbook.post':
+				case 'facebook.post':
 					if ($deleteList[$postId]){
 						// dont post just mark as deleted
 						$deleteList[$postId] = false;
-						error_log('Not posting post in delete list');
 					} else {
 						$this->post($data->message, $data->forumId, $data->topicId, $data->postId);
 					}
 					break;
-				case 'facbook.delete_post':
+				case 'facebook.edit':
+					// Dont edit if the post if the post is just about to be deleted
+					if (! $deleteList[$postId]){
+						$this->edit($data->message, $data->forumId, $data->topicId, $data->postId);
+					}
+					break;
+				case 'facebook.delete_post':
 					$this->deletePost($data->postId);
 					break;
+				default:
+					error_log('No Action: ' . $row['action']);
 			}
 			$select_data = array ('id' => $row['id'],);
 			$this->db->sql_query(
@@ -155,13 +162,24 @@ class facebook_bridge
 	
 	public function deletePost($post)
 	{
-		$token = $this->config['ukrgb_fb_page_token'];
 		$node = $this->get_graph_node($post);
 		if ( ! empty($node)) {
+			$token = $this->config['ukrgb_fb_page_token'];
 			$this->fb->deletePost($node, $token);
 			$this->delete_graph_node($post);
 		}
 	}
+	
+	public function edit($message, $forumId, $topicId, $postId)
+	{
+		$node = $this->get_graph_node($postId);
+		if ( ! empty($node)){
+			$postData  = ['message' => $message,];
+			$this->fb->update($postData, $this->config['ukrgb_fb_page_token'],$node);
+		}
+	}
+	
+	
 	
 	protected function store_graph_node($graphNode, $postId, $topicId)
 	{

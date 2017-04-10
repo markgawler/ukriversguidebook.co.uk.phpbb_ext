@@ -165,6 +165,18 @@ class facebook
 			error_log ('Delete Post, FacebookSDKException: '.$e->getMessage());
 		}
 		return $response;
+	} 
+	
+	public function update($postData, $pageToken, $nodeId)
+	{
+		try {
+			$response =  $this->fb->post('/' . $nodeId, $postData, $pageToken);
+		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+			error_log ('Post, FacebookResponseException: '.$e->getMessage());
+		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+			error_log ('Post, FacebookSDKException: '.$e->getMessage());
+		}
+		return $response;
 	}
 
 }
