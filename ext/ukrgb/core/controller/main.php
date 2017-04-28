@@ -448,13 +448,12 @@ class main
 		$service = $this->get_service($service_name_original, $storage, $service_credentials, '', array('email'));
 				
 		if (!$this->request->is_set('code', \phpbb\request\request_interface::GET)) 
-		{			
+		{
 			header('Location: ' . $service->getAuthorizationUri());
 			exit;
 		}
-		$this->service_providers[$service_name]->set_external_service_provider($service);
+		$this->service_providers[$service_name]->set_external_service_provider($service);	
 		$result = $this->perform_auth_login($service);
-		
 		// Check to see if this provider is already associated with an account
 		$data = array(
 				'provider'	=> $service_name_original,
@@ -466,8 +465,7 @@ class main
 		$sqlresult = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($sqlresult);
 		$this->db->sql_freeresult($sqlresult);
-		
-		if ($row)
+				if ($row)
 		{
 			if (!$this->is_valid_user($row['user_id'])){
 				// the user linked to this provides id dose not exist
@@ -706,7 +704,8 @@ class main
 		}
 		// This was a callback request, get the token
 		$token = $service->requestAccessToken($this->request->variable('code', ''));
-		
+		//var_dump($token);
+		//die('token');
 		// Send a request with it
 		return json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
 	}

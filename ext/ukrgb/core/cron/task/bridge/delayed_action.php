@@ -60,7 +60,7 @@ class delayed_action extends \phpbb\cron\task\base
 	 */
 	public function is_runnable()
 	{
-		return true;
+		return $this->config['ukrgb_fb_auto_post'];
 	}
 	/**
 	 * Returns whether this cron task should run now, because enough time

@@ -37,7 +37,7 @@ services:
             - '%core.php_ext%'
             - '@log'
             
-    ukrgb.core.controller:
+    ukrgb.core.controller_fb:
         class: ukrgb\core\controller\facebook_controller
         arguments:
             - '@config'

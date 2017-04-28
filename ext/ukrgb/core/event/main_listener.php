@@ -32,6 +32,7 @@ class main_listener implements EventSubscriberInterface
 					'core.submit_post_end' => 'coreSubmitPostEnd',
 					'core.delete_posts_after' => 'coreDeletePostsAfter',
 					'core.approve_posts_after' => 'coreApprovePostsAfter',
+					'core.move_topics_before_query' => 'moveTopicsBeforeQuery',
 			);
 		}
 	}
@@ -234,7 +235,7 @@ class main_listener implements EventSubscriberInterface
 		$visibility = $event['post_visibility'];
 		if ($visibility == ITEM_APPROVED) {
 		 	$mode = $event['mode'];
-		 	error_log("Posting Mode:" . $mode);
+		 	//error_log("Posting Mode:" . $mode);
 		 	$data= $event['data'];
 		 	
 		 	switch ($mode) {
@@ -262,7 +263,7 @@ class main_listener implements EventSubscriberInterface
 		foreach ($event['post_info'] as $post )
 		{
 			if ($post['topic_first_post_id'] == $post['post_id']){
-				$this->update(
+				$this->post(
 						$post['forum_id'],
 						$post['topic_id'],
 						$post['post_id'],
@@ -275,12 +276,25 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 	
+	/*
+	 * Use the core.move_topics_before_query event to detect a topic being removed from the allowed forums, 
+	 */
+	public function moveTopicsBeforeQuery($event)
+	{
+		$forum_id = $event['forum_id'];
+		if (!$this->isAllowedForum($forum_id)){	
+			$this->initFacebookBridge();
+			$this->ukrgbFacebook->queueDeleteTopic($event['topic_ids']);
+		}
+		
+	}
+	
 	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username, $mode)
 	{		
 		if ($this->can_post_to_fb($forumId)){
 			$this->initFacebookBridge();
 			strip_bbcode($postText);
-			$message = html_entity_decode('Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText);
+			$message = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" . $postText;
 			
 			$this->ukrgbFacebook->queuePost($message, $forumId, $topicId, $postId, $mode);
 		}
@@ -291,10 +305,15 @@ class main_listener implements EventSubscriberInterface
 	{
 		$auto_post_enabled = $this->config['ukrgb_fb_auto_post'];
 		if ($auto_post_enabled) {
-			$allowed_forums = explode(',',  $this->config['ukrgb_fb_subforums']);
-			return in_array($forum, $allowed_forums);
+			return $this->isAllowedForum($forum);
 		}
 		return false;
+	}
+	
+	protected function isAllowedForum($forum)
+	{
+		$allowed_forums = explode(',',  $this->config['ukrgb_fb_subforums']);
+		return in_array($forum, $allowed_forums);
 	}
 	
 	public function coreDeletePostsAfter($event)
