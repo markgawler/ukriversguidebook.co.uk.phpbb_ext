@@ -59,12 +59,13 @@ class facebook_bridge
 		
 	}
 
-	public function queuePost($message, $forumId, $topicId, $postId, $mode)
+	public function queuePost($header, $message, $forumId, $topicId, $postId, $mode)
 	{
 		$data = (object) [
 				postId => $postId,
 				topicId => $topicId,
 				forumId => $forumId,
+				header => $header,
 				message => $message,
 		];
 		$submitData = array(
@@ -112,14 +113,20 @@ class facebook_bridge
 	
 	public function runTasks()
 	{
-		$deleteList = array();
-		$select_data = array ('action' => 'facbook.delete_post',);
+		$deleteListPost = array();
+		$deleteListTopic = array();	
+		$select_data = array ('action' => 'facebook.delete',);
 		$sql = 'SELECT * FROM '. $this->ukrgb_pending_actions_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
 		$result = $this->db->sql_query($sql);
 		while ($row = $this->db->sql_fetchrow($result))
 		{
 			$data = json_decode($row['data']);
-			$deleteList[$data->postId] = true;
+				
+			if (! is_null($data->postId)) {
+				$deleteListPost[$data->postId] = true;
+			} else {
+				$deleteListTopic[$data->topicId] = true;
+			}
 		}
 		$this->db->sql_freeresult($result);
 		
@@ -130,30 +137,37 @@ class facebook_bridge
 		{		
 			$data = json_decode($row['data']);
 			$postId = $data->postId;
-			error_log($row['action']);
+			$topicId = $data->topicId;
+				//error_log($row['action']);
 			switch ($row['action']){
 				case 'facebook.post':
-					if ($deleteList[$postId]){
+					if ($deleteListPost[$postId] || $deleteListTopic[$topicId]) {
 						// dont post just mark as deleted
-						$deleteList[$postId] = false;
+						$deleteListPost[$postId] = false;
+						$deleteListTopic[$topicId] = false;
 					} else {
-						$this->post(html_entity_decode($data->message), $data->forumId, $data->topicId, $data->postId);
+						$link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
+						$message =$this->truncateMessage(html_entity_decode($data->message), $link);
+						$graphNode= $this->post($data->header . $message, $link);
+						$this->store_graph_node($graphNode['id'], $postId, $topicId);
 					}
 					break;
 				case 'facebook.edit':
 					// Dont edit if the post if the post is just about to be deleted
-					if (! $deleteList[$postId]){
-						$this->edit(html_entity_decode($data->message), $data->forumId, $data->topicId, $data->postId);
+					if ((! $deleteListPost[$postId]) && (! $deleteListTopic[$topicId])) {
+						$link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
+						$message =$this->truncateMessage(html_entity_decode($data->message), $link);
+						$this->edit($data->header . $message, $postId);
 					}
 					break;
 				case 'facebook.delete':
-					if (! empty($data->postId)) {
-						$node = $this->get_graph_node_by_post($data->postId);
+					if (! empty($postId)) {
+						$node = $this->get_graph_node_by_post($postId);
 					} else {
-						$node = $this->get_graph_node_by_topic($data->topicId);
+						$node = $this->get_graph_node_by_topic($topicId);
 					}
 					if (! empty($node)){
-						$this->deleteNode($node);
+						$this->delete($node);
 					}
 					break;
 				default:
@@ -168,9 +182,8 @@ class facebook_bridge
 	}
 	
 	
-	public function post($message, $forumId, $topicId, $postId)
+	public function post($message, $link)
 	{
-		$link = generate_board_url(false) . '/viewtopic.php?f=' . $forumId .'&t=' . $topicId;
 		$postData  = [
 				'message' => $message,
 				'link' => $link,
@@ -178,11 +191,11 @@ class facebook_bridge
 		
 		$response = $this->fb->post($postData, $this->config['ukrgb_fb_page_token'],$this->config['ukrgb_fb_page_id']);
 		$graphNode = $response->getGraphNode();
+		return $graphNode;
 		
-		$this->store_graph_node($graphNode['id'], $postId, $topicId);
 	}
 	
-	public function deleteNode($node)
+	public function delete($node)
 	{
 		if ( ! empty($node)) {
 			$token = $this->config['ukrgb_fb_page_token'];
@@ -191,7 +204,7 @@ class facebook_bridge
 		}
 	}
 	
-	public function edit($message, $forumId, $topicId, $postId)
+	public function edit($message, $postId)
 	{
 		$node = $this->get_graph_node_by_post($postId);
 		if ( ! empty($node)){
@@ -243,7 +256,16 @@ class facebook_bridge
 	
 	}
 	
-	
+	protected function truncateMessage($message, $link)
+	{
+		$truncate_length = 300;
+		if (strlen($message) > $truncate_length) {
+			$nextspace = strpos($message, ' ', $truncate_length);
+			$message = substr($message, 0, $nextspace) . ', read more... ' . $link;
+			
+		} 
+		return $message;
+	}
 	
 	
 	
