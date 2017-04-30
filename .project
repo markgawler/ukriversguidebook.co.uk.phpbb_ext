@@ -3,7 +3,6 @@
 	<name>UKRGB phpBB exstension</name>
 	<comment></comment>
 	<projects>
-		<project>phpbb</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -28,7 +27,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1466168354776</id>
+			<id>1489438601794</id>
 			<name></name>
 			<type>6</type>
 			<matcher>
@@ -37,7 +36,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1466168354778</id>
+			<id>1489438601796</id>
 			<name></name>
 			<type>26</type>
 			<matcher>

@@ -25,12 +25,14 @@ class main_listener implements EventSubscriberInterface
 			return array();
 		}else{
 			return array(
-				'core.user_setup' => 'core_user_setup',
-				'core.auth_login_session_create_before' => 'auth_login_session_create_before',
-				'core.session_kill_after' => 'session_kill_after',
-				'core.page_header' => 'add_page_header_link',
-				//'core.submit_post_end' => 'new_post_actions',
-								
+					'core.user_setup' => 'coreUserSetup',
+					'core.auth_login_session_create_before' => 'coreAuthLoginSessionCreateBefore',
+					'core.session_kill_after' => 'coreSessionKillAfter',
+					'core.page_header' => 'corePageHeader',
+					'core.submit_post_end' => 'coreSubmitPostEnd',
+					'core.delete_posts_after' => 'coreDeletePostsAfter',
+					'core.approve_posts_after' => 'coreApprovePostsAfter',
+					'core.move_topics_before_query' => 'moveTopicsBeforeQuery',
 			);
 		}
 	}
@@ -51,39 +53,66 @@ class main_listener implements EventSubscriberInterface
 	
 
 	/**
+	 * Database driver
+	 *
+	 * @var \phpbb\db\driver\driver_interface
+	 */
+	protected $db;
+	
+	/* @var string */
+	protected $ukrgb_fb_posts_table;
+
+	/* @var string */
+	protected $ukrgb_pending_actions_table;
+	
+	protected $ukrgbFacebook;
+	/**
 	* Constructor
 	*
 	* @param \phpbb\controller\helper $helper
 	* @param \phpbb\template\template $template
-	* @param \phpbb\config\db		  $config		Controller helper object
+	* @param \phpbb\config\db 		  $config, 
 	* @param \phpbb\user			  $user	Template object
 	* @request \phpbb\request 	 	  $request
+	* @param \phpbb\db\driver\driver_interface	$db
+	* @param
+	* @param
+	* @param string 				  $ukrgb_fb_posts_table
+	* @param string 				  $ukrgb_pending_actions_table
+	* 
 	*/
 	public function __construct(\phpbb\controller\helper $helper, 
 			\phpbb\template\template $template, 
 			\phpbb\config\db $config, 
 			\phpbb\user $user, 
-			\phpbb\request\request $request, 
+			\phpbb\request\request $request,
+			\phpbb\db\driver\driver_interface	$db,
 			$root_path,  
-			$php_ext)
+			$php_ext,
+			$ukrgb_fb_posts_table,
+			$ukrgb_pending_actions_table)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
 		$this->config = $config;
 		$this->user = $user;
 		$this->request = $request;
+		$this->db = $db;
 		$this->root_path = $root_path;
-		$this->php_ext = $php_ext;		
+		$this->php_ext = $php_ext;
+		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
+		$this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
+		
 	}
 
 	
 	/**
 	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function auth_login_session_create_before($event)
+	public function coreAuthLoginSessionCreateBefore($event)
 	{		        	
 		global $JFusionActive;
-		error_log('-- UKRGB Jfusion - login ');
+		//error_log('-- UKRGB Jfusion - login ');
 		
 		if (isset($event['login']) && isset($event['login']['status']) && $event['login']['status'] == LOGIN_SUCCESS && !$event['admin'] && empty($JFusionActive))
 		{		
@@ -129,9 +158,9 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function session_kill_after($event)
+	public function coreSessionKillAfter($event)
 	{		
-		error_log('-- UKRGB Jfusion -  logout');
+		//error_log('-- UKRGB Jfusion -  logout');
 		
 		//check to see if JFusion is not active
 		global $JFusionActive;
@@ -157,19 +186,16 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function core_user_setup($event)
+	public function coreUserSetup($event)
 	{		
-		//if (defined('ADMIN_START'))
-		//{
-			$this->load_language_on_setup($event);
-		//}
+		$this->loadLanguageOnSetup($event);
 	}
 		
 	
 	/**
 	 * @return \JFusionAPIInternal
 	 */
-	function startJoomla() {
+	protected function startJoomla() {
 		define('_JFUSIONAPI_INTERNAL', true);
 		$apipath = $this->config['ukrgb_jfusion_apipath'];
 		require_once $apipath . '/jfusionapi.php';
@@ -181,7 +207,7 @@ class main_listener implements EventSubscriberInterface
 	 *
 	 * @param unknown $event
 	 */
-	public function load_language_on_setup($event)
+	public function loadLanguageOnSetup($event)
 	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
@@ -194,7 +220,7 @@ class main_listener implements EventSubscriberInterface
 		
 	}
 	
-	public function add_page_header_link($event)
+	public function corePageHeader($event)
 	{
 		$this->template->assign_vars(array(
 				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
@@ -202,17 +228,110 @@ class main_listener implements EventSubscriberInterface
 				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
 		));
 	}
+	
+	
+	public function coreSubmitPostEnd($event)
+	{
+		$visibility = $event['post_visibility'];
+		if ($visibility == ITEM_APPROVED) {
+		 	$mode = $event['mode'];
+		 	//error_log("Posting Mode:" . $mode);
+		 	$data= $event['data'];
+		 	
+		 	switch ($mode) {
+		 		case 'post':
+		 		case 'edit':
+		 			$this->post(
+			 				$data['forum_id'], 
+			 				$data['topic_id'], 
+			 				$data['post_id'], 
+			 				$data['forum_name'], 
+			 				$data['topic_title'],
+			 				$data['message'],
+			 				$event['username'],
+			 				$mode);
+					break;
+				default:
+					error_log('Unhandled Posting mode: ' . $mode);
+	
+			}
+		}
+	}
+	
+	public function coreApprovePostsAfter($event)
+	{
+		foreach ($event['post_info'] as $post )
+		{
+			if ($post['topic_first_post_id'] == $post['post_id']){
+				$this->post(
+						$post['forum_id'],
+						$post['topic_id'],
+						$post['post_id'],
+						$post['forum_name'],
+						$post['post_subject'],
+						$post['post_text'],
+						$post['username'],
+						'post');
+			}
+		}
+	}
+	
 	/*
-	 public function new_post_actions($event)
-	 {
-	 $mode = $event['mode'];
-	 if ($mode == 'post'){
-	 $subject = $event['subject'];
-	 $data= $event['data'];
-	 error_log("Subject: " . $subject);
-	 error_log("Data   : " . $data);
-	 }
-	 }
+	 * Use the core.move_topics_before_query event to detect a topic being removed from the allowed forums, 
 	 */
+	public function moveTopicsBeforeQuery($event)
+	{
+		$forum_id = $event['forum_id'];
+		if (!$this->isAllowedForum($forum_id)){	
+			$this->initFacebookBridge();
+			$this->ukrgbFacebook->queueDeleteTopic($event['topic_ids']);
+		}
+		
+	}
+	
+	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username, $mode)
+	{		
+		if ($this->can_post_to_fb($forumId)){
+			$this->initFacebookBridge();
+			strip_bbcode($postText);
+			$header = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" ;
+			
+			$this->ukrgbFacebook->queuePost($header, $postText, $forumId, $topicId, $postId, $mode);
+		}
+	}
+
+	
+	protected function can_post_to_fb($forum)
+	{
+		$auto_post_enabled = $this->config['ukrgb_fb_auto_post'];
+		if ($auto_post_enabled) {
+			return $this->isAllowedForum($forum);
+		}
+		return false;
+	}
+	
+	protected function isAllowedForum($forum)
+	{
+		$allowed_forums = explode(',',  $this->config['ukrgb_fb_subforums']);
+		return in_array($forum, $allowed_forums);
+	}
+	
+	public function coreDeletePostsAfter($event)
+	{
+		$this->initFacebookBridge();
+		$this->ukrgbFacebook->queueDeletePost($event['post_ids']);
+		
+	}
+	
+	protected function initFacebookBridge()
+	{
+		if (empty($this->ukrgbFacebook)) {
+			$this->ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
+				$this->config,
+				$this->db,
+				$this->ukrgb_fb_posts_table,
+				$this->ukrgb_pending_actions_table);
+		}
+	}
 	
 }

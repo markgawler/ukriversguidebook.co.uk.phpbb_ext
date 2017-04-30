@@ -1,3 +1,6 @@
+imports:
+    - { resource: tables.yml }
+
 services:
     ukrgb.core.listener:
         class: ukrgb\core\event\main_listener
@@ -7,9 +10,11 @@ services:
             - '@config'
             - '@user'
             - '@request'
+            - '@dbal.conn'
             - '%core.root_path%'
             - '%core.php_ext%'
-                        
+            - '%ukrgb.core.tables.ukrgb_fb_posts%'
+            - '%ukrgb.core.tables.ukrgb_pending_actions%'
         tags:
             - { name: event.listener }
 
@@ -31,3 +36,25 @@ services:
             - '%core.root_path%'
             - '%core.php_ext%'
             - '@log'
+            
+    ukrgb.core.controller_fb:
+        class: ukrgb\core\controller\facebook_controller
+        arguments:
+            - '@config'
+            - '@request'
+            - '@user'
+            - '@controller.helper'
+            - '%core.root_path%'
+            - '%core.php_ext%'
+            
+    ukrgb.core.delayedaction:
+        class: ukrgb\core\cron\task\bridge\delayed_action
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '%ukrgb.core.tables.ukrgb_fb_posts%'
+            - '%ukrgb.core.tables.ukrgb_pending_actions%'
+        calls:
+            - [set_name, [ukrgb.cron.delayed_action]]
+        tags:
+            - { name: cron.task }

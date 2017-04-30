@@ -7,6 +7,14 @@ module.exports = function(grunt) {
 	privateKeyFile: process.env.ukrgbPrivateKeyFile,
        
     synchard: {
+    	localdests: {
+    		options: {
+              	args: ['-av','--delete'],
+              },
+              files: {
+                  'ext/ukrgb/core/': ['vendor']
+              }
+    	},
         remotedest: {
             options: {
             	args: ['-av','--delete'],

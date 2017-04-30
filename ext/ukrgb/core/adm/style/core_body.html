@@ -4,9 +4,10 @@
 
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
+	<!-- IF UKRGB_ACP_MODE == "settings" -->
         <dl>
             <dt>
-                <label for="ukrgb_jfusion_jname">{L_ACP_UKRGB_JFUSION_JNAME}</label>
+                <label for="ukrgb_jfusion_jname">{L_ACP_UKRGB_JFUSION_JNAME}{L_COLON}</label>
             </dt>
             <dd>
                 <input type="text" name="ukrgb_jfusion_jname" value="{UKRGB_JFUSION_JNAME}"/>
@@ -15,7 +16,7 @@
 
         <dl>
             <dt>
-                <label for="ukrgb_jfusion_apipath">{L_ACP_UKRGB_JFUSION_APIPATH}</label>
+                <label for="ukrgb_jfusion_apipath">{L_ACP_UKRGB_JFUSION_APIPATH}{L_COLON}</label>
             </dt>
             <dd>
                 <input type="text" name="ukrgb_jfusion_apipath" value="{UKRGB_JFUSION_APIPATH}"/>
@@ -24,14 +25,71 @@
         
         <dl>
             <dt>
-                <label for="ukrgb_secret">{L_ACP_UKRGB_SECRET}</label>
+                <label for="ukrgb_secret">{L_ACP_UKRGB_SECRET}{L_COLON}</label>
             </dt>
             <dd>
                 <input type="text" name="ukrgb_secret" value="{UKRGB_SECRET}"/>
             </dd>
         </dl>
- 
+	<!-- ELSE -->
+   		<dl>
+            <dt>
+                <label for="ukrgb_fb_appid">{L_ACP_UKRGB_FB_APPID}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_appid" value="{UKRGB_FB_APPID}"/>
+            </dd>
+        </dl>
+   		<dl>
+            <dt>
+                <label for="ukrgb_fb_secret">{L_ACP_UKRGB_FB_SECRET}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_secret" value="{UKRGB_FB_SECRET}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_fb_page_mgr">{L_ACP_UKRGB_FB_PAGE_MGR}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_page_mgr" value="{UKRGB_FB_PAGE_MGR}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_fb_page_id">{L_ACP_UKRGB_FB_PAGE_ID}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_page_id" value="{UKRGB_FB_PAGE_ID}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_fb_subforums">{L_ACP_UKRGB_FB_SUBFORUMS}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_fb_subforums" value="{UKRGB_FB_SUBFORUMS}"/>
+            </dd>
+        </dl>
+        <dl>
+			<dt>
+				<label for="ukrgb_fb_auto_post">{L_APC_UKRGB_AUTO_POST}{L_COLON}</label>
+			</dt>
+			<dd><input type="radio" class="radio" name="ukrgb_fb_auto_post" value="1" <!-- IF UKRGB_FB_AUTO_POST -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+				<input type="radio" class="radio" name="ukrgb_fb_auto_post" value="0" <!-- IF not UKRGB_FB_AUTO_POST -->checked="checked"<!-- ENDIF --> /> {L_NO}
+			</dd>
+		</dl>
+		<dl>
+            <dt>
+                <label for="ukrgb_delayed_action_gc">{L_ACP_UKRGB_CRON_FREQUENCY}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" name="ukrgb_delayed_action_gc" value="{UKRGB_CRON_FREQUENCY}"/>
+            </dd>
+        </dl>
         
+	<!-- ENDIF -->
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
@@ -40,4 +98,49 @@
 		{S_FORM_TOKEN}
 	</fieldset>
 </form>
+<!-- IF UKRGB_FB_TOKEN_REFRESH -->
+
+<a href="{U_UKRGB_GET_FB_TOKEN}">{L_APC_UKRGB_GET_TOKEN}</a>
+<br>
+
+<!-- ENDIF -->
+<!-- IF UKRGB_ACP_MODE == "fb_app_settings" -->
+<table class="table1 two-columns no-header responsive show-header" data-no-responsive-header="true">
+		<caption>{L_ACP_PAGE_TOKEN}</caption>
+		<colgroup><col class="col1"><col class="col2"><col class="col2">
+		</colgroup><thead>
+		<tr>
+			<th>{L_APC_UKRGB_FIELD}</th>
+			<th>{L_APC_UKRGB_VALUE}</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_APP}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_APP_ID} - {UKRGB_FBPT_APP_NAME}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_EXPIRES}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_EXPIRES}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_VALID}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_VALID}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_ISSUED}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_ISSUED}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_SCOPE}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_SCOPE}</strong></td>
+		</tr>
+		<tr>
+			<td class="col1">{L_ACP_UKRGB_FBPT_ERROR}: </td>
+			<td class="col2"><strong>{UKRGB_FBPT_ERROR}</strong></td>
+		</tr>
+	</tbody>
+</table>
+<!-- ENDIF -->
+
 <!-- INCLUDE overall_footer.html -->
