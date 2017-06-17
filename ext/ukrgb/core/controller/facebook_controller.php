@@ -27,10 +27,10 @@ class facebook_controller
 	/**
 	 * phpBB request object
 	 *
-	 * @var \phpbb\request\request_interface
+	 * @var \phpbb\request\request
 	 */
 	protected $request;
-	
+
 	/**
 	 * phpBB user
 	 *
@@ -51,9 +51,18 @@ class facebook_controller
 	 * @var string
 	 */
 	protected $php_ext;
-	
-	
-	public function __construct(
+
+
+    /**
+     * facebook_controller constructor.
+     * @param \phpbb\config\config $config
+     * @request \phpbb\request 	 	  $request
+     * @param \phpbb\user $user
+     * @param \phpbb\controller\helper $helper
+     * @param $phpbb_root_path
+     * @param $php_ext
+     */
+    public function __construct(
 			\phpbb\config\config $config,
 			\phpbb\request\request_interface $request,
 			\phpbb\user $user,	
@@ -73,14 +82,16 @@ class facebook_controller
 		
 		$this->fb = new \ukrgb\core\model\facebook($appId, $appSecret);
 	}
-	
 
-	/**
-	 * Controller for route /facebook/{action}
-	 *
-	 * @param string $action
-	 * @return Response A Symfony Response object
-	 */
+
+    /**
+     * Controller for route /facebook/{action}
+     *
+     * @param $mode
+     * @return Response A Symfony Response object
+     * @throws \exception
+     * @internal param string $action
+     */
 	public function handle($mode)
 	{
 		switch ($mode) {

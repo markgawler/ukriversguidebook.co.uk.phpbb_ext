@@ -117,37 +117,39 @@ class main
 	 *
 	 * @param	\phpbb\db\driver\driver_interface	$db
 	 * @param	\phpbb\config\config	$config
-	 * @param   \phpbb\helper\helper $helper
+	 * @param   \phpbb\controller\helper $helper
  	 * @param   \phpbb\template\template $template
 	 * @param	\phpbb\passwords\manager	$passwords_manager
 	 * @param	\phpbb\request\request_interface	$request
 	 * @param	\phpbb\user		$user
 	 * @param	string			$auth_provider_oauth_token_storage_table
-	 * @param	string			$auth_provider_oauth_token_account_assoc
-	 * @param	\phpbb\di\service_collection	$service_providers Contains \phpbb\auth\provider\oauth\service_interface
+     * @param	string			$auth_provider_oauth_state_table
+     * @param	string			$auth_provider_oauth_token_account_assoc
+     * @param	\phpbb\di\service_collection	$service_providers Contains \phpbb\auth\provider\oauth\service_interface
 	 * @param	string			$users_table
 	 * @param	\Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container DI container
 	 * @param	string			$phpbb_root_path
 	 * @param	string			$php_ext
-	 * @param   \phpbb\log\log	$log	Logger instance
-
+	 * @param   \phpbb\log\log_interface	$log	Logger instance
 	 */
 	
-	public function __construct(\phpbb\db\driver\driver_interface $db, 
-			\phpbb\config\config $config, 
-			\phpbb\controller\helper $helper, 
-			\phpbb\template\template $template, 
-			\phpbb\passwords\manager $passwords_manager, 
-			\phpbb\request\request_interface $request, 
-			\phpbb\user $user, 
-			$auth_provider_oauth_token_storage_table, 
-			$auth_provider_oauth_token_account_assoc, 
-			\phpbb\di\service_collection $service_providers, 
-			$users_table, 
-			\Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container, 
-			$phpbb_root_path, 
-			$php_ext,
-			\phpbb\log\log_interface $log)
+	public function __construct(
+	    \phpbb\db\driver\driver_interface $db,
+		\phpbb\config\config $config,
+		\phpbb\controller\helper $helper,
+		\phpbb\template\template $template,
+		\phpbb\passwords\manager $passwords_manager,
+		\phpbb\request\request_interface $request,
+		\phpbb\user $user,
+		$auth_provider_oauth_token_storage_table,
+        $auth_provider_oauth_state_table,
+		$auth_provider_oauth_token_account_assoc,
+		\phpbb\di\service_collection $service_providers,
+		$users_table,
+		\Symfony\Component\DependencyInjection\ContainerInterface $phpbb_container,
+		$phpbb_root_path,
+		$php_ext,
+		\phpbb\log\log_interface $log)
 	{ 
 		$this->db = $db;
 		$this->config = $config;
@@ -157,7 +159,8 @@ class main
 		$this->request = $request;
 		$this->user = $user;
 		$this->auth_provider_oauth_token_storage_table = $auth_provider_oauth_token_storage_table;
-		$this->auth_provider_oauth_token_account_assoc = $auth_provider_oauth_token_account_assoc;
+        $this->auth_provider_oauth_state_table = $auth_provider_oauth_state_table;
+        $this->auth_provider_oauth_token_account_assoc = $auth_provider_oauth_token_account_assoc;
 		$this->service_providers = $service_providers;
 		$this->users_table = $users_table;
 		$this->phpbb_container = $phpbb_container;
@@ -185,7 +188,8 @@ class main
 	 * @return Response A Symfony Response object
 	 */
 	public function handle($name)
-	{		
+	{
+	    error_log(' Handler: ' . $name);
 		switch ($name) {
 			case "facebook":
 				return $this->authenticate($name);
@@ -294,7 +298,7 @@ class main
 					'user_lang'				=> $data['lang'],
 					'user_type'				=> $user_type,
 					'user_actkey'			=> $user_actkey,
-					'user_ip'				=> $user->ip,
+					'user_ip'				=> $this->user->ip,
 					'user_regdate'			=> time(),
 					'user_inactive_reason'	=> $user_inactive_reason,
 					'user_inactive_time'	=> $user_inactive_time,
@@ -314,6 +318,7 @@ class main
 			}
 
 			// Register user...
+            $cp_data = false;                           // Custom Profile Filed data.
 			$user_id = user_add($user_row, $cp_data);  	//phpBB register
 			$this->register_jfusion($userinfo);  		// Joomal register via jfusion
 			
@@ -443,12 +448,18 @@ class main
 		// Get the service credentials for the given service
 		$service_credentials = $this->service_providers[$service_name]->get_service_credentials();
 		
-		$storage = new \phpbb\auth\provider\oauth\token_storage($this->db, $this->user, $this->auth_provider_oauth_token_storage_table);
+		$storage = new \phpbb\auth\provider\oauth\token_storage(
+		    $this->db,
+            $this->user,
+            $this->auth_provider_oauth_token_storage_table,
+            $this->auth_provider_oauth_state_table
+        );
 		$query = 'oauth/' . $service_name_original;
 		$service = $this->get_service($service_name_original, $storage, $service_credentials, '', array('email'));
 				
 		if (!$this->request->is_set('code', \phpbb\request\request_interface::GET)) 
 		{
+		    error_log('No Code');
 			header('Location: ' . $service->getAuthorizationUri());
 			exit;
 		}
@@ -459,14 +470,16 @@ class main
 				'provider'	=> $service_name_original,
 			 	'oauth_provider_id'	=> $result['id']
 		);
-		
+
 		$sql = 'SELECT user_id FROM ' . $this->auth_provider_oauth_token_account_assoc . '
 				WHERE ' . $this->db->sql_build_array('SELECT', $data);
 		$sqlresult = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($sqlresult);
 		$this->db->sql_freeresult($sqlresult);
-				if ($row)
+		error_log("xxxxxxxx");
+		if ($row)
 		{
+		    error_log("Row not empty");
 			if (!$this->is_valid_user($row['user_id'])){
 				// the user linked to this provides id dose not exist
 				error_log("no such user");
@@ -484,7 +497,8 @@ class main
 		}
 		if (!$row)
 		{
-			// Link or register
+            error_log("Row empty - Link or register");
+		    // Link or register
 			if (!empty($result['email']) && $result['verified'])
 			{
 				// user not logged in, is the email already registered
@@ -535,6 +549,7 @@ class main
 			}
 			else 
 			{
+			    error_log("fail condition authenticate");
 				// Fail conditions
 				if (empty($result['email']))
 				{
@@ -546,7 +561,8 @@ class main
 				}
 			}
 		}
-		
+
+		error_log("assign var");
 		$this->template->assign_vars(array(
 				'MESSAGE_TITLE' =>  $this->user->lang($msg_title),
 				'MESSAGE_TEXT' =>  $this->user->lang($error_msg),
@@ -698,16 +714,15 @@ class main
 	
 	protected function perform_auth_login($service)
 	{
+	    error_log("perform_auth_login");
 		if (!($service instanceof \OAuth\OAuth2\Service\Facebook))
 		{
 			throw new \exception('AUTH_PROVIDER_OAUTH_ERROR_INVALID_SERVICE_TYPE');
 		}
 		// This was a callback request, get the token
 		$token = $service->requestAccessToken($this->request->variable('code', ''));
-		//var_dump($token);
-		//die('token');
-		// Send a request with it
-		return json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
+        $res = json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
+        return $res;
 	}
 	
 	

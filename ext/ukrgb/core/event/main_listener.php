@@ -75,8 +75,6 @@ class main_listener implements EventSubscriberInterface
 	* @param \phpbb\user			  $user	Template object
 	* @request \phpbb\request 	 	  $request
 	* @param \phpbb\db\driver\driver_interface	$db
-	* @param
-	* @param
 	* @param string 				  $ukrgb_fb_posts_table
 	* @param string 				  $ukrgb_pending_actions_table
 	* 
