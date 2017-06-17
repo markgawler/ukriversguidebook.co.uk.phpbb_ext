@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="Area51">
+  <component name="PublishConfigData" autoUpload="Always" serverName="Production">
     <serverData>
       <paths name="Area51">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/phpbb/ext/ukrgb" local="$PROJECT_DIR$/ext/ukrgb" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="Production">
         <serverdata>
           <mappings>
             <mapping deploy="/phpbb/ext/ukrgb" local="$PROJECT_DIR$/ext/ukrgb" web="/" />
