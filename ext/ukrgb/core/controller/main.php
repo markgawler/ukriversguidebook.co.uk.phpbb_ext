@@ -14,8 +14,6 @@
 namespace ukrgb\core\controller;
 
 use OAuth\Common\Consumer\Credentials;
-use OAuth\OAuth2\Service\Facebook;
-
 use Symfony\Component\HttpFoundation\Response;
 
 
@@ -120,7 +118,7 @@ class main
 	 * @param   \phpbb\controller\helper $helper
  	 * @param   \phpbb\template\template $template
 	 * @param	\phpbb\passwords\manager	$passwords_manager
-	 * @param	\phpbb\request\request_interface	$request
+	 * @param   \phpbb\request\request 	 	  $request
 	 * @param	\phpbb\user		$user
 	 * @param	string			$auth_provider_oauth_token_storage_table
      * @param	string			$auth_provider_oauth_state_table
@@ -139,7 +137,7 @@ class main
 		\phpbb\controller\helper $helper,
 		\phpbb\template\template $template,
 		\phpbb\passwords\manager $passwords_manager,
-		\phpbb\request\request_interface $request,
+		\phpbb\request\request $request,
 		\phpbb\user $user,
 		$auth_provider_oauth_token_storage_table,
         $auth_provider_oauth_state_table,
@@ -180,12 +178,14 @@ class main
 			'secret'	=> $this->config['auth_oauth_facebook_secret'],
 		);
 	}
-	
+
+
 	/**
-	 * Controller for route /oauth/{action}
+	 * Controller for the router
 	 *
-	 * @param string $action
-	 * @return Response A Symfony Response object
+	 * @param $name
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 * @throws \exception
 	 */
 	public function handle($name)
 	{
@@ -205,8 +205,12 @@ class main
 				break;
 		}
 	}
-	
-	
+
+
+	/**
+	 * @param array $data
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
 	protected function register(array $data = array())
 	{
 		if ($this->request->is_set('cancel'))
@@ -459,7 +463,6 @@ class main
 				
 		if (!$this->request->is_set('code', \phpbb\request\request_interface::GET)) 
 		{
-		    error_log('No Code');
 			header('Location: ' . $service->getAuthorizationUri());
 			exit;
 		}
@@ -476,14 +479,11 @@ class main
 		$sqlresult = $this->db->sql_query($sql);
 		$row = $this->db->sql_fetchrow($sqlresult);
 		$this->db->sql_freeresult($sqlresult);
-		error_log("xxxxxxxx");
 		if ($row)
 		{
-		    error_log("Row not empty");
 			if (!$this->is_valid_user($row['user_id'])){
 				// the user linked to this provides id dose not exist
-				error_log("no such user");
-				$this->unlink_account_perform_unlink($data); 
+				$this->unlink_account_perform_unlink($data);
 				$row = null;  // invalidate the auth provider association 
 			} 
 			else 
@@ -497,7 +497,6 @@ class main
 		}
 		if (!$row)
 		{
-            error_log("Row empty - Link or register");
 		    // Link or register
 			if (!empty($result['email']) && $result['verified'])
 			{
@@ -751,9 +750,9 @@ class main
 	protected function is_valid_user ($user_id){
 		$select_data = array('user_id' => $user_id);
 		$sql = 'SELECT username FROM '. $this->users_table .' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
-		$sqlresult = $this->db->sql_query($sql);
-		$row = $this->db->sql_fetchrow($sqlresult);
-		$this->db->sql_freeresult($sqlresult);
+		$sqlResult = $this->db->sql_query($sql);
+		$row = $this->db->sql_fetchrow($sqlResult);
+		$this->db->sql_freeresult($sqlResult);
 		
 		return (!empty($row));
 	}

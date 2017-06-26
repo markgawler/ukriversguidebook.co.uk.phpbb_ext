@@ -64,28 +64,43 @@ class main_listener implements EventSubscriberInterface
 
 	/* @var string */
 	protected $ukrgb_pending_actions_table;
-	
-	protected $ukrgbFacebook;
+
 	/**
-	* Constructor
-	*
-	* @param \phpbb\controller\helper $helper
-	* @param \phpbb\template\template $template
-	* @param \phpbb\config\db 		  $config, 
-	* @param \phpbb\user			  $user	Template object
-	* @request \phpbb\request 	 	  $request
-	* @param \phpbb\db\driver\driver_interface	$db
-	* @param string 				  $ukrgb_fb_posts_table
-	* @param string 				  $ukrgb_pending_actions_table
-	* 
-	*/
+	 * @var  \ukrgb\core\model\facebook_bridge
+	 */
+	protected $ukrgbFacebook;
+
+	/**
+	 * @var string $root_path
+	 */
+	protected $root_path;
+
+	/**
+	 * @var string $php_ext
+	 */
+	protected $php_ext;
+
+	/**
+	 * Constructor
+	 *
+	 * @param \phpbb\controller\helper $helper
+	 * @param \phpbb\template\template $template
+	 * @param \phpbb\config\db 		  $config,
+	 * @param \phpbb\user			  $user	Template object
+	 * @param \phpbb\request\request 	 	  $request
+	 * @param \phpbb\db\driver\driver_interface	$db
+	 * @param string $root_path
+	 * @param string $php_ext
+	 * @param string 				  $ukrgb_fb_posts_table
+	 * @param string 				  $ukrgb_pending_actions_table
+	 */
 	public function __construct(\phpbb\controller\helper $helper, 
 			\phpbb\template\template $template, 
 			\phpbb\config\db $config, 
 			\phpbb\user $user, 
 			\phpbb\request\request $request,
 			\phpbb\db\driver\driver_interface	$db,
-			$root_path,  
+			$root_path,
 			$php_ext,
 			$ukrgb_fb_posts_table,
 			$ukrgb_pending_actions_table)
@@ -147,6 +162,7 @@ class main_listener implements EventSubscriberInterface
 			$joomla->setActivePlugin($this->config['ukrgb_jfusion_jname']);
 	
 			$joomla->login($username, $password, $remember);
+
 			//backup phpbb globals
 			$joomla->restoreGlobal();
 			$this->request->disable_super_globals();
@@ -154,9 +170,8 @@ class main_listener implements EventSubscriberInterface
 	}
 	
 	/**
-	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
-	public function coreSessionKillAfter($event)
+	public function coreSessionKillAfter()
 	{		
 		//error_log('-- UKRGB Jfusion -  logout');
 		
@@ -203,7 +218,7 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * Language setup
 	 *
-	 * @param unknown $event
+	 * @param \Symfony\Component\EventDispatcher\Event $event
 	 */
 	public function loadLanguageOnSetup($event)
 	{
@@ -218,7 +233,8 @@ class main_listener implements EventSubscriberInterface
 		
 	}
 	
-	public function corePageHeader($event)
+
+	public function corePageHeader()
 	{
 		$this->template->assign_vars(array(
 				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),

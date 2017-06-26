@@ -43,6 +43,8 @@ class facebook
 	
 	public function getAccessToken()
 	{
+		$error = '';
+		$token = null;
 		$helper = $this->fb->getRedirectLoginHelper();
 		$code = 200;
 		try {
@@ -69,9 +71,9 @@ class facebook
 		}
 		
 		return (object) [
-				token => $token,
-				error => $error,
-				responce_code => $code,
+				'token' => $token,
+				'error' => $error,
+				'responce_code' => $code,
 		];
 	}
 	
@@ -85,6 +87,7 @@ class facebook
 	
 	public function getTokenMetaData($pageToken)
 	{
+		$error = "No Error";
 		if (is_null($this->fb) || empty($pageToken))
 		{
 			return array(
@@ -143,12 +146,12 @@ class facebook
 	
 	public function post($postData, $pageToken, $pageId)
 	{
-
+		$response = null;
 		try {
 			$response =  $this->fb->post('/' . $pageId . '/feed', $postData, $pageToken);
-		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		} catch(\Facebook\Exceptions\FacebookResponseException $e) {
 			error_log ('Post, FacebookResponseException: '.$e->getMessage());
-		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		} catch(\Facebook\Exceptions\FacebookSDKException $e) {
 			error_log ('Post, FacebookSDKException: '.$e->getMessage());
 		}
 		return $response;
@@ -156,6 +159,7 @@ class facebook
 	
 	public function deletePost($graphNode, $pageToken)
 	{
+		$response = null;
 		try {
 			$response = $this->fb->delete('/' . $graphNode , array(), $pageToken);
 		} catch(\Facebook\Exceptions\FacebookResponseException $e) {
@@ -169,11 +173,12 @@ class facebook
 	
 	public function update($postData, $pageToken, $nodeId)
 	{
+		$response = null;
 		try {
 			$response =  $this->fb->post('/' . $nodeId, $postData, $pageToken);
-		} catch(Facebook\Exceptions\FacebookResponseException $e) {
+		} catch(\Facebook\Exceptions\FacebookResponseException $e) {
 			error_log ('Post, FacebookResponseException: '.$e->getMessage());
-		} catch(Facebook\Exceptions\FacebookSDKException $e) {
+		} catch(\Facebook\Exceptions\FacebookSDKException $e) {
 			error_log ('Post, FacebookSDKException: '.$e->getMessage());
 		}
 		return $response;
