@@ -102,13 +102,27 @@ class facebook
 		}
 	
 		$accessToken = new \Facebook\Authentication\AccessToken($pageToken);
-	
+
 		// The OAuth 2.0 client handler helps us manage access tokens
 		$oAuth2Client = $this->fb->getOAuth2Client();
-	
-		// Get the access token metadata from /debug_token
-		$tokenMetadata = $oAuth2Client->debugToken($accessToken);
-		
+
+		try
+		{
+			// Get the access token metadata from /debug_token
+			$tokenMetadata = $oAuth2Client->debugToken($accessToken);
+		} catch (\Facebook\Exceptions\FacebookResponseException $e) {
+			$error = $e->getMessage();
+			return array(
+				'app_id' => '',
+				'app_name' => '',
+				'expires_at' => '',
+				'valid' => 'False',
+				'issued' => '',
+				'scope' => '',
+				'error' => $error,
+			);
+		}
+
 		try {
 			// Validation (these will throw FacebookSDKException's when they fail)
 			$tokenMetadata->validateAppId($this->appId); // Replace {app-id} with your app id
