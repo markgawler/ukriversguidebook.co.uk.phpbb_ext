@@ -1,9 +1,10 @@
 <!-- INCLUDE overall_header.html -->
 
 <h1>{L_SETTINGS}</h1>
-
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
+		<!-- IF UKRGB_ACP_TPL_MODE == "settings" -->
+
 		<dl>
 			<dt><label for="ukrgb_jdb">{L_APC_UKRGB_JDB}</label></dt>
 			<dd><input class="text medium" type="text" id="ukrgb_jdb" name="ukrgb_jdb" value="{UKRGB_JDB}" maxlength="255" /></dd>
@@ -14,7 +15,18 @@
 			<dt><label for="ukrgb_jdbhost">{L_APC_UKRGB_JDBHOST}</label></dt>
 			<dd><input class="text medium" type="text" id="ukrgb_jdbhost" name="ukrgb_jdbhost" value="{UKRGB_JDBHOST}" maxlength="255" /></dd>
 		</dl>
+		<!-- ELSE -->
+		<dl>
+			<dt><label for="page_banner_img_0">{L_APC_UKRGB_PAGE_BANNER_0}</label></dt>
+			<dd><input class="text medium" type="text" id="page_banner_img_0" name="page_banner_img_0" value="{UKRGB_PAGE_BANNER_0}" maxlength="255" /></dd>
 
+			<dt><label for="page_banner_img_1">{L_APC_UKRGB_PAGE_BANNER_1}</label></dt>
+			<dd><input class="text medium" type="text" id="page_banner_img_1" name="page_banner_img_1" value="{UKRGB_PAGE_BANNER_1}" maxlength="255" /></dd>
+			<dt><label for="page_banner_forums_1">{L_APC_UKRGB_DISPLAY_FORUMS}</label></dt>
+			<dd><input class="text medium" type=text" id="page_banner_forums_1" name="page_banner_forums_1" value="{UKRGB_DISPLAY_FORUMS_1}" maxlength="255" /> </dd>
+
+		</dl>
+		<!-- ENDIF -->
 
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
@@ -23,6 +35,8 @@
 
 		{S_FORM_TOKEN}
 	</fieldset>
+
 </form>
+
 
 <!-- INCLUDE overall_footer.html -->

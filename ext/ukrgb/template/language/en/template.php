@@ -37,5 +37,13 @@ $lang = array_merge($lang, array(
 		'APC_UKRGB_JDBPWD' 				=> 'Joomla Database Password',
 		'APC_UKRGB_JDBHOST' 			=> 'Joomla Database Host',
 		//'ACP_UKRGB_JDB_SETUP' 			=> 'Joomla Database Settings',
-		
+
+
+		'APC_UKRGB_TPL_BANNER'			=> 'Page Banners',
+		'APC_UKRGB_PAGE_BANNER_0'		=> 'Default Page Banner',
+		'APC_UKRGB_PAGE_BANNER_1'		=> 'Alternate Page Banner ',
+		'APC_UKRGB_DISPLAY_FORUMS'		=> 'Display on Forums ',
+
+
+
 ));

@@ -10,7 +10,7 @@
                 <label for="ukrgb_jfusion_jname">{L_ACP_UKRGB_JFUSION_JNAME}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_jfusion_jname" value="{UKRGB_JFUSION_JNAME}"/>
+                <input type="text" id="ukrgb_jfusion_jname"  name="ukrgb_jfusion_jname" value="{UKRGB_JFUSION_JNAME}"/>
             </dd>
         </dl>
 
@@ -19,7 +19,7 @@
                 <label for="ukrgb_jfusion_apipath">{L_ACP_UKRGB_JFUSION_APIPATH}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_jfusion_apipath" value="{UKRGB_JFUSION_APIPATH}"/>
+                <input type="text" id="ukrgb_jfusion_apipath" name="ukrgb_jfusion_apipath" value="{UKRGB_JFUSION_APIPATH}"/>
             </dd>
         </dl>
         
@@ -28,7 +28,7 @@
                 <label for="ukrgb_secret">{L_ACP_UKRGB_SECRET}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_secret" value="{UKRGB_SECRET}"/>
+                <input type="text" id="ukrgb_secret" name="ukrgb_secret" value="{UKRGB_SECRET}"/>
             </dd>
         </dl>
 	<!-- ELSE -->
@@ -37,7 +37,7 @@
                 <label for="ukrgb_fb_appid">{L_ACP_UKRGB_FB_APPID}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_fb_appid" value="{UKRGB_FB_APPID}"/>
+				<input type="text" id="ukrgb_fb_appid" name="ukrgb_fb_appid" value="{UKRGB_FB_APPID}"/>
             </dd>
         </dl>
    		<dl>
@@ -45,7 +45,7 @@
                 <label for="ukrgb_fb_secret">{L_ACP_UKRGB_FB_SECRET}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_fb_secret" value="{UKRGB_FB_SECRET}"/>
+                <input type="text" id="ukrgb_fb_secret" name="ukrgb_fb_secret" value="{UKRGB_FB_SECRET}"/>
             </dd>
         </dl>
         <dl>
@@ -53,7 +53,7 @@
                 <label for="ukrgb_fb_page_mgr">{L_ACP_UKRGB_FB_PAGE_MGR}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_fb_page_mgr" value="{UKRGB_FB_PAGE_MGR}"/>
+                <input type="text" id="ukrgb_fb_page_mgr" name="ukrgb_fb_page_mgr" value="{UKRGB_FB_PAGE_MGR}"/>
             </dd>
         </dl>
         <dl>
@@ -61,7 +61,7 @@
                 <label for="ukrgb_fb_page_id">{L_ACP_UKRGB_FB_PAGE_ID}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_fb_page_id" value="{UKRGB_FB_PAGE_ID}"/>
+                <input type="text" id="ukrgb_fb_page_id" name="ukrgb_fb_page_id" value="{UKRGB_FB_PAGE_ID}"/>
             </dd>
         </dl>
         <dl>
@@ -69,14 +69,14 @@
                 <label for="ukrgb_fb_subforums">{L_ACP_UKRGB_FB_SUBFORUMS}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_fb_subforums" value="{UKRGB_FB_SUBFORUMS}"/>
+                <input type="text" id="ukrgb_fb_subforums" name="ukrgb_fb_subforums" value="{UKRGB_FB_SUBFORUMS}"/>
             </dd>
         </dl>
         <dl>
 			<dt>
 				<label for="ukrgb_fb_auto_post">{L_APC_UKRGB_AUTO_POST}{L_COLON}</label>
 			</dt>
-			<dd><input type="radio" class="radio" name="ukrgb_fb_auto_post" value="1" <!-- IF UKRGB_FB_AUTO_POST -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+			<dd><input type="radio" class="radio" id="ukrgb_fb_auto_post" name="ukrgb_fb_auto_post" value="1" <!-- IF UKRGB_FB_AUTO_POST -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
 				<input type="radio" class="radio" name="ukrgb_fb_auto_post" value="0" <!-- IF not UKRGB_FB_AUTO_POST -->checked="checked"<!-- ENDIF --> /> {L_NO}
 			</dd>
 		</dl>
@@ -85,7 +85,7 @@
                 <label for="ukrgb_delayed_action_gc">{L_ACP_UKRGB_CRON_FREQUENCY}{L_COLON}</label>
             </dt>
             <dd>
-                <input type="text" name="ukrgb_delayed_action_gc" value="{UKRGB_CRON_FREQUENCY}"/>
+                <input type="text" id="ukrgb_delayed_action_gc" name="ukrgb_delayed_action_gc" value="{UKRGB_CRON_FREQUENCY}"/>
             </dd>
         </dl>
         

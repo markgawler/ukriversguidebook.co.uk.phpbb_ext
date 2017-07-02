@@ -21,8 +21,6 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	 */
 	public function effectively_installed()
 	{
-		error_log('release_1_0_0 - effectively_installed');
-		
 		return isset($this->config['ukrgb_secret']);
 	}
 
@@ -34,8 +32,6 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 	 */
 	public function update_data()
 	{
-		error_log('release_1_0_0 - update data');
-		
 		return array(
 				
 				array('config.add', array('ukrgb_jfusion_apipath', '')),

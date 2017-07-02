@@ -44,24 +44,28 @@ class main_listener implements EventSubscriberInterface
 
 	/** @var \PDO */
 	protected $pdo;
-	
+
 	/**
 	 * Constructor
 	 *
-	 * @param \phpbb\template\template             $template          Template object
-	 * @param \phpbb\cache\driver\driver_interface $cache             Cache driver interface
-	 * @param \phpbb\config\config                 $config	
-     * @param \phpbb\user                   $user              User object
-
-
+	 * @param \phpbb\template\template             $template Template object
+	 * @param \phpbb\cache\driver\driver_interface $cache    Cache driver interface
+	 * @param \phpbb\config\config                 $config
+	 * @param \phpbb\user                          $user     User object
+	 * @param \phpbb\request\request               $request
 	 */
-	public function __construct(\phpbb\template\template $template, 
-			\phpbb\cache\driver\driver_interface $cache, \phpbb\config\config $config, \phpbb\user $user)
+	public function __construct(
+		\phpbb\template\template $template,
+		\phpbb\cache\driver\driver_interface $cache,
+		\phpbb\config\config $config,
+		\phpbb\user $user,
+		\phpbb\request\request $request)
 	{
 		$this->template = $template;
 		$this->cache = $cache;
 		$this->config = $config;
 		$this->user = $user;
+		$this->request = $request;
 		$this->pdo = null;
 	}
 	
@@ -142,13 +146,14 @@ class main_listener implements EventSubscriberInterface
 	
 	/***
 	 * Banner setup
-	 * - Load Banner data from Joomla DB and store in phpBB cache
+	 * - Load Addvert Banner data from Joomla DB and store in phpBB cache
+	 * - Load Page banner based on forum
 	 * 
 	 * @param unknown $event
 	 */
 	public function load_banner($event)
 	{
-	
+		// Advert banner
 		$banner_data = $this->cache->get('_ukrgb_banner_data');
 		if ($banner_data == false)
 		{
@@ -185,11 +190,30 @@ class main_listener implements EventSubscriberInterface
 			$html[$key] = $banner_data[$index];
 		}
 
+		// Page banners
+		$lookup = $this->cache->get('_ukrgb_page_banner_lookup');
+		if ($lookup == false)
+		{
+			$banner_data = json_decode($this->config['ukrgb_page_banners']);
+			foreach ($banner_data as  $key => $row) {
+				foreach (explode(',', $row->forums) as $f)
+				{
+					$lookup[$f] = $row->img;
+				}
+			}
+			$this->cache->put('_ukrgb_page_banner_lookup',$lookup);
+		}
+		$f = $this->request->variable('f',0);
+		$img = $lookup[$f];
+		if ($img == null) {
+			$img = $lookup[0];
+		}
+
 		$this->template->assign_vars(array(
+				'U_UKRGB_PAGE_BANNER' => $img,
 				'U_UKRGB_BANNER_LEFT' => $html['l'],
 				'U_UKRGB_BANNER_RIGHT' => $html['r'],
 		));
-		
 	}
 	
 	/**

@@ -12,15 +12,20 @@ class main_info
 	function module()
 	{
 		return array(
-				'filename'	=> '\ukrgb\template\acp\main_module',
-				'title'		=> 'ACP_UKRGB_TPL_TITLE',
-				'modes'		=> array(
-						'settings'	=> array(
-								'title'	=> 'ACP_UKRGB_TPL',
-								'auth'	=> 'ext_ukrgb/template && acl_a_board',
-								'cat'	=> array('ACP_UKRGB_TPL_TITLE')
-						),
+			'filename'	=> '\ukrgb\template\acp\main_module',
+			'title'		=> 'ACP_UKRGB_TPL_TITLE',
+			'modes'		=> array(
+				'settings'	=> array(
+					'title'	=> 'ACP_UKRGB_TPL',
+					'auth'	=> 'ext_ukrgb/template && acl_a_board',
+					'cat'	=> array('ACP_UKRGB_TPL_TITLE')
 				),
+				'page_banners' => array(
+					'title' => 'APC_UKRGB_TPL_BANNER',
+					'auth'	=> 'ext_ukrgb/template && acl_a_board',
+					'cat'	=> array('ACP_UKRGB_TPL_BANNER_TITLE')
+				),
+			),
 		);
 	}
 }

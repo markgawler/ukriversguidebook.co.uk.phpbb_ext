@@ -32,7 +32,7 @@ class release_1_0_0 extends \phpbb\db\migration\migration
 						'ACP_UKRGB_TPL_TITLE',
 						array(
 								'module_basename'	=> '\ukrgb\template\acp\main_module',
-								'modes'				=> array('settings'),
+								'modes'				=> array('settings','page_banners'),
 						),
 				)),
 		);
