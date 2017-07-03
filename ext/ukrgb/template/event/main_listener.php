@@ -24,6 +24,7 @@ class main_listener implements EventSubscriberInterface
 		return array(
 				'core.user_setup' => 'core_user_setup',
 				'core.viewforum_get_topic_data' => 'core_viewforum_get_topic_data',
+				'core.viewtopic_get_post_data' => 'core_viewtopic_get_post_data',
 		);
 	}
 
@@ -121,12 +122,18 @@ class main_listener implements EventSubscriberInterface
 		else 
 		{
 			$this->template->assign_vars(array(
-					'UKRGB_SHOW_PP_DONATE' => false,
-					'UKRGB_SHOW_ADSENSE_IFL' => false,		
+				'U_UKRGB_PAGE_BANNER' => $this->_page_banner($forum_id),
+				'UKRGB_SHOW_PP_DONATE' => false,
+				'UKRGB_SHOW_ADSENSE_IFL' => false,
 			));
 		}
 	}
-	
+
+	public function core_viewtopic_get_post_data($event){
+		$this->template->assign_vars(array(
+			'U_UKRGB_PAGE_BANNER' => $this->_page_banner($event['forum_id']),
+		));
+	}
 	
 	/**
 	 * Language setup
@@ -190,7 +197,15 @@ class main_listener implements EventSubscriberInterface
 			$html[$key] = $banner_data[$index];
 		}
 
-		// Page banners
+		$this->template->assign_vars(array(
+				'U_UKRGB_PAGE_BANNER' => $this->_page_banner(0), // Default page banner
+				'U_UKRGB_BANNER_LEFT' => $html['l'],
+				'U_UKRGB_BANNER_RIGHT' => $html['r'],
+		));
+	}
+
+	protected function _page_banner($forumId)
+	{
 		$lookup = $this->cache->get('_ukrgb_page_banner_lookup');
 		if ($lookup == false)
 		{
@@ -203,17 +218,11 @@ class main_listener implements EventSubscriberInterface
 			}
 			$this->cache->put('_ukrgb_page_banner_lookup',$lookup);
 		}
-		$f = $this->request->variable('f',0);
-		$img = $lookup[$f];
+		$img = $lookup[$forumId];
 		if ($img == null) {
 			$img = $lookup[0];
 		}
-
-		$this->template->assign_vars(array(
-				'U_UKRGB_PAGE_BANNER' => $img,
-				'U_UKRGB_BANNER_LEFT' => $html['l'],
-				'U_UKRGB_BANNER_RIGHT' => $html['r'],
-		));
+		return $img;
 	}
 	
 	/**
