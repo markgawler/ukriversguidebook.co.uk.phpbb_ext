@@ -64,6 +64,7 @@ class main_module
 						}
 						$page_banners[$key] = array(
 							'img'    => $request->variable('page_banner_img_' . $key, ''),
+							'fb_img'    => $request->variable('fb_banner_img_' . $key, ''),
 							'forums' => $forums,
 						);
 					}
@@ -76,6 +77,7 @@ class main_module
 
 				foreach (json_decode($config['ukrgb_page_banners']) as $key => $data){
 					$template_vars['UKRGB_PAGE_BANNER_' . $key] = $data->img;
+					$template_vars['UKRGB_FB_BANNER_' . $key] = $data->fb_img;
 					$template_vars['UKRGB_DISPLAY_FORUMS_' . $key] = $data->forums;
 				}
 

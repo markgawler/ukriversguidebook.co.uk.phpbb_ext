@@ -121,8 +121,10 @@ class main_listener implements EventSubscriberInterface
 		}
 		else 
 		{
+			$images = $this->_page_banner($forum_id); // Default page banners
 			$this->template->assign_vars(array(
-				'U_UKRGB_PAGE_BANNER' => $this->_page_banner($forum_id),
+				'U_UKRGB_PAGE_BANNER' => $images['page'], // page banner
+				'U_UKRGB_FB_BANNER' => $images['fb'], // Facebook banner
 				'UKRGB_SHOW_PP_DONATE' => false,
 				'UKRGB_SHOW_ADSENSE_IFL' => false,
 			));
@@ -130,14 +132,16 @@ class main_listener implements EventSubscriberInterface
 	}
 
 	public function core_viewtopic_get_post_data($event){
+		$images = $this->_page_banner($event['forum_id']); // Default page banners
 		$this->template->assign_vars(array(
-			'U_UKRGB_PAGE_BANNER' => $this->_page_banner($event['forum_id']),
+			'U_UKRGB_PAGE_BANNER' => $images['page'], // page banner
+			'U_UKRGB_FB_BANNER' => $images['fb'], // Facebook banner
 		));
 	}
-	
+
 	/**
 	 * Language setup
-	 * 
+	 *
 	 * @param unknown $event
 	 */
 	public function load_language_on_setup($event)
@@ -197,10 +201,12 @@ class main_listener implements EventSubscriberInterface
 			$html[$key] = $banner_data[$index];
 		}
 
+		$images = $this->_page_banner(0); // Default page banners
 		$this->template->assign_vars(array(
-				'U_UKRGB_PAGE_BANNER' => $this->_page_banner(0), // Default page banner
-				'U_UKRGB_BANNER_LEFT' => $html['l'],
-				'U_UKRGB_BANNER_RIGHT' => $html['r'],
+			'U_UKRGB_PAGE_BANNER' => $images['page'], // page banner
+			'U_UKRGB_FB_BANNER' => $images['fb'], // Facebook banner
+			'U_UKRGB_BANNER_LEFT' => $html['l'],
+			'U_UKRGB_BANNER_RIGHT' => $html['r'],
 		));
 	}
 
@@ -213,16 +219,21 @@ class main_listener implements EventSubscriberInterface
 			foreach ($banner_data as  $key => $row) {
 				foreach (explode(',', $row->forums) as $f)
 				{
-					$lookup[$f] = $row->img;
+					$lookup[$f] = array(
+						'page' =>$row->img,
+						'fb' => $row->fb_img,
+						);
 				}
 			}
 			$this->cache->put('_ukrgb_page_banner_lookup',$lookup);
 		}
-		$img = $lookup[$forumId];
-		if ($img == null) {
-			$img = $lookup[0];
+		if ($lookup[$forumId] == null) {
+			$images = $lookup[0];
+		} else {
+			$images = $lookup[$forumId];
 		}
-		return $img;
+		$images['fb'] = generate_board_url(true) . $images['fb'];
+		return $images;
 	}
 	
 	/**

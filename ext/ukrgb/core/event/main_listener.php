@@ -308,8 +308,9 @@ class main_listener implements EventSubscriberInterface
 		if ($this->can_post_to_fb($forumId)){
 			$this->initFacebookBridge();
 			strip_bbcode($postText);
-			$header = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" ;
-			
+//			$header = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" ;
+			$header = $topicTitle. " / " . $forumName . "\n" . $username . "\n\n" ;
+
 			$this->ukrgbFacebook->queuePost($header, $postText, $forumId, $topicId, $postId, $mode);
 		}
 	}

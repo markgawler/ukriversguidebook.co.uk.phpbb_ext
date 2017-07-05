@@ -41,7 +41,9 @@ $lang = array_merge($lang, array(
 
 		'APC_UKRGB_TPL_BANNER'			=> 'Page Banners',
 		'APC_UKRGB_PAGE_BANNER_0'		=> 'Default Page Banner',
+		'APC_UKRGB_FB_BANNER_0'			=> 'Default Facebook Banner',
 		'APC_UKRGB_PAGE_BANNER_1'		=> 'Alternate Page Banner ',
+		'APC_UKRGB_FB_BANNER_1'			=> 'Alternate Facebook Banner ',
 		'APC_UKRGB_DISPLAY_FORUMS'		=> 'Display on Forums ',
 
 
