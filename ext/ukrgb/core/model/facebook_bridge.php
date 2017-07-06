@@ -13,6 +13,11 @@
 
 namespace ukrgb\core\model;
 
+/**
+ * Class facebook_bridge
+ *
+ * @package ukrgb\core\model
+ */
 class facebook_bridge
 {
 	protected $fb;
@@ -62,11 +67,11 @@ class facebook_bridge
 	public function queuePost($header, $message, $forumId, $topicId, $postId, $mode)
 	{
 		$data = (object) [
-				postId => $postId,
-				topicId => $topicId,
-				forumId => $forumId,
-				header => $header,
-				message => $message,
+				'postId' => $postId,
+				'topicId' => $topicId,
+				'forumId' => $forumId,
+				'header' => $header,
+				'message' => $message,
 		];
 		$submitData = array(
 				'action' => 'facebook.' . $mode,
@@ -79,7 +84,7 @@ class facebook_bridge
 	{
 		foreach ($postIds as $postId) {
 			$data = (object) [
-					postId => $postId,
+					'postId' => $postId,
 			];
 			$submitData = array(
 					'action' => 'facebook.delete',
@@ -93,7 +98,7 @@ class facebook_bridge
 	{
 		foreach ($topicIds as $topicId) {
 			$data = (object) [
-					topicId => $topicId,
+					'topicId' => $topicId,
 			];
 			$submitData = array(
 					'action' => 'facebook.delete',

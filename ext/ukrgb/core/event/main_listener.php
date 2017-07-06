@@ -309,8 +309,8 @@ class main_listener implements EventSubscriberInterface
 			$this->initFacebookBridge();
 			strip_bbcode($postText);
 //			$header = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" ;
-			$header = $topicTitle. " / " . $forumName . "\n" . $username . "\n\n" ;
-
+//			$header = $topicTitle. " / " . $forumName . "\n" . $username . "\n\n" ;
+			$header = '';
 			$this->ukrgbFacebook->queuePost($header, $postText, $forumId, $topicId, $postId, $mode);
 		}
 	}
