@@ -1,0 +1,91 @@
+<!-- INCLUDE overall_header.html -->
+
+<h1>{L_SETTINGS}</h1>
+
+<form id="acp_board" method="post" action="{U_ACTION}">
+	<fieldset>
+	<!-- IF UKRGB_ACP_MODE == "settings" -->
+        <dl>
+            <dt>
+                <label for="user_name">{L_APC_UKRGB_USER_NAME}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="user_name"  name="user_name" value="{UKRGB_FIX_USER_NAME}"/>
+            </dd>
+        </dl>
+
+	<!-- ELSE -->
+	<p>Nothing to show</p>
+	<!-- ENDIF -->
+		<p class="submit-buttons">
+			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
+		</p>
+		{S_HIDDEN_FIELDS}
+		{S_FORM_TOKEN}
+	</fieldset>
+</form>
+<!-- IF UKRGB_FIX_DB_HASH != 0 -->
+<form id="acp_board_fix_one" method="post" action="{U_ACTION}">
+	<fieldset>
+		<table class="table1 two-columns no-header responsive show-header" data-no-responsive-header="true">
+			<caption>{L_APC_UKRGB_FIX_CAPTION}</caption>
+			<colgroup><col class="col1"><col class="col2"><col class="col1"><col class="col2">
+			</colgroup><thead>
+		<tr>
+			<th>ID</th>
+			<th>{L_APC_UKRGB_FIX_CALC}</th>
+			<th>{L_APC_UKRGB_FIX_DB}</th>
+			<th>{L_APC_UKRGB_FIX_MATCH}</th>
+			<th>{L_APC_UKRGB_FIX_FIX}</th>
+		</tr>
+		</thead>
+			<tbody>
+			<tr>
+				<td class="col1">{UKRGB_FIX_USER_NAME}</td>
+				<td class="col2">{UKRGB_FIX_CALC_HASH}</td>
+				<td class="col1">{UKRGB_FIX_DB_HASH}</td>
+				<td class="col2">{{ UKRGB_FIX_HASH_MATCH ? 'Yes' : 'No' }}</td>
+				<td class="col1"><input class="button" type="submit" id="fix_one" name="fix_one" value="{L_SUBMIT}" />&nbsp;</td>
+			</tr>
+			</tbody>
+		</table>
+		{S_HIDDEN_FIELDS}
+		{S_FORM_TOKEN}
+	</fieldset>
+
+</form>
+<!-- ENDIF -->
+
+<!-- IF UKRGB_ACP_MODE == "settings" -->
+
+<form id="acp_board_check_all" method="post" action="{U_ACTION}">
+	<fieldset>
+		<p class="buttons">{L_APC_UKRGB_CHECK_ALL}
+			<input class="button" type="submit" id="check_all" name="check_all" value="{L_SUBMIT}" />&nbsp;
+		</p>
+		{% if UKRGB_ACP_CHECK_ALL %}
+		<p>{L_APC_UKRGB_FIX_COUNT_MSG}: {UKRGB_FIX_MISMATCH_COUNT}</p>
+		{% endif %}
+		{S_HIDDEN_FIELDS}
+		{S_FORM_TOKEN}
+	</fieldset>
+</form>
+
+<form id="acp_board_fix_all" method="post" action="{U_ACTION}">
+<fieldset>
+	<p class="buttons">{L_APC_UKRGB_FIX_ALL}
+		<input class="button" type="submit" id="fix-all" name="fix_all" value="{L_SUBMIT}" />&nbsp;
+	</p>
+	{% if (not UKRGB_ACP_CHECK_ALL and  UKRGB_FIX_MISMATCH_COUNT)  %}
+	<p>{L_APC_UKRGB_FIX_MSG}: {UKRGB_FIX_MISMATCH_COUNT}</p>
+	{% endif %}
+	{S_HIDDEN_FIELDS}
+	{S_FORM_TOKEN}
+</fieldset>
+</form>
+
+
+
+<!-- ENDIF -->
+
+<!-- INCLUDE overall_footer.html -->
