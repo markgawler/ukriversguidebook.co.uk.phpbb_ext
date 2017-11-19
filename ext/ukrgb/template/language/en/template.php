@@ -46,6 +46,6 @@ $lang = array_merge($lang, array(
 		'APC_UKRGB_FB_BANNER_1'			=> 'Alternate Facebook Banner ',
 		'APC_UKRGB_DISPLAY_FORUMS'		=> 'Display on Forums ',
 
-
+		'UKRGB_UPLOAD'					=> 'Upload Image',
 
 ));
