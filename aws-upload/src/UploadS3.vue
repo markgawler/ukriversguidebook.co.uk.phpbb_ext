@@ -1,5 +1,6 @@
 <template>
- <div id="uploads3">
+  <div id="uploads3">
+    <h1>{{msg}}</h1>
     <div class="container">
       <!--UPLOAD-->
       <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
@@ -21,7 +22,7 @@
         </p>
         <ul class="list-unstyled">
           <li v-for="item in uploadedFiles">
-            <img :src="item.url" class="img-responsive" :alt="item.name">
+            <img :src="item.url" class="img-preview" :alt="item.name">
           </li>
         </ul>
       </div>
@@ -47,8 +48,11 @@ const STATUS_FAILED = 3
 export default {
   name: 'UploadS3',
   data () {
+    if (!window.hasOwnProperty('phpbbUserId')) {
+      window.phpbbUserId = 123456
+    }
     return {
-      msg: 'Welcome',
+      msg: window.phpbbUserId,
       uploadFieldName: 'photos',
       currentStatus: null,
       uploadedFiles: []
@@ -111,8 +115,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style >
-
+<style>
   .dropbox {
     outline: 2px dashed grey; /* the dash box */
     outline-offset: -10px;
@@ -123,7 +126,8 @@ export default {
     position: relative;
     cursor: pointer;
   }
-  #phpbb input[type="file"] {
+  /* #phpbb input[type="file"] { */
+  #uploads3 input[type="file"] {
     height: 200px;
     width: 100%;
   }
@@ -147,14 +151,14 @@ export default {
     padding: 50px 0;
   }
 
-  .img-responsive {
+  .img-preview {
     max-height : 100px;
     padding: 10px;
   }
-  #phpbb .list-unstyled {
+ .list-unstyled {
     list-style-type: none;
   }
-  #phpbb li {
+  #uploads3 li {
     display: inline;
   }
 </style>
