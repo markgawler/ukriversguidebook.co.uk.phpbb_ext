@@ -93,17 +93,23 @@ export default {
       this.save(formData)
     },
     save (formData) {
-      this.$awsService.uploadFiles(formData)
-      .then(files => {
-        this.uploadedFiles = files
-        files.map((file) => {
-          console.log(file)
+      this.$awsService.createFolder(window.phpbbUserId)
+      .then(
+        this.$awsService.uploadFiles(formData, window.phpbbUserId)
+        .then(files => {
+          this.uploadedFiles = files
+          files.map((file) => {
+            console.log(file)
+          })
+          this.currentStatus = STATUS_SUCCESS
         })
-        this.currentStatus = STATUS_SUCCESS
-      })
-      .catch((err) => {
+        .catch((err) => {
+          this.currentStatus = STATUS_FAILED
+          this.uploadError = err.message
+        }))
+      .catch(() => {
+        console.log('failed to create folder')
         this.currentStatus = STATUS_FAILED
-        this.uploadError = err.message
       })
       this.currentStatus = STATUS_SAVING
     }

@@ -23,22 +23,23 @@ export default class AwsService {
       params: { Bucket: bucket }
     })
   }
-  uploadFiles (formData) {
+  uploadFiles (formData, folder) {
     const photos = formData.getAll('photos')
     // Upload a list of files to an S3 bucket
-    return this.uploadBatch(photos)
-    .then(() => (photos))
+    return this.uploadBatch(photos, folder)
+    .then(() => photos)
   }
 
-  uploadBatch (photos) {
+  uploadBatch (photos, folder) {
     return Promise.all(photos.map((file) => {
+      const fn = encodeURIComponent(folder) + '/' + this.createFileName(file.name)
       const params = {
-        Key: this.createFileName(file.name),
+        Key: fn,
         Body: file,
         ACL: 'public-read'
       }
       // console.log(file)
-      file.url = this.baseUrl + file.name
+      file.url = this.baseUrl + fn
       return this.s3.upload(params).promise()
     }))
   }
