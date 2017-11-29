@@ -22,7 +22,7 @@
         </p>
         <ul class="list-unstyled">
           <li v-for="item in uploadedFiles">
-            <img :src="item.url" class="img-preview" :alt="item.name">
+            <img :src="item.url" class="img-previewxx" :alt="item.name">
           </li>
         </ul>
       </div>
@@ -90,8 +90,89 @@ export default {
         .map(x => {
           formData.append(fieldName, fileList[x], fileList[x].name)
         })
-      this.save(formData)
+      // this.save(formData)
+      this.resize(formData)
     },
+
+    resize (formData) {
+      this.resizeImages(formData)
+      .then(files => {
+        this.uploadedFiles = files
+       /*  files.map((file) => {
+          console.log(file)
+        }) */
+        this.currentStatus = STATUS_SUCCESS
+      })
+      .catch((err) => {
+        this.currentStatus = STATUS_FAILED
+        this.uploadError = err.message
+      })
+      this.currentStatus = STATUS_SAVING
+    },
+
+    resizeImages (formData) {
+      const photos = formData.getAll('photos')
+      return this.resizeBatch(photos)
+      .then((x) => {
+        return photos
+      })
+    },
+
+    resizeBatch (photos) {
+      return Promise.all(photos.map((file) => {
+        if (!file.type.match(/image.*/)) {
+          console.log(file.name + ' is not an image')
+        } else {
+          const p = this.getImage(file)
+          p.then((f) => (file.url = f))
+          return p
+        }
+      }))
+    },
+    getImage (file) {
+      return new Promise((resolve, reject) => {
+        const img = document.createElement('img')
+        const reader = new FileReader()
+
+        reader.onload = (e) => {
+          img.src = e.target.result
+          img.onload = (e) => resolve(this.getBase64Image(img))
+        }
+        reader.readAsDataURL(file)
+      })
+    },
+    getBase64Image (img) {
+      const canvas = document.createElement('canvas')
+      const imgDimensions = this.calcImageDimensions(img.width, img.height)
+      canvas.width = imgDimensions.w
+      canvas.height = imgDimensions.h
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      // ctx.drawImage(img, 0, 0)
+
+      const dataURL = canvas.toDataURL('image/gif')
+      return dataURL
+    },
+    calcImageDimensions (width, height) {
+      const maxWidth = 1024
+      const maxHeight = 768
+      let imgWidth = width
+      let imgHeight = height
+      if (width > maxWidth || height > maxHeight) {
+        const aspectRatio = width / height
+        if (aspectRatio > 1) {
+          imgWidth = maxWidth
+          imgHeight = maxWidth / aspectRatio
+        } else {
+          imgHeight = maxHeight
+          imgWidth = maxHeight * aspectRatio
+        }
+      }
+      return {
+        w: imgWidth,
+        h: imgHeight}
+    },
+
     save (formData) {
       this.$awsService.createFolder(window.phpbbUserId)
       .then(

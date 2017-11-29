@@ -1,8 +1,5 @@
 import { config, S3, CognitoIdentityCredentials } from 'aws-sdk'
 
-// const albumBucketName = 'ukrgb-test-upload'
-// const BaseUrl = 'https://s3-eu-west-1.amazonaws.com/' + albumBucketName + '/'
-
 export default class AwsService {
   configure (appConfig) {
     const bucket = 'ukrgb-test-upload'
