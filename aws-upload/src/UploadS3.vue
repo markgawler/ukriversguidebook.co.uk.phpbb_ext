@@ -3,7 +3,7 @@
     <h1>{{msg}}</h1>
     <div class="container">
       <!--UPLOAD-->
-      <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving">
+      <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving || isResize">
         <div class="dropbox">
             <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length" accept="image/*" class="input-file">
           <p v-if="isInitial">
@@ -11,6 +11,9 @@
           </p>
           <p v-if="isSaving">
             Uploading {{ fileCount }} files...
+          </p> 
+          <p v-if="isResize">
+            Resizing {{ fileCount }} files...
           </p>
         </div>
       </form>
@@ -44,6 +47,7 @@ const STATUS_INITIAL = 0
 const STATUS_SAVING = 1
 const STATUS_SUCCESS = 2
 const STATUS_FAILED = 3
+const STATUS_RESIZE = 4
 
 export default {
   name: 'UploadS3',
@@ -70,6 +74,9 @@ export default {
     },
     isFailed () {
       return this.currentStatus === STATUS_FAILED
+    },
+    isResize () {
+      return this.currentStatus === STATUS_RESIZE
     }
   },
   methods: {
@@ -90,24 +97,24 @@ export default {
         .map(x => {
           formData.append(fieldName, fileList[x], fileList[x].name)
         })
-      // this.save(formData)
       this.resize(formData)
+
+      this.upload()
+
+      // this.save(formData)
     },
 
     resize (formData) {
       this.resizeImages(formData)
       .then(files => {
         this.uploadedFiles = files
-       /*  files.map((file) => {
-          console.log(file)
-        }) */
         this.currentStatus = STATUS_SUCCESS
       })
       .catch((err) => {
         this.currentStatus = STATUS_FAILED
         this.uploadError = err.message
       })
-      this.currentStatus = STATUS_SAVING
+      this.currentStatus = STATUS_RESIZE
     },
 
     resizeImages (formData) {
@@ -148,9 +155,8 @@ export default {
       canvas.height = imgDimensions.h
       const ctx = canvas.getContext('2d')
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-      // ctx.drawImage(img, 0, 0)
 
-      const dataURL = canvas.toDataURL('image/gif')
+      const dataURL = canvas.toDataURL('image/png')
       return dataURL
     },
     calcImageDimensions (width, height) {
@@ -171,6 +177,21 @@ export default {
       return {
         w: imgWidth,
         h: imgHeight}
+    },
+
+    upload () {
+      const folder = window.phpbbUserId
+      this.$awsService.createFolder(folder)
+      .then(() => {
+        this.uploadedFiles.map(file => {
+          console.log('Upload:' + file.name + ', ' + folder)
+          this.$awsService.uploadDataUri(file.url, file.name, folder)
+        })
+      })
+      .catch(() => {
+        console.log('failed to create folder')
+        this.currentStatus = STATUS_FAILED
+      })
     },
 
     save (formData) {

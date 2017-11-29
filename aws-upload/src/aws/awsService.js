@@ -66,6 +66,32 @@ export default class AwsService {
   createFileName (fileName) {
     return encodeURIComponent(Date.now() + '-' + fileName)
   }
+
+  dataURItoBlob (dataURI) {
+    var binary = atob(dataURI.split(',')[1])
+    var array = []
+    for (var i = 0; i < binary.length; i++) {
+      array.push(binary.charCodeAt(i))
+    }
+    return new Blob([new Uint8Array(array)], {type: 'image/png'})
+  }
+
+  uploadDataUri (dataURI, name, folder) {
+    const basename = name.substr(0, name.lastIndexOf('.'))
+    const key = encodeURIComponent(folder) + '/' + this.createFileName(basename) + '.png'
+    // return Promise((dataURI, key) => {
+    console.log(dataURI)
+    const blob = this.dataURItoBlob(dataURI)
+    const params = {
+      Key: key,
+      Body: blob,
+      ACL: 'public-read'
+    }
+    // console.log(file)
+    // file.url = this.baseUrl + key
+    return this.s3.upload(params).promise()
+    // })
+  }
 }
 
 AwsService.install = function (Vue, options) {
