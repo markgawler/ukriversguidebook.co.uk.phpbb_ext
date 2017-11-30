@@ -20,45 +20,15 @@ export default class AwsService {
       params: { Bucket: bucket }
     })
   }
-  uploadFiles (formData, folder) {
-    const photos = formData.getAll('photos')
-    // Upload a list of files to an S3 bucket
-    return this.uploadBatch(photos, folder)
-    .then(() => photos)
-  }
-
-  uploadBatch (photos, folder) {
-    return Promise.all(photos.map((file) => {
-      const fn = encodeURIComponent(folder) + '/' + this.createFileName(file.name)
-      const params = {
-        Key: fn,
-        Body: file,
-        ACL: 'public-read'
-      }
-      file.url = this.baseUrl + fn
-      return this.s3.upload(params).promise()
-    }))
-  }
 
   createFolder (name) {
     const albumKey = encodeURIComponent(name) + '/'
     return this.s3.headObject({Key: albumKey}).promise()
-    .then((data) => {
-      // Folder exists
-      return 'Success'
-    })
     .catch((err) => {
       if (err.code === 'NotFound') {
         // Folder not found, create it
         return this.s3.putObject({Key: albumKey}).promise()
-        .then((data) => {
-          return 'Success'
-        })
-        .catch((err) => {
-          return 'Error creating folder: ' + err.message
-        })
       }
-      return 'Unspecified error'
     })
   }
 

@@ -107,11 +107,38 @@ export default {
       // this.save(formData)
     },
 
+    upload () {
+      this.currentStatus = STATUS_SAVING
+      const folder = window.phpbbUserId
+      this.$awsService.createFolder(folder)
+      .then(() => {
+        this.uploadedFiles.map(file => {
+          this.$awsService.uploadDataUri(file.url, file.name, folder)
+          .then(() => {
+            this.uploadCount += 1
+            if (this.uploadCount + this.failedCount > this.uploadedFiles.length) {
+              this.currentStatus = STATUS_SUCCESS
+            }
+          })
+          .catch((err) => {
+            console.log('File upload Failed')
+            this.failedCount += 1
+            this.currentStatus = STATUS_FAILED
+            this.uploadError = err.message
+          })
+        })
+      })
+      .catch((err) => {
+        console.log('failed to create folder')
+        this.currentStatus = STATUS_FAILED
+        this.uploadError = err.message
+      })
+    },
+
     resize (formData) {
       this.resizeImages(formData)
       .then(files => {
         this.uploadedFiles = files
-        // this.currentStatus = STATUS_SUCCESS
       })
       .catch((err) => {
         this.currentStatus = STATUS_FAILED
@@ -180,54 +207,6 @@ export default {
       return {
         w: imgWidth,
         h: imgHeight}
-    },
-
-    upload () {
-      this.currentStatus = STATUS_SAVING
-      const folder = window.phpbbUserId
-      this.$awsService.createFolder(folder)
-      .then(() => {
-        this.uploadedFiles.map(file => {
-          this.$awsService.uploadDataUri(file.url, file.name, folder)
-          .then(() => {
-            this.uploadCount += 1
-            if (this.uploadCount + this.failedCount > this.uploadedFiles.length) {
-              this.currentStatus = STATUS_SUCCESS
-            }
-          })
-          .catch((err) => {
-            this.failedCount += 1
-            this.uploadError = err.message
-          })
-        })
-      })
-      .catch(() => {
-        console.log('failed to create folder')
-        this.currentStatus = STATUS_FAILED
-      })
-    },
-
-    save (formData) {
-      this.$awsService.createFolder(window.phpbbUserId)
-      .then(
-        this.$awsService.uploadFiles(formData, window.phpbbUserId)
-        .then(files => {
-          this.uploadedFiles = files
-          files.map((file) => {
-            console.log(file)
-          })
-          this.currentStatus = STATUS_SUCCESS
-        })
-        .catch((err) => {
-          this.currentStatus = STATUS_FAILED
-          this.uploadError = err.message
-          this.currentStatus = STATUS_FAILED
-        }))
-      .catch(() => {
-        console.log('failed to create folder')
-        this.currentStatus = STATUS_FAILED
-      })
-      this.currentStatus = STATUS_SAVING
     }
   },
   mounted () {
