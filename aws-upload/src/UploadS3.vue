@@ -1,6 +1,5 @@
 <template>
   <div id="uploads3">
-    <h1>{{msg}}</h1>
     <div class="container">
       <!--UPLOAD-->
       <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving || isResize">
@@ -10,7 +9,7 @@
             Drag your file(s) here to begin uploading images<br> or click to browse
           </p>
           <p v-if="isSaving">
-            Uploading {{ fileCount }} files...
+            Uploading {{ uploadCount }} file of {{fileCount}}.
           </p> 
           <p v-if="isResize">
             Resizing {{ fileCount }} files...
@@ -23,9 +22,12 @@
         <p>
           <a href="javascript:void(0)" @click="reset()">Upload again</a>
         </p>
+      </div>
+      <!-- Preview-->
+      <div v-if="isSuccess || isSaving">
         <ul class="list-unstyled">
           <li v-for="item in uploadedFiles">
-            <img :src="item.url" class="img-previewxx" :alt="item.name">
+            <img :src="item.url" class="img-preview" :alt="item.name">
           </li>
         </ul>
       </div>
@@ -56,10 +58,10 @@ export default {
       window.phpbbUserId = 123456
     }
     return {
-      msg: window.phpbbUserId,
       uploadFieldName: 'photos',
       currentStatus: null,
-      uploadedFiles: []
+      uploadedFiles: [],
+      uploadCount: this.uploadCount
     }
   },
   computed: {
@@ -85,6 +87,8 @@ export default {
       this.currentStatus = STATUS_INITIAL
       this.uploadedFiles = []
       this.uploadError = null
+      this.uploadCount = 1 // Don't display uploding the zeroth file
+      this.failedCount = 0
     },
     filesChange (fieldName, fileList) {
       // handle file changes
@@ -98,7 +102,6 @@ export default {
           formData.append(fieldName, fileList[x], fileList[x].name)
         })
       this.resize(formData)
-
       this.upload()
 
       // this.save(formData)
@@ -108,7 +111,7 @@ export default {
       this.resizeImages(formData)
       .then(files => {
         this.uploadedFiles = files
-        this.currentStatus = STATUS_SUCCESS
+        // this.currentStatus = STATUS_SUCCESS
       })
       .catch((err) => {
         this.currentStatus = STATUS_FAILED
@@ -180,12 +183,22 @@ export default {
     },
 
     upload () {
+      this.currentStatus = STATUS_SAVING
       const folder = window.phpbbUserId
       this.$awsService.createFolder(folder)
       .then(() => {
         this.uploadedFiles.map(file => {
-          console.log('Upload:' + file.name + ', ' + folder)
           this.$awsService.uploadDataUri(file.url, file.name, folder)
+          .then(() => {
+            this.uploadCount += 1
+            if (this.uploadCount + this.failedCount > this.uploadedFiles.length) {
+              this.currentStatus = STATUS_SUCCESS
+            }
+          })
+          .catch((err) => {
+            this.failedCount += 1
+            this.uploadError = err.message
+          })
         })
       })
       .catch(() => {
@@ -208,6 +221,7 @@ export default {
         .catch((err) => {
           this.currentStatus = STATUS_FAILED
           this.uploadError = err.message
+          this.currentStatus = STATUS_FAILED
         }))
       .catch(() => {
         console.log('failed to create folder')

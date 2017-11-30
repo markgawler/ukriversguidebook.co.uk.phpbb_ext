@@ -35,7 +35,6 @@ export default class AwsService {
         Body: file,
         ACL: 'public-read'
       }
-      // console.log(file)
       file.url = this.baseUrl + fn
       return this.s3.upload(params).promise()
     }))
@@ -79,18 +78,14 @@ export default class AwsService {
   uploadDataUri (dataURI, name, folder) {
     const basename = name.substr(0, name.lastIndexOf('.'))
     const key = encodeURIComponent(folder) + '/' + this.createFileName(basename) + '.png'
-    // return Promise((dataURI, key) => {
-    console.log(dataURI)
     const blob = this.dataURItoBlob(dataURI)
     const params = {
       Key: key,
       Body: blob,
-      ACL: 'public-read'
+      ACL: 'public-read',
+      ContentType: 'image/png'
     }
-    // console.log(file)
-    // file.url = this.baseUrl + key
     return this.s3.upload(params).promise()
-    // })
   }
 }
 
