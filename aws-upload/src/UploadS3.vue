@@ -2,20 +2,23 @@
   <div id="uploads3">
     <div class="container">
       <!--UPLOAD-->
-      <form enctype="multipart/form-data" novalidate v-if="isInitial || isSaving || isResize">
+      <form enctype="multipart/form-data" novalidate v-if="isInitial">
         <div class="dropbox">
             <input type="file" multiple :name="uploadFieldName" :disabled="isSaving" @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length" accept="image/*" class="input-file">
           <p v-if="isInitial">
             Drag your file(s) here to begin uploading images<br> or click to browse
           </p>
-          <p v-if="isSaving">
-            Uploading {{ uploadCount }} file of {{fileCount}}.
-          </p> 
-          <p v-if="isResize">
-            Resizing {{ fileCount }} files...
-          </p>
         </div>
       </form>
+      <!--Progress-->
+      <div>
+        <h2 v-if="isSaving">
+          Uploading {{ uploadCount }} file of {{fileCount}}.
+        </h2> 
+        <h2 v-if="isResize">
+          Resizing {{ fileCount }} files...
+        </h2>
+      </div>
       <!--SUCCESS-->
       <div v-if="isSuccess">
         <h2>Uploaded {{ uploadedFiles.length }} file(s) successfully.</h2>
@@ -24,7 +27,7 @@
         </p>
       </div>
       <!-- Preview-->
-      <div v-if="isSuccess || isSaving">
+      <div v-if="isSuccess || isResize || isSaving">
         <ul class="list-unstyled">
           <li v-for="item in uploadedFiles">
             <img :src="item.url" class="img-preview" :alt="item.name">
@@ -101,10 +104,18 @@ export default {
         .map(x => {
           formData.append(fieldName, fileList[x], fileList[x].name)
         })
-      this.resize(formData)
-      this.upload()
 
-      // this.save(formData)
+      this.resizeImages(formData)
+      .then(files => {
+        this.uploadedFiles = files
+        this.upload()
+      })
+      .catch((err) => {
+        this.currentStatus = STATUS_FAILED
+        this.uploadError = err.message
+      })
+      console.log('Resizing...')
+      this.currentStatus = STATUS_RESIZE
     },
 
     upload () {
@@ -119,6 +130,7 @@ export default {
             if (this.uploadCount + this.failedCount > this.uploadedFiles.length) {
               this.currentStatus = STATUS_SUCCESS
             }
+            console.log('file uploaded')
           })
           .catch((err) => {
             console.log('File upload Failed')
@@ -133,35 +145,23 @@ export default {
         this.currentStatus = STATUS_FAILED
         this.uploadError = err.message
       })
-    },
-
-    resize (formData) {
-      this.resizeImages(formData)
-      .then(files => {
-        this.uploadedFiles = files
-      })
-      .catch((err) => {
-        this.currentStatus = STATUS_FAILED
-        this.uploadError = err.message
-      })
-      this.currentStatus = STATUS_RESIZE
+      console.log('uploading...')
     },
 
     resizeImages (formData) {
       const photos = formData.getAll('photos')
       return this.resizeBatch(photos)
-      .then((x) => {
-        return photos
-      })
+      .then(() => photos)
     },
 
     resizeBatch (photos) {
       return Promise.all(photos.map((file) => {
         if (!file.type.match(/image.*/)) {
-          console.log(file.name + ' is not an image')
+          return Promise.reject(Error(file.name + ' is not an image file'))
         } else {
           const p = this.getImage(file)
           p.then((f) => (file.url = f))
+          .catch((err) => (this.uploadError = err.message))
           return p
         }
       }))
@@ -170,10 +170,10 @@ export default {
       return new Promise((resolve, reject) => {
         const img = document.createElement('img')
         const reader = new FileReader()
-
         reader.onload = (e) => {
           img.src = e.target.result
           img.onload = (e) => resolve(this.getBase64Image(img))
+          img.onerror = (e) => reject(Error('File cannot be resized: ' + file.name))
         }
         reader.readAsDataURL(file)
       })
@@ -190,8 +190,8 @@ export default {
       return dataURL
     },
     calcImageDimensions (width, height) {
-      const maxWidth = 1024
-      const maxHeight = 768
+      const maxWidth = 800
+      const maxHeight = 600
       let imgWidth = width
       let imgHeight = height
       if (width > maxWidth || height > maxHeight) {
