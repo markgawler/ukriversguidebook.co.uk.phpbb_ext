@@ -1,5 +1,8 @@
 <template>
   <div id="uploads3">
+    <div v-if="isDevel">
+      <textarea name="message" id="message" rows="15" cols="76" tabindex="4"  class="inputbox"></textarea>
+    </div>
     <div class="container">
       <!--UPLOAD-->
       <form enctype="multipart/form-data" novalidate v-if="isInitial">
@@ -48,6 +51,8 @@
 
 <script>
 
+import appConfig from '@/config'
+
 const STATUS_INITIAL = 0
 const STATUS_SAVING = 1
 const STATUS_SUCCESS = 2
@@ -57,14 +62,16 @@ const STATUS_RESIZE = 4
 export default {
   name: 'UploadS3',
   data () {
-    if (!window.hasOwnProperty('phpbbUserId')) {
-      window.phpbbUserId = 123456
+    let userId = 1234567890
+    if (window.hasOwnProperty('phpbbUserId')) {
+      userId = window.phpbbUserId
     }
     return {
       uploadFieldName: 'photos',
       currentStatus: null,
       uploadedFiles: [],
-      uploadCount: this.uploadCount
+      uploadCount: this.uploadCount,
+      userId: userId
     }
   },
   computed: {
@@ -82,6 +89,10 @@ export default {
     },
     isResize () {
       return this.currentStatus === STATUS_RESIZE
+    },
+    isDevel () {
+      console.log('isDevel called')
+      return !window.hasOwnProperty('phpbbUserId')
     }
   },
   methods: {
@@ -93,6 +104,7 @@ export default {
       this.uploadCount = 1 // Don't display uploding the zeroth file
       this.failedCount = 0
     },
+
     filesChange (fieldName, fileList) {
       // handle file changes
       const formData = new FormData()
@@ -118,19 +130,27 @@ export default {
       this.currentStatus = STATUS_RESIZE
     },
 
+    insertBBCode (imgUri) {
+      const el = document.getElementById('message')
+      const bbCode = '[img]' + appConfig.baseUrl + appConfig.bucket + '/' + imgUri + '[/img]\n'
+
+      let text = el.value
+      el.value = text + bbCode
+    },
+
     upload () {
       this.currentStatus = STATUS_SAVING
-      const folder = window.phpbbUserId
+      const folder = this.userId
       this.$awsService.createFolder(folder)
       .then(() => {
         this.uploadedFiles.map(file => {
           this.$awsService.uploadDataUri(file.url, file.name, folder)
-          .then(() => {
+          .then((params) => {
+            this.insertBBCode(params.key)
             this.uploadCount += 1
             if (this.uploadCount + this.failedCount > this.uploadedFiles.length) {
               this.currentStatus = STATUS_SUCCESS
             }
-            console.log('file uploaded')
           })
           .catch((err) => {
             console.log('File upload Failed')
@@ -145,7 +165,6 @@ export default {
         this.currentStatus = STATUS_FAILED
         this.uploadError = err.message
       })
-      console.log('uploading...')
     },
 
     resizeImages (formData) {
@@ -166,6 +185,7 @@ export default {
         }
       }))
     },
+
     getImage (file) {
       return new Promise((resolve, reject) => {
         const img = document.createElement('img')
@@ -178,6 +198,7 @@ export default {
         reader.readAsDataURL(file)
       })
     },
+
     getBase64Image (img) {
       const canvas = document.createElement('canvas')
       const imgDimensions = this.calcImageDimensions(img.width, img.height)
@@ -189,9 +210,10 @@ export default {
       const dataURL = canvas.toDataURL('image/png')
       return dataURL
     },
+
     calcImageDimensions (width, height) {
-      const maxWidth = 800
-      const maxHeight = 600
+      const maxWidth = appConfig.maxWidth
+      const maxHeight = appConfig.maxHeight
       let imgWidth = width
       let imgHeight = height
       if (width > maxWidth || height > maxHeight) {
@@ -209,6 +231,7 @@ export default {
         h: imgHeight}
     }
   },
+
   mounted () {
     this.reset()
   }
@@ -227,7 +250,6 @@ export default {
     position: relative;
     cursor: pointer;
   }
-  /* #phpbb input[type="file"] { */
   #uploads3 input[type="file"] {
     height: 200px;
     width: 100%;

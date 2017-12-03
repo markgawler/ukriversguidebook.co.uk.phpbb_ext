@@ -3,6 +3,7 @@ const utils = require('./utils')
 const webpack = require('webpack')
 const config = require('../config')
 const merge = require('webpack-merge')
+const Dotenv = require('dotenv-webpack');
 const baseWebpackConfig = require('./webpack.base.conf')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
@@ -35,6 +36,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     }
   },
   plugins: [
+    new Dotenv({
+      path: './.env', // Path to .env file (this is the default) 
+      safe: false // load .env.example (defaults to "false" which does not use dotenv-safe) 
+    }),
     new webpack.DefinePlugin({
       'process.env': require('../config/dev.env')
     }), 

@@ -2,13 +2,11 @@ import { config, S3, CognitoIdentityCredentials } from 'aws-sdk'
 
 export default class AwsService {
   configure (appConfig) {
-    const bucket = 'ukrgb-test-upload'
-    const region = 'eu-west-1'
-    const identityPoolId = 'eu-west-1:a79d444a-bb3a-4862-9ee2-ae776b0f3e6e'
+    const identityPoolId = appConfig.identityPoolId
+    const bucket = appConfig.bucket
+    const region = appConfig.region
 
-    this.awsRegion = region
-    this.albumBucketName = bucket
-    this.baseUrl = 'https://s3-eu-west-1.amazonaws.com/' + bucket + '/'
+    this.baseUrl = appConfig.baseUrl + bucket + '/'
 
     config.region = region // Region
     config.credentials = new CognitoIdentityCredentials({
