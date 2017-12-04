@@ -20,7 +20,7 @@ export default class AwsService {
   }
 
   createFolder (name) {
-    const albumKey = encodeURIComponent(name) + '/'
+    const albumKey = name + '/'
     return this.s3.headObject({Key: albumKey}).promise()
     .catch((err) => {
       if (err.code === 'NotFound') {
@@ -45,7 +45,7 @@ export default class AwsService {
 
   uploadDataUri (dataURI, name, folder) {
     const basename = name.substr(0, name.lastIndexOf('.'))
-    const key = encodeURIComponent(folder) + '/' + this.createFileName(basename) + '.png'
+    const key = folder + '/' + this.createFileName(basename) + '.png'
     const blob = this.dataURItoBlob(dataURI)
     const params = {
       Key: key,

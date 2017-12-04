@@ -5,3 +5,4 @@
 /vendor/
 ext/ukrgb/template/vue-app
 aws-upload/.env
+aws-upload/.env.development

@@ -132,7 +132,7 @@ export default {
 
     insertBBCode (imgUri) {
       const el = document.getElementById('message')
-      const bbCode = '[img]' + appConfig.baseUrl + appConfig.bucket + '/' + imgUri + '[/img]\n'
+      const bbCode = '[img]https://' + appConfig.domain + '/' + imgUri + '[/img]\n'
 
       let text = el.value
       el.value = text + bbCode
@@ -140,7 +140,7 @@ export default {
 
     upload () {
       this.currentStatus = STATUS_SAVING
-      const folder = this.userId
+      const folder = appConfig.basePath + '/' + encodeURIComponent(this.userId)
       this.$awsService.createFolder(folder)
       .then(() => {
         this.uploadedFiles.map(file => {
@@ -154,6 +154,7 @@ export default {
           })
           .catch((err) => {
             console.log('File upload Failed')
+            console.log(err)
             this.failedCount += 1
             this.currentStatus = STATUS_FAILED
             this.uploadError = err.message
