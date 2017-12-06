@@ -62,7 +62,7 @@ const STATUS_RESIZE = 4
 export default {
   name: 'UploadS3',
   data () {
-    let userId = 1234567890
+    let userId = '0000'
     if (window.hasOwnProperty('phpbbUserId')) {
       userId = window.phpbbUserId
     }
