@@ -7,8 +7,13 @@ SRC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # location of template files to modify
 template_event_path=${SRC}/../ext/ukrgb/template/styles/ukrgb-prosilver/template/event
+rm -rf ${SRC}/../ext/ukrgb/template/vue-app/static
+mkdir -p ${SRC}/../ext/ukrgb/template/vue-app/static/js
+mkdir -p ${SRC}/../ext/ukrgb/template/vue-app/static/css
 
-cp -a ${SRC}/dist/* ${SRC}/../ext/ukrgb/template/vue-app/
+cp -a ${SRC}/dist/static/js/*.js ${SRC}/../ext/ukrgb/template/vue-app/static/js/
+cp -a ${SRC}/dist/static/css/*.css ${SRC}/../ext/ukrgb/template/vue-app/static/css/
+
 
 for f in $SRC/dist/static/css/*.css ;do
 	file=$(basename $f .css)
