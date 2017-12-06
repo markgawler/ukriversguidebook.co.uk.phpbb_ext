@@ -240,6 +240,7 @@ class main_listener implements EventSubscriberInterface
 				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
 				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
 				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
+				'IS_BETA_TEST' => $this->isBetaTester()
 		));
 	}
 	
@@ -267,7 +268,6 @@ class main_listener implements EventSubscriberInterface
 					break;
 				default:
 					error_log('Unhandled Posting mode: ' . $mode);
-	
 			}
 		}
 	}
@@ -348,5 +348,26 @@ class main_listener implements EventSubscriberInterface
 				$this->ukrgb_pending_actions_table);
 		}
 	}
-	
+
+	protected function isBetaTester()
+	{
+		if ($this->config['ukrgb_beta_enabled'])
+		{
+			// IS_BETA_TEST
+			if (!function_exists('group_memberships'))
+			{
+				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+			}
+
+			$memberships = array();
+			foreach (group_memberships(false, $this->user->data['user_id']) as $grp)
+			{
+				$memberships[] = $grp["group_id"];
+			}
+			$groups = explode(',', $this->config['ukrgb_beta_group']);
+			return !empty(array_intersect($groups, $memberships));
+		} else {
+			return false;
+		}
+	}
 }

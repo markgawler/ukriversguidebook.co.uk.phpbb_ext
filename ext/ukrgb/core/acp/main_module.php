@@ -44,6 +44,8 @@ class main_module
 						$config->set('ukrgb_jfusion_jname',   $request->variable('ukrgb_jfusion_jname', ''));
 						$config->set('ukrgb_jfusion_apipath', $request->variable('ukrgb_jfusion_apipath', ''));
 						$config->set('ukrgb_secret', $request->variable('ukrgb_secret', ''));
+						$config->set('ukrgb_beta_enabled', $request->variable('ukrgb_beta_enabled', 0));
+						$config->set('ukrgb_beta_group', $request->variable('ukrgb_beta_group', ''));
 
 						trigger_error($user->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
 					}
@@ -59,6 +61,8 @@ class main_module
 						'UKRGB_JFUSION_JNAME'		=> $config['ukrgb_jfusion_jname'],
 						'UKRGB_JFUSION_APIPATH'		=> $config['ukrgb_jfusion_apipath'],
 						'UKRGB_SECRET'				=> $secret,
+						'UKRGB_BETA_GROUP' 			=> $config['ukrgb_beta_group'],
+						'UKRGB_BETA_ENABLED' 		=> $config['ukrgb_beta_enabled']
 				)));
 				break;
 				

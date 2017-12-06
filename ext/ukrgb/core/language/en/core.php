@@ -74,6 +74,8 @@ $lang = array_merge($lang, array(
 		
 	'LOG_UKRGB_OAUTH_REG'			=> '<strong>User Registered using "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
 	'LOG_UKRGB_OAUTH_LINK'			=> '<strong>User account Linked to "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
-		
+
+	'ACP_UKRGB_ENABLE_BETA'			=> 'Enable Beta Test',
+	'ACP_UKRGB_BETA_GROUP'			=> 'Beta test Group ID'
 
 ));
