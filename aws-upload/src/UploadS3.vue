@@ -39,11 +39,13 @@
       </div>
       <!--FAILED-->
       <div v-if="isFailed">
-        <h2>Uploaded failed.</h2>
+        <div class="alert alert-block alert-error">
+          <h2 class="alert-error">Upload failed.</h2>
+          <p>{{ uploadError }}</p>
+        </div>
         <p>
-          <a href="javascript:void(0)" @click="reset()">Try again</a>
+          <a class="alert-error" href="javascript:void(0)" @click="reset()">Try again</a>
         </p>
-        <pre>{{ uploadError }}</pre>
       </div>
     </div>
   </div>
@@ -110,6 +112,11 @@ export default {
       const formData = new FormData()
 
       if (!fileList.length) return
+      if (fileList.length > 4) {
+        this.currentStatus = STATUS_FAILED
+        this.uploadError = 'Error: A maximum of 4 images can be uploaded'
+        return
+      }
       // append the files to FormData
       Array
         .from(Array(fileList.length).keys())
@@ -126,7 +133,6 @@ export default {
         this.currentStatus = STATUS_FAILED
         this.uploadError = err.message
       })
-      console.log('Resizing...')
       this.currentStatus = STATUS_RESIZE
     },
 
@@ -284,5 +290,9 @@ export default {
   }
   #uploads3 li {
     display: inline;
+  }
+
+  #uploads3 h2.alert-error {
+      color: #b94a48;
   }
 </style>
