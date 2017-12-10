@@ -30,8 +30,14 @@ export default class AwsService {
     })
   }
 
-  createFileName (fileName) {
-    return encodeURIComponent(Date.now() + '-' + fileName)
+  createFileName () {
+    function randomString () {
+      let min = Math.ceil(0)
+      let max = Math.floor(9999)
+      return '000' + (Math.floor(Math.random() * (max - min)) + min)
+    }
+    let a = randomString()
+    return encodeURIComponent(Date.now() + '-' + a.substring(a.length - 4))
   }
 
   dataURItoBlob (dataURI) {
@@ -44,8 +50,7 @@ export default class AwsService {
   }
 
   uploadDataUri (dataURI, name, folder) {
-    const basename = name.substr(0, name.lastIndexOf('.'))
-    const key = folder + '/' + this.createFileName(basename) + '.png'
+    const key = folder + '/' + this.createFileName() + '.png'
     const blob = this.dataURItoBlob(dataURI)
     const params = {
       Key: key,
