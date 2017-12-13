@@ -353,7 +353,6 @@ class main_listener implements EventSubscriberInterface
 	{
 		if ($this->config['ukrgb_beta_enabled'])
 		{
-			// IS_BETA_TEST
 			if (!function_exists('group_memberships'))
 			{
 				include($this->root_path . 'includes/functions_user.' . $this->php_ext);

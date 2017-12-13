@@ -11,7 +11,9 @@ function resolve (dir) {
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    // 'formdata-polyfill', // formData.getAll MS Edge
+    // 'babel-polyfill', // IE11 keys
+    app: ['formdata-polyfill', 'babel-polyfill', './src/main.js']
   },
   output: {
     path: config.build.assetsRoot,

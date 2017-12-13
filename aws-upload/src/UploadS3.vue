@@ -93,7 +93,6 @@ export default {
       return this.currentStatus === STATUS_RESIZE
     },
     isDevel () {
-      console.log('isDevel called')
       return !window.hasOwnProperty('phpbbUserId')
     }
   },
