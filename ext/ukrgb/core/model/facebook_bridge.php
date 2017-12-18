@@ -152,7 +152,7 @@ class facebook_bridge
 						$deleteListTopic[$topicId] = false;
 					} else {
 						$link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
-						$message =$this->truncateMessage(html_entity_decode($data->message), $link);
+						$message =$this->truncateMessage(html_entity_decode($data->message));
 						$graphNode= $this->post($data->header . $message, $link);
 						$this->store_graph_node($graphNode['id'], $postId, $topicId);
 					}
@@ -160,8 +160,8 @@ class facebook_bridge
 				case 'facebook.edit':
 					// Dont edit if the post if the post is just about to be deleted
 					if ((! $deleteListPost[$postId]) && (! $deleteListTopic[$topicId])) {
-						$link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
-						$message =$this->truncateMessage(html_entity_decode($data->message), $link);
+						// $link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
+						$message =$this->truncateMessage(html_entity_decode($data->message));
 						$this->edit($data->header . $message, $postId);
 					}
 					break;
@@ -261,12 +261,12 @@ class facebook_bridge
 	
 	}
 	
-	protected function truncateMessage($message, $link)
+	protected function truncateMessage($message)
 	{
 		$truncate_length = 300;
 		if (strlen($message) > $truncate_length) {
 			$nextspace = strpos($message, ' ', $truncate_length);
-			$message = substr($message, 0, $nextspace) . ', read more... ' . $link;
+			$message = substr($message, 0, $nextspace) . ', read more... ';
 			
 		} 
 		return $message;
