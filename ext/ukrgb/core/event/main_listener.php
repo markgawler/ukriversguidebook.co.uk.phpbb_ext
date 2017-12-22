@@ -65,10 +65,18 @@ class main_listener implements EventSubscriberInterface
 	/* @var string */
 	protected $ukrgb_pending_actions_table;
 
+	/* @var string */
+	protected $ukrgb_images_table;
+
 	/**
 	 * @var  \ukrgb\core\model\facebook_bridge
 	 */
 	protected $ukrgbFacebook;
+
+	/**
+    * @var  \ukrgb\core\model\image
+    */
+	protected $ukrgbImage;
 
 	/**
 	 * @var string $root_path
@@ -93,6 +101,7 @@ class main_listener implements EventSubscriberInterface
 	 * @param string $php_ext
 	 * @param string 				  $ukrgb_fb_posts_table
 	 * @param string 				  $ukrgb_pending_actions_table
+     * @param string                  $ukrgb_images_table'
 	 */
 	public function __construct(\phpbb\controller\helper $helper, 
 			\phpbb\template\template $template, 
@@ -103,7 +112,8 @@ class main_listener implements EventSubscriberInterface
 			$root_path,
 			$php_ext,
 			$ukrgb_fb_posts_table,
-			$ukrgb_pending_actions_table)
+			$ukrgb_pending_actions_table,
+            $ukrgb_images_table)
 	{
 		$this->helper = $helper;
 		$this->template = $template;
@@ -114,8 +124,8 @@ class main_listener implements EventSubscriberInterface
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
-		$this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
-		
+        $this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
+        $this->ukrgb_images_table = $ukrgb_images_table;
 	}
 
 	
@@ -247,12 +257,13 @@ class main_listener implements EventSubscriberInterface
 	
 	public function coreSubmitPostEnd($event)
 	{
-		$visibility = $event['post_visibility'];
-		if ($visibility == ITEM_APPROVED) {
+		// Facebook Post
+	    $visibility = $event['post_visibility'];
+        $data= $event['data'];
+        if ($visibility == ITEM_APPROVED) {
 		 	$mode = $event['mode'];
 		 	//error_log("Posting Mode:" . $mode);
-		 	$data= $event['data'];
-		 	
+
 		 	switch ($mode) {
 		 		case 'post':
 		 		case 'edit':
@@ -266,10 +277,28 @@ class main_listener implements EventSubscriberInterface
 			 				$event['username'],
 			 				$mode);
 					break;
+                case 'reply':
+                    break;
 				default:
 					error_log('Unhandled Posting mode: ' . $mode);
 			}
 		}
+
+
+		// Image tracking
+
+        $postText = $data['message'];
+        strip_bbcode($postText);
+        preg_match_all('#https://media\.ukriversguidebook\.co\.uk/uploads/([0-9]+)/([0-9]+-[0-9]+)\.png#', $postText, $matches);
+
+        if (count($matches[0]) >0) {
+
+            $this->initImage($data['forum_id'], $data['topic_id'], $data['post_id']);
+            foreach ($matches[2] as $key => $file_key) {
+                $user_id = $matches[1][$key];
+                $this->ukrgbImage->set_image_is_posted($file_key, $user_id);
+            }
+        }
 	}
 	
 	public function coreApprovePostsAfter($event)
@@ -349,6 +378,27 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
+	/**
+     * Ukrgb Imahe function
+     */
+	protected function initImage($forum_id, $topic_id, $post_id)
+    {
+        if (empty($this->ukrgbImage)) {
+            $this->ukrgbImage = new \ukrgb\core\model\image(
+                $this->config,
+                $this->db,
+                $this->ukrgb_images_table,
+                $forum_id,
+                $topic_id,
+                $post_id);
+        }
+    }
+
+
+    /**
+     * Is the user a beta tester
+     * @return bool
+     */
 	protected function isBetaTester()
 	{
 		if ($this->config['ukrgb_beta_enabled'])

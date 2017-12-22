@@ -15,6 +15,7 @@ services:
             - '%core.php_ext%'
             - '%ukrgb.core.tables.ukrgb_fb_posts%'
             - '%ukrgb.core.tables.ukrgb_pending_actions%'
+            - '%ukrgb.core.tables.ukrgb_images%'
         tags:
             - { name: event.listener }
 
