@@ -74,7 +74,7 @@ class image_client
                 'AttributeNames' => ['SentTimestamp'],
                 'MaxNumberOfMessages' => 1,
                 'MessageAttributeNames' => ['All'],
-                'QueueUrl' => $this->queueUrl, // REQUIRED
+                'QueueUrl' => $this->queueUrl,
                 'WaitTimeSeconds' => 0,
             ));
             if (count($result->get('Messages')) > 0)
@@ -82,11 +82,10 @@ class image_client
                 $message = $result->get('Messages')[0];
                 $sentTime = json_decode($message['Attributes']['SentTimestamp']);
                 $s3 = json_decode($message['Body'])->Records[0]->s3;
-
-                /*        $result = $client->deleteMessage([
-                    'QueueUrl' => $this->>queueUrl, // REQUIRED
-                    'ReceiptHandle' => $result->get('Messages')[0]['ReceiptHandle'] // REQUIRED
-                ]);*/
+                $this->client->deleteMessage([
+                    'QueueUrl' => $this->queueUrl,
+                    'ReceiptHandle' => $result->get('Messages')[0]['ReceiptHandle']
+                ]);
                 return array(
                     'bucketName' =>  $s3->bucket->name,
                     'objectKey' => $s3->object->key,

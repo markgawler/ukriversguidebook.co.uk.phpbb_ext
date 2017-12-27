@@ -221,7 +221,8 @@ class main_listener implements EventSubscriberInterface
 	protected function startJoomla() {
 		define('_JFUSIONAPI_INTERNAL', true);
 		$apipath = $this->config['ukrgb_jfusion_apipath'];
-		require_once $apipath . '/jfusionapi.php';
+        /** @noinspection PhpIncludeInspection */
+        require_once $apipath . '/jfusionapi.php';
 		return \JFusionAPIInternal::getInstance();
 	}
 	
