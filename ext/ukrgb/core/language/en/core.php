@@ -38,10 +38,13 @@ $lang = array_merge($lang, array(
 	'OAUTH_LNK_ANOTHER_ACC' 		=> 'Your UK Rivers Guidebook Account is already linked to different Facebook account, please contact the Administrator for assistance.',
 		
 	'ACP_UKRGB_CORE_TITLE'			=> 'UKRGB Core Extension',
-	'ACP_UKRGB_FB_APP_TITLE'		=> 'Facebook App Settings',	
+	'ACP_UKRGB_FB_APP_TITLE'		=> 'Facebook App Settings',
+    'ACP_UKRGB_IMAGE_TITLE'         => 'Image Settings',
+
 	'ACP_UKRGB_CORE_CFG'			=> 'Core Settings',
 	'ACP_UKRGB_FB_CFG'				=> 'Facebook App',
-		
+    'ACP_UKRGB_IMAGE_CFG'           => 'Image Settings',
+
 	'ACP_UKRGB_JFUSION_JNAME'		=> 'JFusion Instance Name',
 	'ACP_UKRGB_JFUSION_APIPATH'		=> 'JFusion Api Path',
 	'ACP_UKRGB_CORE_SETTING_SAVED'	=> 'Settings have been saved successfully!',
@@ -76,6 +79,11 @@ $lang = array_merge($lang, array(
 	'LOG_UKRGB_OAUTH_LINK'			=> '<strong>User account Linked to "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
 
 	'ACP_UKRGB_ENABLE_BETA'			=> 'Enable Beta Test',
-	'ACP_UKRGB_BETA_GROUP'			=> 'Beta test Group ID'
+	'ACP_UKRGB_BETA_GROUP'			=> 'Beta test Group ID',
 
+    'ACP_UKRGB_IMAGE_AWS_REGION'    => 'Region',
+    'ACP_UKRGB_IMAGE_AWS_KEY'		=> 'AWS Access Key',
+    'ACP_UKRGB_IMAGE_AWS_SECRET'    => 'AWS Secret',
+    'ACP_UKRGB_IMAGE_SES_QUEUE'     => 'AWS SQS Queue',
+    'ACP_UKRGB_IMAGE_SQS_READ'      => 'Enable processing of AWS SQS queue'
 ));

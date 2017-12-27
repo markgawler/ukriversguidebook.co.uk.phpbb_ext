@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 	RemoteHost: process.env.ukrgbRemoteHost,
 	RemoteUser: process.env.ukrgbRemoteUser,
 	privateKeyFile: process.env.ukrgbPrivateKeyFile,
-       
+
     synchard: {
     	localdests: {
     		options: {

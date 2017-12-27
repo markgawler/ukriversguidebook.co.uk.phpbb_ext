@@ -1,5 +1,6 @@
 {
   "require" : {
-    "facebook/graph-sdk" : "~5.0"
+    "facebook/graph-sdk" : "~5.0",
+    "aws/aws-sdk-php": "^3.48"
   }
 }

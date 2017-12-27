@@ -57,7 +57,6 @@ class image
     /**
      * Constructor for ukrgb Image
      *
-     * @param	\phpbb\config\config $config
      * @param   \phpbb\db\driver\driver_interface
      * @param   string $ukrgb_images_table
      * @param   integer $forum_id
@@ -65,21 +64,18 @@ class image
      * @param   integer $post_id
      */
     public function __construct(
-        \phpbb\config\config $config,
         \phpbb\db\driver\driver_interface $db,
         $ukrgb_images_table,
         $forum_id,
         $topic_id,
         $post_id)
     {
-        $this->config = $config;
         $this->db = $db;
         $this->ukrgb_images_table = $ukrgb_images_table;
         $this->forum_id = $forum_id;
         $this->topic_id = $topic_id;
         $this->post_id = $post_id;
     }
-
 
     /**
      * @param $file_key
@@ -102,12 +98,12 @@ class image
     }
 
     /**
-     * @param $image_id string 18 char
+     * @param $file_key string 18 char
      * @return mixed
      */
-    protected function get_image_data($image_id)
+    public function get_image_data($file_key)
     {
-        $select_data = array('file_key' => $image_id);
+        $select_data = array('file_key' => $file_key);
         $sql = 'SELECT id,in_post FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         $result = $this->db->sql_query($sql);
         $row = $this->db->sql_fetchrow($result);
@@ -127,12 +123,13 @@ class image
 
     /**
      * @param $id
+     * @param bool $in_post = true
      */
-    protected function update_image_date($id)
+    public function update_image_date($id, $in_post = true)
     {
         error_log('Update image: ' . $id);
         $data = array (
-            'in_post' => true,
+            'in_post' => $in_post,
             'post_id' => $this->post_id,
             'topic_id' => $this->topic_id,
             'forum_id' => $this->forum_id
@@ -141,12 +138,17 @@ class image
         $this->db->sql_query($sql);
     }
 
-    protected function insert_image_data($file_key, $user_id)
+    /**
+     * @param $file_key
+     * @param $user_id
+     * @param bool $in_post = true
+     */
+    public function insert_image_data($file_key, $user_id, $in_post = true)
     {
         $data = array (
             'file_key' => $file_key,
             'poster_id' => $user_id,
-            'in_post' => true,
+            'in_post' => $in_post,
             'post_id' => $this->post_id,
             'topic_id' => $this->topic_id,
             'forum_id' => $this->forum_id

@@ -4,7 +4,7 @@
 
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
-	<!-- IF UKRGB_ACP_MODE == "settings" -->
+    {% if UKRGB_ACP_MODE == 'settings' %}
         <dl>
             <dt>
                 <label for="ukrgb_jfusion_jname">{L_ACP_UKRGB_JFUSION_JNAME}{L_COLON}</label>
@@ -47,7 +47,7 @@
 				<input type="text" id="ukrgb_beta_group" name="ukrgb_beta_group" value="{UKRGB_BETA_GROUP}"/>
 			</dd>
 		</dl>
-	<!-- ELSE -->
+	{% elseif UKRGB_ACP_MODE == 'fb_app_settings' %}
    		<dl>
             <dt>
                 <label for="ukrgb_fb_appid">{L_ACP_UKRGB_FB_APPID}{L_COLON}</label>
@@ -104,8 +104,50 @@
                 <input type="text" id="ukrgb_delayed_action_gc" name="ukrgb_delayed_action_gc" value="{UKRGB_CRON_FREQUENCY}"/>
             </dd>
         </dl>
-        
-	<!-- ENDIF -->
+    {% else %}
+
+        <dl>
+            <dt>
+                <label for="ukrgb_image_aws_region">{L_ACP_UKRGB_IMAGE_AWS_REGION}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="ukrgb_image_aws_region" name="ukrgb_image_aws_region" value="{UKRGB_IMAGE_AWS_REGION}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_image_aws_key">{L_ACP_UKRGB_IMAGE_AWS_KEY}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="ukrgb_image_aws_key" name="ukrgb_image_aws_key" value="{UKRGB_IMAGE_AWS_KEY}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_image_aws_secret">{L_ACP_UKRGB_IMAGE_AWS_SECRET}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="ukrgb_image_aws_secret" name="ukrgb_image_aws_secret" value="{UKRGB_IMAGE_AWS_SECRET}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_image_ses_queue_url">{L_ACP_UKRGB_IMAGE_SES_QUEUE}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="ukrgb_image_ses_queue_url" name="ukrgb_image_ses_queue_url" value="{UKRGB_IMAGE_SES_QUEUE}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_image_sqs_enabled">{L_ACP_UKRGB_IMAGE_SQS_READ}{L_COLON}</label>
+            </dt>
+            <dd><input type="radio" class="radio" id="ukrgb_image_sqs_enabled" name="ukrgb_image_sqs_enabled" value="1" <!-- IF UKRGB_IMAGE_SQS_ENABLED -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
+                <input type="radio" class="radio" name="ukrgb_image_sqs_enabled" value="0" <!-- IF not UKRGB_IMAGE_SQS_ENABLED -->checked="checked"<!-- ENDIF --> /> {L_NO}
+            </dd>
+        </dl>
+
+     {% endif %}
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
@@ -114,13 +156,13 @@
 		{S_FORM_TOKEN}
 	</fieldset>
 </form>
-<!-- IF UKRGB_FB_TOKEN_REFRESH -->
+{% if UKRGB_FB_TOKEN_REFRESH %}
 
 <a href="{U_UKRGB_GET_FB_TOKEN}">{L_APC_UKRGB_GET_TOKEN}</a>
 <br>
 
-<!-- ENDIF -->
-<!-- IF UKRGB_ACP_MODE == "fb_app_settings" -->
+{% endif %}
+{% if UKRGB_ACP_MODE == 'b_app_settings' %}
 <table class="table1 two-columns no-header responsive show-header" data-no-responsive-header="true">
 		<caption>{L_ACP_PAGE_TOKEN}</caption>
 		<colgroup><col class="col1"><col class="col2"><col class="col2">
@@ -157,6 +199,6 @@
 		</tr>
 	</tbody>
 </table>
-<!-- ENDIF -->
+{% endif %}
 
 <!-- INCLUDE overall_footer.html -->

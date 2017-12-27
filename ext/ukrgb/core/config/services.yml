@@ -54,8 +54,10 @@ services:
         arguments:
             - '@config'
             - '@dbal.conn'
+            - '@log'
             - '%ukrgb.core.tables.ukrgb_fb_posts%'
             - '%ukrgb.core.tables.ukrgb_pending_actions%'
+            - '%ukrgb.core.tables.ukrgb_images%'
         calls:
             - [set_name, [ukrgb.cron.delayed_action]]
         tags:

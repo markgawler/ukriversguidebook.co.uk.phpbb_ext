@@ -64,13 +64,12 @@ class facebook_bridge
 		
 	}
 
-	public function queuePost($header, $message, $forumId, $topicId, $postId, $mode)
+	public function queuePost($message, $forumId, $topicId, $postId, $mode)
 	{
 		$data = (object) [
 				'postId' => $postId,
 				'topicId' => $topicId,
 				'forumId' => $forumId,
-				'header' => $header,
 				'message' => $message,
 		];
 		$submitData = array(
@@ -111,8 +110,7 @@ class facebook_bridge
 	
 	protected function queueTask($submitData)
 	{
-		$sql = 'INSERT INTO ' . $this->ukrgb_pending_actions_table . '
-			' . $this->db->sql_build_array('INSERT', $submitData);
+		$sql = 'INSERT INTO ' . $this->ukrgb_pending_actions_table . ' ' . $this->db->sql_build_array('INSERT', $submitData);
 		$this->db->sql_query($sql);
 	}
 	
@@ -143,26 +141,24 @@ class facebook_bridge
 			$data = json_decode($row['data']);
 			$postId = $data->postId;
 			$topicId = $data->topicId;
-				//error_log($row['action']);
 			switch ($row['action']){
 				case 'facebook.post':
 					if ($deleteListPost[$postId] || $deleteListTopic[$topicId]) {
-						// dont post just mark as deleted
+						// Don't post just mark as deleted
 						$deleteListPost[$postId] = false;
 						$deleteListTopic[$topicId] = false;
 					} else {
 						$link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
 						$message =$this->truncateMessage(html_entity_decode($data->message));
-						$graphNode= $this->post($data->header . $message, $link);
+						$graphNode= $this->post($message, $link);
 						$this->store_graph_node($graphNode['id'], $postId, $topicId);
 					}
 					break;
 				case 'facebook.edit':
-					// Dont edit if the post if the post is just about to be deleted
+					// Don't edit if the post if the post is just about to be deleted
 					if ((! $deleteListPost[$postId]) && (! $deleteListTopic[$topicId])) {
-						// $link = generate_board_url(false) . '/viewtopic.php?f=' . $data->forumId .'&t=' . $topicId;
 						$message =$this->truncateMessage(html_entity_decode($data->message));
-						$this->edit($data->header . $message, $postId);
+						$this->edit($message, $postId);
 					}
 					break;
 				case 'facebook.delete':

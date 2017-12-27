@@ -119,7 +119,31 @@ class main_module
 					$template->assign_vars(array_merge($commonVars, $appVars));
 				}
 				
-				break;	
+				break;
+			case 'image_settings':
+
+                if ($submit) {
+                    if (!check_form_key('ukrgb/core')) {
+                        trigger_error('FORM_INVALID');
+                    } else {
+                        $config->set('ukrgb_image_aws_region',   $request->variable('ukrgb_image_aws_region', ''));
+                        $config->set('ukrgb_image_aws_key',   $request->variable('ukrgb_image_aws_key', ''));
+                        $config->set('ukrgb_image_aws_secret',   $request->variable('ukrgb_image_aws_secret', ''));
+                        $config->set('ukrgb_image_ses_queue_url',   $request->variable('ukrgb_image_ses_queue_url', ''));
+                        $config->set('ukrgb_image_sqs_enabled',   $request->variable('ukrgb_image_sqs_enabled', 0));
+
+                        trigger_error($user->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
+                    }
+                }
+
+                $template->assign_vars(array_merge($commonVars, array(
+                    'UKRGB_IMAGE_AWS_REGION'		=> $config['ukrgb_image_aws_region'],
+                    'UKRGB_IMAGE_AWS_KEY'		    => $config['ukrgb_image_aws_key'],
+                    'UKRGB_IMAGE_AWS_SECRET'		=> $config['ukrgb_image_aws_secret'],
+                    'UKRGB_IMAGE_SES_QUEUE'		    => $config['ukrgb_image_ses_queue_url'],
+                    'UKRGB_IMAGE_SQS_ENABLED'		=> $config['ukrgb_image_sqs_enabled'],
+                )));
+                break;
 			//end case
 		
 		}

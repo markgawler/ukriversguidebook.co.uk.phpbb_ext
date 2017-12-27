@@ -270,11 +270,8 @@ class main_listener implements EventSubscriberInterface
 		 			$this->post(
 			 				$data['forum_id'], 
 			 				$data['topic_id'], 
-			 				$data['post_id'], 
-			 				$data['forum_name'], 
-			 				$data['topic_title'],
+			 				$data['post_id'],
 			 				$data['message'],
-			 				$event['username'],
 			 				$mode);
 					break;
                 case 'reply':
@@ -310,10 +307,7 @@ class main_listener implements EventSubscriberInterface
 						$post['forum_id'],
 						$post['topic_id'],
 						$post['post_id'],
-						$post['forum_name'],
-						$post['post_subject'],
 						$post['post_text'],
-						$post['username'],
 						'post');
 			}
 		}
@@ -332,15 +326,12 @@ class main_listener implements EventSubscriberInterface
 		
 	}
 	
-	protected function post($forumId, $topicId, $postId, $forumName, $topicTitle, $postText, $username, $mode)
+	protected function post($forumId, $topicId, $postId, $postText, $mode)
 	{		
 		if ($this->can_post_to_fb($forumId)){
 			$this->initFacebookBridge();
 			strip_bbcode($postText);
-//			$header = 'Title: ' . $topicTitle. "\nForum: " . $forumName . "\nBy: " . $username . "\n\n" ;
-//			$header = $topicTitle. " / " . $forumName . "\n" . $username . "\n\n" ;
-			$header = '';
-			$this->ukrgbFacebook->queuePost($header, $postText, $forumId, $topicId, $postId, $mode);
+			$this->ukrgbFacebook->queuePost($postText, $forumId, $topicId, $postId, $mode);
 		}
 	}
 
@@ -378,14 +369,15 @@ class main_listener implements EventSubscriberInterface
 		}
 	}
 
-	/**
-     * Ukrgb Imahe function
+    /**
+     * @param $forum_id integer
+     * @param $topic_id integer
+     * @param $post_id integer
      */
 	protected function initImage($forum_id, $topic_id, $post_id)
     {
         if (empty($this->ukrgbImage)) {
             $this->ukrgbImage = new \ukrgb\core\model\image(
-                $this->config,
                 $this->db,
                 $this->ukrgb_images_table,
                 $forum_id,
@@ -393,7 +385,6 @@ class main_listener implements EventSubscriberInterface
                 $post_id);
         }
     }
-
 
     /**
      * Is the user a beta tester

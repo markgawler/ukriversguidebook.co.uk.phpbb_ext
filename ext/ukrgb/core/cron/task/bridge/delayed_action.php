@@ -14,45 +14,63 @@ class delayed_action extends \phpbb\cron\task\base
 {
 	protected $config;
 	protected $db;
+	protected $log;
 	protected $ukrgb_fb_posts_table;
 	protected $ukrgb_pending_actions_table;
+	protected $ukrgb_images_table;
 	
 	/**
-	 * Constructor.
-	 *
-	 * @param phpbb_config $config The config
-	 * @param phpbb_db_driver $db The db connection
-	 */
+     * Constructor - delayed_action
+     *
+     * @param \phpbb\config\config $config              The config
+     * @param \phpbb\db\driver\driver_interface $db     The db connection
+     * @param \phpbb\log\log $log                       System Logs
+     * @param $ukrgb_fb_posts_table
+     * @param $ukrgb_pending_actions_table
+     * @param $ukrgb_images_table
+     */
 	public function __construct(
 			\phpbb\config\config $config,  
 			\phpbb\db\driver\driver_interface $db,
+			\phpbb\log\log $log,
 			$ukrgb_fb_posts_table,
-			$ukrgb_pending_actions_table)
+			$ukrgb_pending_actions_table,
+            $ukrgb_images_table)
 	{
 		$this->config = $config;
 		$this->db = $db;
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
-		$this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
+        $this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
+        $this->ukrgb_images_table = $ukrgb_images_table;
 	}
 	/**
 	 * Runs this cron task.
 	 *
-	 * @return null
 	 */
 	public function run()
-	{
-		$this->config->set('ukrgb_delayed_action_last_gc', time());
-		error_log('Cron Run');
-				
-		$ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
-				$this->config,
-				$this->db,
-				$this->ukrgb_fb_posts_table,
-				$this->ukrgb_pending_actions_table
-				);
-		$ukrgbFacebook->runTasks();
+    {
+        error_log('Cron Run');
 
-	}
+        $this->config->set('ukrgb_delayed_action_last_gc', time());
+
+        if ($this->config['ukrgb_fb_auto_post']) {
+            $ukrgbFacebook = new \ukrgb\core\model\facebook_bridge(
+                    $this->config,
+                    $this->db,
+                    $this->ukrgb_fb_posts_table,
+                    $this->ukrgb_pending_actions_table
+                    );
+            $ukrgbFacebook->runTasks();
+        }
+
+        if ($this->config['ukrgb_image_sqs_enabled']) {
+            $imageQueue = new \ukrgb\core\model\image_client(
+                $this->config,
+                $this->db,
+                $this->ukrgb_images_table);
+            $imageQueue->runTask();
+        }
+    }
 	/**
 	 * Returns whether this cron task can run, given current board configuration.
 	 *
@@ -60,7 +78,8 @@ class delayed_action extends \phpbb\cron\task\base
 	 */
 	public function is_runnable()
 	{
-		return $this->config['ukrgb_fb_auto_post'];
+        error_log('is_runnable');
+		return $this->config['ukrgb_image_sqs_enabled'] || $this->config['ukrgb_fb_auto_post'];
 	}
 	/**
 	 * Returns whether this cron task should run now, because enough time
