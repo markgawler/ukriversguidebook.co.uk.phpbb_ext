@@ -39,11 +39,13 @@ class facebook_bridge
 	protected $ukrgb_fb_posts_table;
 	protected $ukrgb_pending_actions_table;
 	
-	/**
-	 * Constructor for Facebook phpBB bridge
-	 * 
-	 * @param	\phpbb\config\config				$config
-	 */
+    /**
+     * facebook_bridge constructor.
+     * @param \phpbb\config\config $config
+     * @param \phpbb\db\driver\driver_interface $db
+     * @param $ukrgb_fb_posts_table string
+     * @param $ukrgb_pending_actions_table  string
+     */
 	public function __construct(
 			\phpbb\config\config $config,
 			\phpbb\db\driver\driver_interface $db,
@@ -181,9 +183,15 @@ class facebook_bridge
 		}
 		$this->db->sql_freeresult($result);
 	}
-	
-	
-	public function post($message, $link)
+
+
+    /**
+     * @param $message
+     * @param $link
+     * @return \Facebook\GraphNodes\GraphNode
+     * @throws \Facebook\Exceptions\FacebookSDKException
+     */
+    public function post($message, $link)
 	{
 		$postData  = [
 				'message' => $message,
@@ -218,15 +226,19 @@ class facebook_bridge
 	
 	protected function store_graph_node($graphNode, $postId, $topicId)
 	{
-		$submit_data = array (
-				'post_id' => $postId,
-				'topic_id' => $topicId,
-				'graph_node' => $graphNode
-		);
-		
-		$sql = 'INSERT INTO ' . $this->ukrgb_fb_posts_table . '
-			' . $this->db->sql_build_array('INSERT', $submit_data);
-		$this->db->sql_query($sql);
+	    if (!$this->get_graph_node_by_post($postId)) {
+            $submit_data = array(
+                'post_id' => $postId,
+                'topic_id' => $topicId,
+                'graph_node' => $graphNode
+            );
+
+            $sql = 'INSERT INTO ' . $this->ukrgb_fb_posts_table . '	' . $this->db->sql_build_array('INSERT', $submit_data);
+            $this->db->sql_query($sql);
+        } else {
+	        error_log('Facebook_Bridge store_graph_node duplicate key:' . $postId);
+        }
+
 	}
 	
 	protected function get_graph_node_by_post($postId)

@@ -78,7 +78,6 @@ class delayed_action extends \phpbb\cron\task\base
 	 */
 	public function is_runnable()
 	{
-        error_log('is_runnable');
 		return $this->config['ukrgb_image_sqs_enabled'] || $this->config['ukrgb_fb_auto_post'];
 	}
 	/**

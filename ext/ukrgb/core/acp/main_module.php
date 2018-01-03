@@ -11,19 +11,50 @@ namespace ukrgb\core\acp;
 
 class main_module
 {
-	var $u_action;
-	
-	function main($id, $mode)
+	//  var $u_action;
+
+    /** @var string $page_title The page title */
+    public $page_title;
+
+    /** @var string $u_action Custom form action */
+    public $u_action;
+
+    /** @var string $tpl_name The page template name */
+    public $tpl_name;
+
+    /**
+     * @param $id
+     * @param $mode
+     * @throws \Exception
+     */
+    function main($id, $mode)
 	{
-		global $db, $config, $request, $template, $user;
+        global $phpbb_container;
+
+        /** @var \phpbb\config\config $config Config object */
+        $config = $phpbb_container->get('config');
+
+        /** @var \phpbb\request\request $request Request object */
+        $request  = $phpbb_container->get('request');
+
+        /** @var \phpbb\template\template $template Template object */
+        $template = $phpbb_container->get('template');
+
+        /** @var \phpbb\language\language $language Language object */
+        $language = $phpbb_container->get('language');
+
+        $language->add_lang('core', 'ukrgb/core');
+
+        global $user;
 		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
-		global $phpbb_container;
+
+		//global $phpbb_container;
+        //$language->add_lang('acp/common');
+
+        $this->tpl_name = 'core_body';
+
+        $this->page_title = $language->lang('ACP_UKRGB_CORE_TITLE');
 		
-		$user->add_lang('acp/common');
-		$user->add_lang('core', false, false, 'ukrgb/core');
-		$this->page_title = $user->lang('ACP_UKRGB_CORE_TITLE');
-		
-		$this->tpl_name = 'core_body';
 		$submit = $request->is_set_post('submit');
 
 		add_form_key('ukrgb/core');
@@ -47,14 +78,14 @@ class main_module
 						$config->set('ukrgb_beta_enabled', $request->variable('ukrgb_beta_enabled', 0));
 						$config->set('ukrgb_beta_group', $request->variable('ukrgb_beta_group', ''));
 
-						trigger_error($user->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
+						trigger_error($language->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
 					}
 				}
 
 				$secret =  $config['ukrgb_secret'];
 				if ( $secret == ''){
-					$secret = gen_rand_string_friendly(16, 24);
-					$this->config['ukrgb_secret'] = $secret;
+					$secret = gen_rand_string_friendly(24);
+					$config['ukrgb_secret'] = $secret;
 				}
 								
 				$template->assign_vars(array_merge($commonVars, array(
@@ -67,7 +98,8 @@ class main_module
 				break;
 				
 			case 'fb_app_settings':
-				include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
+				/** @noinspection PhpIncludeInspection */
+                include_once($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 				
 				if ($submit) {
 					if (!check_form_key('ukrgb/core')) {
@@ -81,10 +113,10 @@ class main_module
 						$config->set('ukrgb_fb_auto_post', $request->variable('ukrgb_fb_auto_post', 0));
 						$config->set('ukrgb_delayed_action_gc', $request->variable('ukrgb_delayed_action_gc', 300));
 						
-						trigger_error($user->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
+						trigger_error($language->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
 					}
-				}	
-				
+				}
+                /** @var \phpbb\controller\helper $helper Controller helper object */
 				$helper = $phpbb_container->get('controller.helper');
 				$ukrgbFacebook = new \ukrgb\core\controller\facebook_controller($config, $request, $user, $helper, $phpbb_admin_path, $phpEx);
 				$tokenData = $ukrgbFacebook->getTokenMetaData();
@@ -132,7 +164,7 @@ class main_module
                         $config->set('ukrgb_image_ses_queue_url',   $request->variable('ukrgb_image_ses_queue_url', ''));
                         $config->set('ukrgb_image_sqs_enabled',   $request->variable('ukrgb_image_sqs_enabled', 0));
 
-                        trigger_error($user->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
+                        trigger_error($language->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
                     }
                 }
 
