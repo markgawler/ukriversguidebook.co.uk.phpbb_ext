@@ -54,11 +54,20 @@ services:
         arguments:
             - '@config'
             - '@dbal.conn'
-            - '@log'
             - '%ukrgb.core.tables.ukrgb_fb_posts%'
             - '%ukrgb.core.tables.ukrgb_pending_actions%'
-            - '%ukrgb.core.tables.ukrgb_images%'
         calls:
             - [set_name, [ukrgb.cron.delayed_action]]
+        tags:
+            - { name: cron.task }
+
+    ukrgb.core.cleanup:
+        class: ukrgb\core\cron\task\bridge\cleanup
+        arguments:
+            - '@config'
+            - '@dbal.conn'
+            - '%ukrgb.core.tables.ukrgb_images%'
+        calls:
+            - [set_name, [ukrgb.cron.cleanup]]
         tags:
             - { name: cron.task }

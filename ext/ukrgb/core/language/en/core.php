@@ -85,5 +85,6 @@ $lang = array_merge($lang, array(
     'ACP_UKRGB_IMAGE_AWS_KEY'		=> 'AWS Access Key',
     'ACP_UKRGB_IMAGE_AWS_SECRET'    => 'AWS Secret',
     'ACP_UKRGB_IMAGE_SES_QUEUE'     => 'AWS SQS Queue',
-    'ACP_UKRGB_IMAGE_SQS_READ'      => 'Enable processing of AWS SQS queue'
+    'ACP_UKRGB_IMAGE_SQS_READ'      => 'Enable processing of AWS SQS queue',
+    'ACP_UKRGB_CRON_FREQ_CLEANUP'   => 'Cron Frequency (s)',
 ));

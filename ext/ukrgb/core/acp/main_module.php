@@ -163,6 +163,7 @@ class main_module
                         $config->set('ukrgb_image_aws_secret',   $request->variable('ukrgb_image_aws_secret', ''));
                         $config->set('ukrgb_image_ses_queue_url',   $request->variable('ukrgb_image_ses_queue_url', ''));
                         $config->set('ukrgb_image_sqs_enabled',   $request->variable('ukrgb_image_sqs_enabled', 0));
+                        $config->set('ukrgb_cleanup_gc', $request->variable('ukrgb_cleanup_gc', 300));
 
                         trigger_error($language->lang('ACP_UKRGB_CORE_SETTING_SAVED') . adm_back_link($this->u_action));
                     }
@@ -174,6 +175,7 @@ class main_module
                     'UKRGB_IMAGE_AWS_SECRET'		=> $config['ukrgb_image_aws_secret'],
                     'UKRGB_IMAGE_SES_QUEUE'		    => $config['ukrgb_image_ses_queue_url'],
                     'UKRGB_IMAGE_SQS_ENABLED'		=> $config['ukrgb_image_sqs_enabled'],
+                    'UKRGB_CRON_FREQ_CLEANUP'       => $config['ukrgb_cleanup_gc'],
                 )));
                 break;
 			//end case
