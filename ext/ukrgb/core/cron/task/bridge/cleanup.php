@@ -38,11 +38,13 @@ class cleanup  extends \phpbb\cron\task\base
 
         $this->config->set('ukrgb_cleanup_last_gc', time());
 
+        // Process AWS image upload queue
         $imageQueue = new \ukrgb\core\model\image_client(
             $this->config,
             $this->db,
             $this->ukrgb_images_table);
         $imageQueue->runTask();
+
     }
     /**
      * Returns whether this cron task can run, given current board configuration.

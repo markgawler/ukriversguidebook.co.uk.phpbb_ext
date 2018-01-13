@@ -18,9 +18,11 @@
       <library name="PHARS">
         <CLASSES>
           <root url="phar://$MODULE_DIR$/composer.phar/" />
+          <root url="phar://$MODULE_DIR$/../phpbb/phpBB/vendor/symfony/dependency-injection/Tests/Fixtures/includes/ProjectWithXsdExtensionInPhar.phar/" />
         </CLASSES>
         <SOURCES>
           <root url="phar://$MODULE_DIR$/composer.phar/" />
+          <root url="phar://$MODULE_DIR$/../phpbb/phpBB/vendor/symfony/dependency-injection/Tests/Fixtures/includes/ProjectWithXsdExtensionInPhar.phar/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -29,11 +31,13 @@
       <library name="PHP" type="php">
         <CLASSES>
           <root url="file://$MODULE_DIR$/../org.jfusion.jfusion" />
-          <root url="file://$USER_HOME$/reference/phpBB3" />
+          <root url="file://$MODULE_DIR$/../phpbb/phpBB" />
+          <root url="file://$MODULE_DIR$/../phpbb/tests" />
         </CLASSES>
         <SOURCES>
           <root url="file://$MODULE_DIR$/../org.jfusion.jfusion" />
-          <root url="file://$USER_HOME$/reference/phpBB3" />
+          <root url="file://$MODULE_DIR$/../phpbb/phpBB" />
+          <root url="file://$MODULE_DIR$/../phpbb/tests" />
         </SOURCES>
       </library>
     </orderEntry>

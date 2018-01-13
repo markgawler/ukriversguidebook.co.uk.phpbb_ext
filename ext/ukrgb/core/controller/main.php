@@ -710,8 +710,15 @@ class main
 		$this->db->sql_freeresult($result);
 		return $row['oauth_provider_id'];
 	}
-	
-	protected function perform_auth_login($service)
+
+    /**
+     * @param $service
+     * @return mixed
+     * @throws \OAuth\Common\Exception\Exception
+     * @throws \OAuth\Common\Token\Exception\ExpiredTokenException
+     * @throws \exception
+     */
+    protected function perform_auth_login($service)
 	{
 	    error_log("perform_auth_login");
 		if (!($service instanceof \OAuth\OAuth2\Service\Facebook))
@@ -723,8 +730,8 @@ class main
         $res = json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
         return $res;
 	}
-	
-	
+
+
 	public function register_jfusion($userdata)
 	{
 		global $JFusionActive;
@@ -740,7 +747,7 @@ class main
 
 		$joomla->setActivePlugin($this->config['ukrgb_jfusion_jname']);
 		$joomla->register($userdata);
-		$joomla->login($userdata->username, $userdata->password, $remember);
+		$joomla->login($userdata->username, $userdata->password, true);
 		
 		$joomla->restoreGlobal();
 		$this->request->disable_super_globals();

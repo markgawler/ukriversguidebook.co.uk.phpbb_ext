@@ -2,8 +2,9 @@
 <project version="4">
   <component name="PhpIncludePathManager">
     <include_path>
-      <path value="$USER_HOME$/reference/phpBB3" />
+      <path value="$PROJECT_DIR$/../phpbb/phpBB" />
       <path value="$PROJECT_DIR$/../org.jfusion.jfusion" />
+      <path value="$PROJECT_DIR$/../phpbb/tests" />
     </include_path>
   </component>
   <component name="PhpUnit">

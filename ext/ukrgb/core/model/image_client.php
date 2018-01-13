@@ -11,6 +11,10 @@ namespace ukrgb\core\model;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+/**
+ * Class image_client
+ * @package ukrgb\core\model
+ */
 class image_client
 {
     /**
@@ -80,7 +84,7 @@ class image_client
             if (count($result->get('Messages')) > 0)
             {
                 $message = $result->get('Messages')[0];
-                $sentTime = json_decode($message['Attributes']['SentTimestamp']);
+                $sentTime = (int) json_decode($message['Attributes']['SentTimestamp'])/1000;
                 $s3 = json_decode($message['Body'])->Records[0]->s3;
                 $this->client->deleteMessage([
                     'QueueUrl' => $this->queueUrl,
@@ -119,15 +123,16 @@ class image_client
             if ($message) {
                 $this->initImage();
                 $key = explode('/', $message['objectKey']);
+                $sent_time = $message['sentTime'];
                 $user_id = $key[1];
                 $file_key = substr($key[2], 0, strpos($key[2], "."));
                 $image_data = $this->ukrgbImage->get_image_data($file_key);
-                if (! $image_data) {
-                    $this->ukrgbImage->insert_image_data($file_key, $user_id, false);
+                if ($image_data) {
+                    $this->ukrgbImage->update_upload_time($file_key, $sent_time);
+                } else {
+                    $this->ukrgbImage->insert_image_data($file_key, $user_id, false, $sent_time);
                 }
             }
         } while ($message);
-
-
     }
 }

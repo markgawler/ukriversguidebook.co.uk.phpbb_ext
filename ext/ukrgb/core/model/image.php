@@ -40,6 +40,11 @@ class image
     protected $ukrgb_images_table;
 
     /**
+     * @var string file_key
+     */
+    protected $file_key;
+
+    /**
      * @var int forum_id
      */
     protected $forum_id;
@@ -55,107 +60,227 @@ class image
     protected $post_id;
 
     /**
+     * @var int $upload_time in seconds
+     */
+    protected $upload_time;
+
+    /**
+     * @var int $poster_id the phpbb user id of the poster
+     */
+    protected $poster_id;
+
+    /**
      * Constructor for ukrgb Image
      *
      * @param   \phpbb\db\driver\driver_interface
      * @param   string $ukrgb_images_table
-     * @param   integer $forum_id
-     * @param   integer $topic_id
-     * @param   integer $post_id
+     * @param   string $file_key
+     * @param   integer $forum_id = 0
+     * @param   integer $topic_id = 0
+     * @param   integer $post_id = 0
+     * @param   integer $upload_time = 0
+     * @param   integer $poster_id = 0
      */
     public function __construct(
         \phpbb\db\driver\driver_interface $db,
         $ukrgb_images_table,
-        $forum_id,
-        $topic_id,
-        $post_id)
+        $file_key,
+        $forum_id = 0,
+        $topic_id = 0,
+        $post_id = 0,
+        $upload_time = 0,
+        $poster_id = 0)
     {
+        $this->file_key = $file_key;
         $this->db = $db;
         $this->ukrgb_images_table = $ukrgb_images_table;
+        $this->forum_id = $forum_id;
+        $this->topic_id = $topic_id;
+        $this->post_id = $post_id;
+        $this->upload_time = $upload_time;
+        $this->poster_id = $poster_id;
+    }
+
+    /**
+     * Clear existing object and populate with new upload data, saves destroying and recreating the image object.
+     * @param $file_key
+     * @param $poster_id
+     * @param int $upload_time
+     */
+    public function new_upload_data($file_key, $poster_id = 0, $upload_time = 0)
+    {
+        $this->clear_data();
+        $this->file_key = $file_key;
+        $this->upload_time = $upload_time;
+        $this->poster_id = $poster_id;
+    }
+
+    /**
+     * Clear existin object and populate with new forum data, saves destroying and recreating the image object.
+     * @param $file_key
+     * @param $forum_id
+     * @param $topic_id
+     * @param $post_id
+     */
+    public function new_forum_data($file_key, $forum_id, $topic_id, $post_id)
+    {
+        $this->clear_data();
+        $this->file_key = $file_key;
         $this->forum_id = $forum_id;
         $this->topic_id = $topic_id;
         $this->post_id = $post_id;
     }
 
     /**
-     * @param $file_key
-     * @param $user_id
+     * Update the file data,
+     * @param $poster_id
+     * @param int $upload_time
      */
-    public function set_image_is_posted($file_key, $user_id)
+    public function update_and_store_upload_data($poster_id = 0, $upload_time = 0)
     {
-        $image_data = $this->get_image_data($file_key);
-        if ($image_data) {
-            // Update
-            if ($image_data['in_post'] == 0) {
-                // Only update the database if the image has not been found in a post before.
-                $this->update_image_date($image_data['id']);
-            }
+        $this->upload_time = $upload_time;
+        $this->poster_id = $poster_id;
+        $this->store_upload_data();
+    }
+
+    /**
+     * Update the forum data,
+     * @param $forum_id
+     * @param $topic_id
+     * @param $post_id
+     */
+    public function update_and_store_forum_data($forum_id, $topic_id, $post_id)
+    {
+        $this->forum_id = $forum_id;
+        $this->topic_id = $topic_id;
+        $this->post_id = $post_id;
+        $this->store_forum_data();
+    }
+
+    protected function clear_data()
+    {
+        $this->file_key = '';
+        $this->forum_id = 0;
+        $this->topic_id = 0;
+        $this->post_id = 0;
+        $this->upload_time = 0;
+        $this->poster_id = 0;
+    }
+
+    /**
+    * @return boolean
+    */
+    public function is_in_post()
+    {
+        $select_data = array('file_key' => $this->file_key);
+        $sql = 'SELECT in_post FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+        $result = $this->db->sql_query($sql);
+        $row = $this->db->sql_fetchrow($result);
+
+        return ($row['in_post'] === 1);
+    }
+
+    /**
+     *
+     */
+    public function is_new_image()
+    {
+        $select_data = array('file_key' => $this->file_key);
+        $sql = 'SELECT id FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+        $result = $this->db->sql_query($sql);
+        $row = $this->db->sql_fetchrow($result);
+
+        return ($row['id'] === null);
+    }
+
+
+    /**
+     * @param bool $in_post = false
+     */
+    public function store_upload_data()
+    {
+        if ($this->is_new_image()) {
+            $data = array(
+                'file_key' => $this->file_key,
+                'upload_time' => $this->upload_time,
+                'poster_id' => $this->poster_id,
+            );
+            $sql = 'INSERT INTO ' . $this->ukrgb_images_table . ' ' . $this->db->sql_build_array('INSERT', $data);
+        } else {
+            $data = array(
+                'upload_time' => $this->upload_time,
+                'poster_id' => $this->poster_id,
+            );
+            $sql = 'UPDATE ' . $this->ukrgb_images_table . ' SET ' . $this->db->sql_build_array('UPDATE', $data) . ' WHERE file_key = ' . $this->db->sql_escape($this->file_key);
         }
-        else {
-            // Insert
-            $this->insert_image_data($file_key, $user_id);
+        $this->db->sql_query($sql);
+    }
+
+    /**
+     * @param bool $in_post = true
+     */
+    public function store_forum_data($in_post = true)
+    {
+        $data = array (
+            'in_post' => $in_post,
+            'post_id' => $this->post_id,
+            'topic_id' => $this->topic_id,
+            'forum_id' => $this->forum_id,
+           // 'poster_id' => $this->poster_id
+
+        );
+        if ($this->is_new_image()) {
+            $sql = 'INSERT INTO ' . $this->ukrgb_images_table . ' ' . $this->db->sql_build_array('INSERT', array_merge(array('file_key' => $this->file_key),$data));
+        } else {
+            $select_data = array('file_key' => $this->file_key);
+            $sql = 'UPDATE ' . $this->ukrgb_images_table . ' SET ' . $this->db->sql_build_array('UPDATE', $data) . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         }
+        $this->db->sql_query($sql);
     }
 
     /**
      * @param $file_key string 18 char
      * @return mixed
      */
-    public function get_image_data($file_key)
+    public function get_all_image_data()
     {
-        $select_data = array('file_key' => $file_key);
-        $sql = 'SELECT id,in_post FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+        $select_data = array('file_key' => $this->file_key);
+        $sql = 'SELECT * FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         $result = $this->db->sql_query($sql);
         $row = $this->db->sql_fetchrow($result);
+        //var_dump($row);
+        return $row;
+    }
 
+
+
+
+
+
+
+
+    /**
+     * @return array of data
+     */
+    public function get_upload_data()
+    {
+        $select_data = array('file_key' => $this->file_key);
+        $sql = 'SELECT id,poster_id,upload_time FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+        $result = $this->db->sql_query($sql);
+        $row = $this->db->sql_fetchrow($result);
         return $row;
     }
 
     /**
-     * array =
-     * file_key
-     * poster_id
-     * post_id
-     * topic_id
-     * forum_id
-     * in_post
+     * @return array of data
      */
-
-    /**
-     * @param $id
-     * @param bool $in_post = true
-     */
-    public function update_image_date($id, $in_post = true)
+    public function get_forum_data()
     {
-        error_log('Update image: ' . $id);
-        $data = array (
-            'in_post' => $in_post,
-            'post_id' => $this->post_id,
-            'topic_id' => $this->topic_id,
-            'forum_id' => $this->forum_id
-        );
-        $sql = 'UPDATE ' . $this->ukrgb_images_table . ' SET ' . $this->db->sql_build_array('UPDATE', $data) . ' WHERE id = ' . (int) $id;
-        $this->db->sql_query($sql);
+        $select_data = array('file_key' => $this->file_key);
+        $sql = 'SELECT post_id,forum_id,topic_id,in_post FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+        $result = $this->db->sql_query($sql);
+        $row = $this->db->sql_fetchrow($result);
+        return $row;
     }
-
-    /**
-     * @param $file_key
-     * @param $user_id
-     * @param bool $in_post = true
-     */
-    public function insert_image_data($file_key, $user_id, $in_post = true)
-    {
-        $data = array (
-            'file_key' => $file_key,
-            'poster_id' => $user_id,
-            'in_post' => $in_post,
-            'post_id' => $this->post_id,
-            'topic_id' => $this->topic_id,
-            'forum_id' => $this->forum_id
-        );
-        $sql = 'INSERT INTO ' . $this->ukrgb_images_table . ' ' . $this->db->sql_build_array('INSERT', $data);
-        $this->db->sql_query($sql);
-    }
-
 
 }
