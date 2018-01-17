@@ -37,15 +37,23 @@ class cleanup  extends \phpbb\cron\task\base
         error_log('Cron Run - cleanup');
 
         $this->config->set('ukrgb_cleanup_last_gc', time());
+        $sqs = new \ukrgb\core\utils\aws_sqs(
+            $this->config['ukrgb_image_ses_queue_url'],
+            $this->config['ukrgb_image_aws_region'],
+            $this->config['ukrgb_image_aws_key'],
+            $this->config['ukrgb_image_aws_secret']);
+
 
         // Process AWS image upload queue
         $imageQueue = new \ukrgb\core\model\image_client(
             $this->config,
             $this->db,
-            $this->ukrgb_images_table);
+            $this->ukrgb_images_table,
+            $sqs);
         $imageQueue->runTask();
 
     }
+
     /**
      * Returns whether this cron task can run, given current board configuration.
      *
@@ -55,6 +63,7 @@ class cleanup  extends \phpbb\cron\task\base
     {
         return $this->config['ukrgb_image_sqs_enabled'];
     }
+
     /**
      * Returns whether this cron task should run now, because enough time
      * has passed since it was last run.

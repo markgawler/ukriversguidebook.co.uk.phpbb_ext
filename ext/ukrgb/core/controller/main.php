@@ -60,7 +60,12 @@ class main
 	 * @var string
 	 */
 	protected $auth_provider_oauth_token_storage_table;
-	
+
+	/**
+	 * @var string
+	 */
+	protected $auth_provider_oauth_state_table;
+
 	/**
 	 * OAuth account association table
 	 *
@@ -109,6 +114,12 @@ class main
 	 * @var string
 	 */
 	protected $php_ext;
+
+    /* @var \phpbb\template\template */
+    protected $template;
+
+    /* @var \phpbb\controller\helper */
+    protected $helper;
 	
 	/**
 	 * OAuth Authentication Constructor
@@ -442,9 +453,16 @@ class main
 		));
 		return $this->helper->render('link_account.html',$this->user->lang('LINK_ACCOUNT'));
 	}
-	
-	
-	protected function authenticate($name)
+
+
+    /**
+     * @param $name
+     * @return Response
+     * @throws \Exception
+     * @throws \OAuth\Common\Exception\Exception
+     * @throws \OAuth\Common\Token\Exception\ExpiredTokenException
+     */
+    protected function authenticate($name)
 	{
 		$service_name_original = 'facebook';
 		$service_name = 'auth.provider.oauth.service.' . $service_name_original;
@@ -672,8 +690,7 @@ class main
 				'oauth_provider_id' => $data['oauth_unique_id']
 		);
 	
-		$sql = 'INSERT INTO ' . $this->auth_provider_oauth_token_account_assoc . '
-			' . $this->db->sql_build_array('INSERT', $submit_data);
+		$sql = 'INSERT INTO ' . $this->auth_provider_oauth_token_account_assoc . ' ' . $this->db->sql_build_array('INSERT', $submit_data);
 		$this->db->sql_query($sql);
 	}
 	
@@ -738,6 +755,7 @@ class main
 		
 		define('_JFUSIONAPI_INTERNAL', true);
 		$apipath = $this->config['ukrgb_jfusion_apipath'];
+        /** @noinspection PhpIncludeInspection */
 		require_once $apipath . '/jfusionapi.php';
 		
 		$joomla = \JFusionAPIInternal::getInstance();

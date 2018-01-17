@@ -52,11 +52,16 @@ class facebook_controller
 	 */
 	protected $php_ext;
 
+	/** @var \phpbb\controller\helper  */
+	protected $helper;
+
+	/** @var \ukrgb\core\model\facebook  */
+	protected $fb;
 
     /**
      * facebook_controller constructor.
      * @param \phpbb\config\config $config
-     * @request \phpbb\request 	 	  $request
+     * @param \phpbb\request\request_interface 	 	  $request
      * @param \phpbb\user $user
      * @param \phpbb\controller\helper $helper
      * @param $phpbb_root_path
@@ -83,16 +88,13 @@ class facebook_controller
 		$this->fb = new \ukrgb\core\model\facebook($appId, $appSecret);
 	}
 
-
     /**
      * Controller for route /facebook/{action}
-     *
      * @param $mode
-     * @return Response A Symfony Response object
+     * @return \Symfony\Component\HttpFoundation\Response
      * @throws \exception
-     * @internal param string $action
      */
-	public function handle($mode)
+    public function handle($mode)
 	{
 		switch ($mode) {
 			case 'callback':
@@ -110,7 +112,7 @@ class facebook_controller
 	public function getRequestPermisionsUrl()
 	{
 		$permissions = ['manage_pages', 'publish_pages']; // Optional permissions
-		$callbackUrl = generate_board_url(true) . $this->helper->route('ukrgb_facebook', array(mode => 'callback'));
+		$callbackUrl = generate_board_url(true) . $this->helper->route('ukrgb_facebook', array('mode' => 'callback'));
 		$loginUrl = $this->fb->getLoginUrl($callbackUrl, $permissions);
 
 		return htmlspecialchars($loginUrl);
@@ -124,7 +126,8 @@ class facebook_controller
 	{
 		if (!function_exists('group_memberships'))
 		{
-			include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+            /** @noinspection PhpIncludeInspection */
+            include($this->phpbb_root_path . 'includes/functions_user.' . $this->php_ext);
 		}
 		
 		if (empty(group_memberships(array($this->config['ukrgb_fb_page_mgr']), $this->user->data['user_id'])))

@@ -88,20 +88,24 @@ class main_listener implements EventSubscriberInterface
 	 */
 	protected $php_ext;
 
+	/** var \phpbb\language\language  $language */
+	//protected $language;
+
 	/**
 	 * Constructor
 	 *
-	 * @param \phpbb\controller\helper $helper
-	 * @param \phpbb\template\template $template
-	 * @param \phpbb\config\db 		  $config,
-	 * @param \phpbb\user			  $user	Template object
-	 * @param \phpbb\request\request 	 	  $request
+	 * @param \phpbb\controller\helpe   $helper
+	 * @param \phpbb\template\template  $template
+	 * @param \phpbb\config\db 		    $config,
+	 * @param \phpbb\user			    $user	Template object
+	 * @param \phpbb\request\request    $request
 	 * @param \phpbb\db\driver\driver_interface	$db
 	 * @param string $root_path
 	 * @param string $php_ext
-	 * @param string 				  $ukrgb_fb_posts_table
-	 * @param string 				  $ukrgb_pending_actions_table
-     * @param string                  $ukrgb_images_table'
+	 * @param string 				    $ukrgb_fb_posts_table
+	 * @param string 				    $ukrgb_pending_actions_table
+     * @param string                    $ukrgb_images_table'
+     * param \phpbb\language\language language
 	 */
 	public function __construct(\phpbb\controller\helper $helper, 
 			\phpbb\template\template $template, 
@@ -113,7 +117,9 @@ class main_listener implements EventSubscriberInterface
 			$php_ext,
 			$ukrgb_fb_posts_table,
 			$ukrgb_pending_actions_table,
-            $ukrgb_images_table)
+            $ukrgb_images_table
+            //\phpbb\language\language $language
+        )
 	{
 		$this->helper = $helper;
 		$this->template = $template;
@@ -126,6 +132,7 @@ class main_listener implements EventSubscriberInterface
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
         $this->ukrgb_pending_actions_table = $ukrgb_pending_actions_table;
         $this->ukrgb_images_table = $ukrgb_images_table;
+        $this->language;
 	}
 
 	
@@ -241,7 +248,6 @@ class main_listener implements EventSubscriberInterface
 		$event['lang_set_ext'] = $lang_set_ext;
 		
 		$this->user->add_lang_ext('','ucp');
-		
 	}
 	
 
@@ -290,11 +296,11 @@ class main_listener implements EventSubscriberInterface
         preg_match_all('#https://media\.ukriversguidebook\.co\.uk/uploads/([0-9]+)/([0-9]+-[0-9]+)\.png#', $postText, $matches);
 
         if (count($matches[0]) >0) {
-
-            $this->initImage($data['forum_id'], $data['topic_id'], $data['post_id']);
             foreach ($matches[2] as $key => $file_key) {
                 $user_id = $matches[1][$key];
-                $this->ukrgbImage->set_image_is_posted($file_key, $user_id);
+                $image = new \ukrgb\core\model\image(
+                    $this->db, $this->ukrgb_images_table, $file_key, $data['forum_id'], $data['topic_id'], $data['post_id'],0, $user_id);
+                $image->store_data();
             }
         }
 	}
@@ -371,23 +377,6 @@ class main_listener implements EventSubscriberInterface
 	}
 
     /**
-     * @param $forum_id integer
-     * @param $topic_id integer
-     * @param $post_id integer
-     */
-	protected function initImage($forum_id, $topic_id, $post_id)
-    {
-        if (empty($this->ukrgbImage)) {
-            $this->ukrgbImage = new \ukrgb\core\model\image(
-                $this->db,
-                $this->ukrgb_images_table,
-                $forum_id,
-                $topic_id,
-                $post_id);
-        }
-    }
-
-    /**
      * Is the user a beta tester
      * @return bool
      */
@@ -397,7 +386,8 @@ class main_listener implements EventSubscriberInterface
 		{
 			if (!function_exists('group_memberships'))
 			{
-				include($this->root_path . 'includes/functions_user.' . $this->php_ext);
+                /** @noinspection PhpIncludeInspection */
+                include($this->root_path . 'includes/functions_user.' . $this->php_ext);
 			}
 
 			$memberships = array();

@@ -9,7 +9,6 @@
 
 namespace ukrgb\core\model;
 
-require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
  * Class image_client
@@ -47,49 +46,40 @@ class image_client
      */
     protected $db;
 
+    protected $util_aws_sqs;
+
     /**
      * image_client constructor.
-     * @param \phpbb\config\config $config
+     * @param \phpbb\config\config      $config
      * @param \phpbb\db\driver\driver_interface $db
-     * @param string $ukrgb_images_table
+     * @param string                    $ukrgb_images_table
+     * @param \ukrgb\core\utils\aws_sqs $util_aws_sqs
      */
     public function __construct(
         \phpbb\config\config $config,
     	\phpbb\db\driver\driver_interface $db,
-        $ukrgb_images_table
+        $ukrgb_images_table,
+        $util_aws_sqs
         )
     {
         $this->config = $config;
         $this->db = $db;
         $this->ukrgb_images_table = $ukrgb_images_table;
-        $this->queueUrl = $config['ukrgb_image_ses_queue_url'];
-        $this->client = new \Aws\Sqs\SqsClient(['region' => $config['ukrgb_image_aws_region'],
-            'version' => 'latest',
-            'credentials' =>
-                ['key' => $config['ukrgb_image_aws_key'],
-                    'secret' => $config['ukrgb_image_aws_secret']]]);
+        $this->util_aws_sqs = $util_aws_sqs;
+
     }
 
     public function get_message()
     {
         try
         {
-            $result = $this->client->receiveMessage(array(
-                'AttributeNames' => ['SentTimestamp'],
-                'MaxNumberOfMessages' => 1,
-                'MessageAttributeNames' => ['All'],
-                'QueueUrl' => $this->queueUrl,
-                'WaitTimeSeconds' => 0,
-            ));
+            $result = $this->util_aws_sqs->receive_message();
             if (count($result->get('Messages')) > 0)
             {
                 $message = $result->get('Messages')[0];
                 $sentTime = (int) json_decode($message['Attributes']['SentTimestamp'])/1000;
                 $s3 = json_decode($message['Body'])->Records[0]->s3;
-                $this->client->deleteMessage([
-                    'QueueUrl' => $this->queueUrl,
-                    'ReceiptHandle' => $result->get('Messages')[0]['ReceiptHandle']
-                ]);
+                //$this->util_aws_sqs->delete_message($result->get('Messages')[0]['ReceiptHandle']);
                 return array(
                     'bucketName' =>  $s3->bucket->name,
                     'objectKey' => $s3->object->key,
@@ -104,35 +94,19 @@ class image_client
         }
     }
 
-    protected function initImage()
-    {
-        if (empty($this->ukrgbImage)) {
-            $this->ukrgbImage = new \ukrgb\core\model\image(
-                $this->db,
-                $this->ukrgb_images_table,
-                0,
-                0,
-                0);
-        }
-    }
-
     public function runTask()
     {
         do {
-            $message = $this->get_message();
-            if ($message) {
-                $this->initImage();
-                $key = explode('/', $message['objectKey']);
-                $sent_time = $message['sentTime'];
+            $img_data = $this->get_message();
+            if ($img_data) {
+                $key = explode('/', $img_data['objectKey']);
+                $sent_time = $img_data['sentTime'];
                 $user_id = $key[1];
                 $file_key = substr($key[2], 0, strpos($key[2], "."));
-                $image_data = $this->ukrgbImage->get_image_data($file_key);
-                if ($image_data) {
-                    $this->ukrgbImage->update_upload_time($file_key, $sent_time);
-                } else {
-                    $this->ukrgbImage->insert_image_data($file_key, $user_id, false, $sent_time);
-                }
+
+                $image = new \ukrgb\core\model\image($this->db, $this->ukrgb_images_table, $file_key);
+                $image->update_and_store_upload_data($user_id, $sent_time);
             }
-        } while ($message);
+        } while ($img_data);
     }
 }
