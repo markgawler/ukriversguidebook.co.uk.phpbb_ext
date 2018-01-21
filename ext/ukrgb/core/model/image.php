@@ -15,9 +15,6 @@
 
 namespace ukrgb\core\model;
 
-
-use foo\typewrong\error;
-
 class image
 {
     /**
@@ -255,6 +252,7 @@ class image
         $sql = 'SELECT * FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         $result = $this->db->sql_query($sql);
         $row = $this->db->sql_fetchrow($result);
+        $this->db->sql_freeresult($result);
         return $row;
     }
 
@@ -268,6 +266,7 @@ class image
         $sql = 'SELECT id,poster_id,upload_time FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         $result = $this->db->sql_query($sql);
         $row = $this->db->sql_fetchrow($result);
+        $this->db->sql_freeresult($result);
         return $row;
     }
 
@@ -280,7 +279,14 @@ class image
         $sql = 'SELECT post_id,forum_id,topic_id,in_post FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         $result = $this->db->sql_query($sql);
         $row = $this->db->sql_fetchrow($result);
+        $this->db->sql_freeresult($result);
         return $row;
+    }
+
+    public function delete()
+    {
+        $select_data = array('file_key' => $this->file_key);
+        $this->db->sql_query('DELETE FROM ' . $this->ukrgb_images_table .' WHERE ' . $this->db->sql_build_array('SELECT', $select_data));
     }
 
 }

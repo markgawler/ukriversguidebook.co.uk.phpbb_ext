@@ -79,7 +79,7 @@ class image_client
                 $message = $result->get('Messages')[0];
                 $sentTime = (int) json_decode($message['Attributes']['SentTimestamp'])/1000;
                 $s3 = json_decode($message['Body'])->Records[0]->s3;
-                //$this->util_aws_sqs->delete_message($result->get('Messages')[0]['ReceiptHandle']);
+                $this->util_aws_sqs->delete_message($message['ReceiptHandle']);
                 return array(
                     'bucketName' =>  $s3->bucket->name,
                     'objectKey' => $s3->object->key,

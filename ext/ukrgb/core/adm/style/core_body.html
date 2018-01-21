@@ -140,6 +140,22 @@
         </dl>
         <dl>
             <dt>
+                <label for="ukrgb_image_s3_bucket">{L_ACP_UKRGB_IMAGE_S3_BUCKET}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="ukrgb_image_s3_bucket" name="ukrgb_image_s3_bucket" value="{UKRGB_IMAGE_S3_BUCKET}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label for="ukrgb_image_s3_prefix">{L_ACP_UKRGB_IMAGE_S3_PREFIX}{L_COLON}</label>
+            </dt>
+            <dd>
+                <input type="text" id="ukrgb_image_s3_prefix" name="ukrgb_image_s3_prefix" value="{UKRGB_IMAGE_S3_PREFIX}"/>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
                 <label for="ukrgb_image_sqs_enabled">{L_ACP_UKRGB_IMAGE_SQS_READ}{L_COLON}</label>
             </dt>
             <dd><input type="radio" class="radio" id="ukrgb_image_sqs_enabled" name="ukrgb_image_sqs_enabled" value="1" <!-- IF UKRGB_IMAGE_SQS_ENABLED -->checked="checked"<!-- ENDIF -->/> {L_YES} &nbsp;
@@ -206,6 +222,23 @@
 		</tr>
 	</tbody>
 </table>
+{% elseif UKRGB_ACP_MODE == 'image_settings' %}
+<form id="acp_board_orphan_image" method="post" action="{U_ACTION}">
+    <fieldset>
+        <p class="buttons">{L_APC_UKRGB_ORPHAN_IMAGE_MSG}
+            <input class="button" type="submit" id="orphan_image" name="orphan_image" value="{L_SUBMIT}" />&nbsp;
+        </p>
+
+        <dl>
+            <dt><label>{L_APC_UKRGB_ORPHAN_IMAGE}: </label></dt>
+            <dd><label>{UKRGB_ORPHAN_IMAGE_COUNT}</label></dd>
+        </dl>
+
+        </table>
+        {S_HIDDEN_FIELDS}
+        {S_FORM_TOKEN}
+    </fieldset>
+</form>
 {% endif %}
 
 <!-- INCLUDE overall_footer.html -->

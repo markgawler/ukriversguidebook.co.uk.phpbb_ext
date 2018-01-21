@@ -81,10 +81,16 @@ $lang = array_merge($lang, array(
 	'ACP_UKRGB_ENABLE_BETA'			=> 'Enable Beta Test',
 	'ACP_UKRGB_BETA_GROUP'			=> 'Beta test Group ID',
 
-    'ACP_UKRGB_IMAGE_AWS_REGION'    => 'Region',
+    'ACP_UKRGB_IMAGE_AWS_REGION'    => 'AWS Region',
     'ACP_UKRGB_IMAGE_AWS_KEY'		=> 'AWS Access Key',
     'ACP_UKRGB_IMAGE_AWS_SECRET'    => 'AWS Secret',
     'ACP_UKRGB_IMAGE_SES_QUEUE'     => 'AWS SQS Queue',
+    'ACP_UKRGB_IMAGE_S3_BUCKET'     => 'AWS S3 Bucket',
+    'ACP_UKRGB_IMAGE_S3_PREFIX'     => 'AWS S3 Bucket prefix',
     'ACP_UKRGB_IMAGE_SQS_READ'      => 'Enable processing of AWS SQS queue',
-    'ACP_UKRGB_CRON_FREQ_CLEANUP'   => 'Cron Frequency (s)',
+    'ACP_UKRGB_CRON_FREQ_CLEANUP'   => 'AWS SQS Cron Frequency (s)',
+
+    'APC_UKRGB_ORPHAN_IMAGE_MSG' => 'Find Orphan Images (images from deleted posts, failed uploads, etc.)',
+    'APC_UKRGB_ORPHAN_IMAGE' => 'Orphan Images found:',
+
 ));

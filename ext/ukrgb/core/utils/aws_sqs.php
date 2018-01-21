@@ -37,11 +37,6 @@ class aws_sqs
         $aws_key,
         $aws_secret)
     {
-/*        error_log('Queue URL: ' . $queue_url);
-        error_log('Region   : ' . $region);
-        error_log('Key      : ' . $aws_key);
-        error_log('Secret   : ' . $aws_secret);*/
-
         $this->queue_url = $queue_url;
         $this->client = new \Aws\Sqs\SqsClient(['region' => $region,
             'version' => 'latest',

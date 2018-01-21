@@ -41,7 +41,8 @@ class main_test extends \phpbb_test_case
         $body = file_get_contents(dirname(__FILE__) . '/fixtures/body.json');
         $message = array(
             'Body' => $body,
-            'Attributes' => array('SentTimestamp' => '1515753119227')
+            'Attributes' => array('SentTimestamp' => '1515753119227'),
+            'ReceiptHandle' => str_repeat('A',412)
         );
 
         $aws_result = $this->getMockBuilder(\Aws\Result::class)
@@ -60,6 +61,10 @@ class main_test extends \phpbb_test_case
         $aws_result->expects($this->exactly(2))
             ->method('get')
             ->with($this->equalTo('Messages'));
+
+        $this->aws_sqs_util->expects($this->once())
+            ->method('delete_message')
+            ->with($this->equalTo(str_repeat('A',412)));
 
         $client = new \ukrgb\core\model\image_client($this->config, $this->db, 'dummy_table', $this->aws_sqs_util);
 

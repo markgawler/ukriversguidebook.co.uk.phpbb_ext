@@ -200,7 +200,7 @@ class image_model_test extends \phpbb_database_test_case
         $file_key = '1515583999888-5555';
         $image = new \ukrgb\core\model\image($this->db, $this->table_prefix . 'ukrgb_images', $file_key);
 
-        $img_data = $image->get_all_image_data();
+        //$img_data = $image->get_all_image_data();
         $image->update_and_store_upload_data(4321, 1515406683);
         $img_data = $image->get_all_image_data();
 
@@ -238,6 +238,15 @@ class image_model_test extends \phpbb_database_test_case
     }
 
 
+    public function test_delete_image_row()
+    {
+        $image = new \ukrgb\core\model\image($this->db, $this->table_prefix . 'ukrgb_images', '1515583999888-6666');
+        $this->assertFalse($image->is_new_image(),'Asserting that this is NOT a new image');
+        $image->delete();
+        unset($image);
+        $image = new \ukrgb\core\model\image($this->db, $this->table_prefix . 'ukrgb_images', '1515583999888-6666');
+        $this->assertTrue($image->is_new_image(),'Asserting that this is a new image');
 
+    }
 
 }
