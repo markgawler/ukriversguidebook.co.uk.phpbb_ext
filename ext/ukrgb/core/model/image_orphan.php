@@ -47,20 +47,30 @@ class image_orphan
     {
         $objects = $this->aws_s3->get_iterator($this->prefix, $this->bucket);
         $orphan_count = 0;
+        $invalid_count = 0;
         foreach ($objects as $object) {
             $field = explode('/', $object['Key']);
             $user_id = $field[1];
             $file_key = substr($field[2], 0, strpos($field[2], "."));
 
+
             $modified_time = $object['LastModified']->getTimestamp();
 
-            $image = new \ukrgb\core\model\image($this->db, $this->table, $file_key);
-            if ($image->is_new_image()){
-                $image->update_and_store_upload_data($user_id, $modified_time);
-                $orphan_count += 1;
+            if (preg_match('#^[0-9]{13}-[0-9]{4}$#', $file_key) !== 0)
+            {
+                $image = new \ukrgb\core\model\image($this->db, $this->table, $file_key);
+                if ($image->is_new_image()){
+                    $image->update_and_store_upload_data($user_id, $modified_time);
+                    $orphan_count += 1;
+                }
+            } else {
+                $invalid_count += 1;
+                error_log("Invalid File: " . $object['Key']);
             }
         }
-        return $orphan_count;
+        return array(
+            'orphan_count' => $orphan_count,
+            'invalid_count' => $invalid_count);
     }
 
 }

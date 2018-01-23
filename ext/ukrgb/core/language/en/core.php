@@ -90,7 +90,8 @@ $lang = array_merge($lang, array(
     'ACP_UKRGB_IMAGE_SQS_READ'      => 'Enable processing of AWS SQS queue',
     'ACP_UKRGB_CRON_FREQ_CLEANUP'   => 'AWS SQS Cron Frequency (s)',
 
-    'APC_UKRGB_ORPHAN_IMAGE_MSG' => 'Find Orphan Images (images from deleted posts, failed uploads, etc.)',
-    'APC_UKRGB_ORPHAN_IMAGE' => 'Orphan Images found:',
+    'APC_UKRGB_ORPHAN_IMAGE_MSG'    => 'Find Orphan Images (images from deleted posts, failed uploads, etc.)',
+    'APC_UKRGB_ORPHAN_IMAGE'        => 'Orphan Images found:',
+    'APC_UKRGB_ORPHAN_INVALID_IMAGE' => 'Uploads with Invalid file keys found:',
 
 ));

@@ -34,6 +34,9 @@ class main_module
         /** @var \phpbb\config\config $config Config object */
         $config = $phpbb_container->get('config');
 
+        /** @var \phpbb\db\driver\driver_interface $db Database object */
+        //$db = $phpbb_container->get('db');
+
         /** @var \phpbb\request\request $request Request object */
         $request  = $phpbb_container->get('request');
 
@@ -47,9 +50,12 @@ class main_module
 
         global $user;
 		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
+        global $db, $table_prefix;
 
 		//global $phpbb_container;
         //$language->add_lang('acp/common');
+
+
 
         $this->tpl_name = 'core_body';
 
@@ -173,7 +179,19 @@ class main_module
                     }
                 }
                 if ($submit_orphan) {
-                    $orphans = 999;
+                    $table = $table_prefix . 'ukrgb_images';
+                    try {
+                    $orphan_images = new \ukrgb\core\model\image_orphan(
+                        new \ukrgb\core\utils\aws_s3(
+                            $config['ukrgb_image_aws_region'],
+                            $config['ukrgb_image_aws_key'],
+                            $config['ukrgb_image_aws_secret']),
+                        $config, $db, $table);
+                    $orphans = $orphan_images->find_orphan_images();
+                    } catch (\Aws\S3\Exception\S3Exception $e) {
+                        trigger_error($e->getMessage());
+                    }
+
                 }
 
                 $template->assign_vars(array_merge($commonVars, array(
@@ -185,7 +203,8 @@ class main_module
                     'UKRGB_IMAGE_S3_PREFIX' 		=> $config['ukrgb_image_s3_prefix'],
                     'UKRGB_IMAGE_S3_BUCKET' 		=> $config['ukrgb_image_s3_bucket'],
                     'UKRGB_CRON_FREQ_CLEANUP'       => $config['ukrgb_cleanup_gc'],
-                    'UKRGB_ORPHAN_IMAGE_COUNT'      => $orphans,
+                    'UKRGB_ORPHAN_IMAGE_COUNT'      => $orphans['orphan_count'],
+                    'UKRGB_ORPHAN_INVALID_COUNT'    => $orphans['invalid_count'],
                 )));
                 break;
 			//end case

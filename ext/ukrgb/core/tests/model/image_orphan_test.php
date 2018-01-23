@@ -71,7 +71,8 @@ class image_orphan_test extends \phpbb_database_test_case
 
         $oi = new \ukrgb\core\model\image_orphan($this->aws_s3_util, $this->config, $this->db, $this->table);
         $count = $oi->find_orphan_images();
-        $this->assertTrue($count === 1, 'Asserting if count of orphans is zero');
+        $this->assertTrue($count['orphan_count'] === 1, 'Asserting if count of orphans is one');
+        $this->assertTrue($count['invalid_count'] === 0, 'Asserting if count of invalid objects zero');
 
         $image = new \ukrgb\core\model\image($this->db, $this->table, '1516227349588-8853');
         $img_data = $image->get_all_image_data();
@@ -97,7 +98,8 @@ class image_orphan_test extends \phpbb_database_test_case
 
         $oi = new \ukrgb\core\model\image_orphan($this->aws_s3_util, $this->config, $this->db, $this->table);
         $count = $oi->find_orphan_images();
-        $this->assertTrue($count === 0, 'Asserting if count of orphans is zero');
+        $this->assertTrue($count['orphan_count'] === 0, 'Asserting if count of orphans is zero');
+        $this->assertTrue($count['invalid_count'] === 0, 'Asserting if count of invalid objects zero');
 
         $image = new \ukrgb\core\model\image($this->db, $this->table, '1515583485123-1554');
         $img_data = $image->get_all_image_data();
@@ -108,5 +110,39 @@ class image_orphan_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True"');
         $this->assertTrue($img_data['poster_id'] === 1234, 'Asserting that image data is "poster_id: 1234"');
         $this->assertTrue($img_data['upload_time'] === $time_stamp, 'Asserting that image data is "upload_time: ' . $time_stamp);
+    }
+
+    public function test_find_orphan_images_invalid()
+    {
+        $time_stamp = time();
+        //$object = ;
+        $objects = array(
+            0 => array(
+                'Key' => 'some_prefix/9663/1516227349588-P8853.png',
+                'LastModified' => \Aws\Api\DateTimeResult::fromEpoch($time_stamp)),
+            1 => array(
+                'Key' => 'some_prefix/9663/1516227349588-053.png',
+                'LastModified' => \Aws\Api\DateTimeResult::fromEpoch($time_stamp)),
+            2 => array(
+                'Key' => 'some_prefix/9663/151622734958800053.png',
+                'LastModified' => \Aws\Api\DateTimeResult::fromEpoch($time_stamp)),
+            3 => array(
+                'Key' => 'some_prefix/9663/15162273s9588-0053.png',
+                'LastModified' => \Aws\Api\DateTimeResult::fromEpoch($time_stamp)),
+            4 => array(
+                'Key' => 'some_prefix/hello.png',
+                'LastModified' => \Aws\Api\DateTimeResult::fromEpoch($time_stamp)),
+            );
+
+        $this->aws_s3_util->expects($this->once())
+            ->method('get_iterator')
+            ->with('some_prefix', 'some_bucket')
+            ->willReturn($objects);
+
+        $oi = new \ukrgb\core\model\image_orphan($this->aws_s3_util, $this->config, $this->db, $this->table);
+        $count = $oi->find_orphan_images();
+        $this->assertTrue($count['orphan_count'] === 0, 'Asserting if count of orphans is zero');
+        $this->assertTrue($count['invalid_count'] === 5, 'Asserting if count of invalid objects one');
+
     }
 }
