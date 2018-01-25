@@ -25,17 +25,22 @@ class main_listener implements EventSubscriberInterface
 			return array();
 		}else{
 			return array(
-					'core.user_setup' => 'coreUserSetup',
-					'core.auth_login_session_create_before' => 'coreAuthLoginSessionCreateBefore',
-					'core.session_kill_after' => 'coreSessionKillAfter',
-					'core.page_header' => 'corePageHeader',
-					'core.submit_post_end' => 'coreSubmitPostEnd',
-					'core.delete_posts_after' => 'coreDeletePostsAfter',
-					'core.approve_posts_after' => 'coreApprovePostsAfter',
-					'core.move_topics_before_query' => 'moveTopicsBeforeQuery',
+				'core.user_setup' => 'coreUserSetup',
+				'core.auth_login_session_create_before' => 'coreAuthLoginSessionCreateBefore',
+				'core.session_kill_after' => 'coreSessionKillAfter',
+				'core.page_header' => 'corePageHeader',
+				'core.submit_post_end' => 'coreSubmitPostEnd',
+				'core.delete_posts_after' => 'coreDeletePostsAfter',
+				'core.approve_posts_after' => 'coreApprovePostsAfter',
+				'core.move_topics_before_query' => 'moveTopicsBeforeQuery',
+                'core.viewtopic_modify_post_action_conditions' => 'modify_post_action_conditions',
+                'core.permissions' => 'core_permissions'
 			);
 		}
 	}
+
+	/* @var \phpbb\auth\auth */
+	protected $auth;
 	
 	/* @var \phpbb\controller\helper */
 	protected $helper;
@@ -88,20 +93,22 @@ class main_listener implements EventSubscriberInterface
 	 */
 	protected $php_ext;
 
-	/** var \phpbb\language\language  $language */
-	//protected $language;
+	/** @var \phpbb\language\language  $language */
+	protected $language;
 
 	/**
 	 * Constructor
 	 *
-	 * @param \phpbb\controller\helpe   $helper
+	 * @param \phpbb\controller\helper   $helper
 	 * @param \phpbb\template\template  $template
 	 * @param \phpbb\config\db 		    $config,
 	 * @param \phpbb\user			    $user	Template object
 	 * @param \phpbb\request\request    $request
 	 * @param \phpbb\db\driver\driver_interface	$db
-	 * @param string $root_path
-	 * @param string $php_ext
+     * @param \phpbb\auth\auth          $auth
+     * @param \phpbb\language\language  $language
+	 * @param string                    $root_path
+	 * @param string                    $php_ext
 	 * @param string 				    $ukrgb_fb_posts_table
 	 * @param string 				    $ukrgb_pending_actions_table
      * @param string                    $ukrgb_images_table'
@@ -113,12 +120,13 @@ class main_listener implements EventSubscriberInterface
 			\phpbb\user $user, 
 			\phpbb\request\request $request,
 			\phpbb\db\driver\driver_interface	$db,
+			\phpbb\auth\auth    $auth,
+			\phpbb\language\language $language,
 			$root_path,
 			$php_ext,
 			$ukrgb_fb_posts_table,
 			$ukrgb_pending_actions_table,
             $ukrgb_images_table
-            //\phpbb\language\language $language
         )
 	{
 		$this->helper = $helper;
@@ -127,6 +135,7 @@ class main_listener implements EventSubscriberInterface
 		$this->user = $user;
 		$this->request = $request;
 		$this->db = $db;
+		$this->auth = $auth;
 		$this->root_path = $root_path;
 		$this->php_ext = $php_ext;
 		$this->ukrgb_fb_posts_table = $ukrgb_fb_posts_table;
@@ -242,22 +251,23 @@ class main_listener implements EventSubscriberInterface
 	{
 		$lang_set_ext = $event['lang_set_ext'];
 		$lang_set_ext[] = array(
-				'ext_name' => 'ukrgb/core',
-				'lang_set' => 'core',
+            'ext_name' => 'ukrgb/core',
+            'lang_set' => 'core',
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
 		
-		$this->user->add_lang_ext('','ucp');
+		//$this->user->add_lang_ext('','ucp');
+		//$this->language->
 	}
 	
 
 	public function corePageHeader()
 	{
 		$this->template->assign_vars(array(
-				'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
-				'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
-				'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
-				'IS_BETA_TEST' => $this->isBetaTester()
+            'U_OAUTH_FB' => $this->helper->route('ukrgb_oauth_route', array('name' => 'facebook')),
+            'U_OAUTH_REG_SUBMIT' => $this->helper->route('ukrgb_oauth_register'),
+            'U_OAUTH_LNK_SUBMIT' => $this->helper->route('ukrgb_oauth_link'),
+            'IS_BETA_TEST' => $this->isBetaTester()
 		));
 	}
 	
@@ -275,11 +285,11 @@ class main_listener implements EventSubscriberInterface
 		 		case 'post':
 		 		case 'edit':
 		 			$this->post(
-			 				$data['forum_id'], 
-			 				$data['topic_id'], 
-			 				$data['post_id'],
-			 				$data['message'],
-			 				$mode);
+                        $data['forum_id'],
+                        $data['topic_id'],
+                        $data['post_id'],
+                        $data['message'],
+                        $mode);
 					break;
                 case 'reply':
                     break;
@@ -311,11 +321,11 @@ class main_listener implements EventSubscriberInterface
 		{
 			if ($post['topic_first_post_id'] == $post['post_id']){
 				$this->post(
-						$post['forum_id'],
-						$post['topic_id'],
-						$post['post_id'],
-						$post['post_text'],
-						'post');
+                    $post['forum_id'],
+                    $post['topic_id'],
+                    $post['post_id'],
+                    $post['post_text'],
+                    'post');
 			}
 		}
 	}
@@ -375,6 +385,21 @@ class main_listener implements EventSubscriberInterface
 				$this->ukrgb_pending_actions_table);
 		}
 	}
+
+	public function core_permissions($event)
+    {
+        $permissions = $event['permissions'];
+        $permissions['u_ignore_edit_time'] = array('lang' => 'ACL_U_IGNORE_EDIT_TIME', 'cat' => 'post');
+        $event['permissions'] = $permissions;
+    }
+
+	public function modify_post_action_conditions($event)
+    {
+        if ($this->auth->acl_get('u_ignore_edit_time'))
+        {
+            $event['s_cannot_edit_time'] = 0;
+        }
+    }
 
     /**
      * Is the user a beta tester

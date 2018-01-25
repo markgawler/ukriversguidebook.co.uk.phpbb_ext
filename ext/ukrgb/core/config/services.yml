@@ -11,6 +11,8 @@ services:
             - '@user'
             - '@request'
             - '@dbal.conn'
+            - '@auth'
+            - '@language'
             - '%core.root_path%'
             - '%core.php_ext%'
             - '%ukrgb.core.tables.ukrgb_fb_posts%'

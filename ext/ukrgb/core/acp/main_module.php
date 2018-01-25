@@ -46,15 +46,11 @@ class main_module
         /** @var \phpbb\language\language $language Language object */
         $language = $phpbb_container->get('language');
 
-        $language->add_lang('core', 'ukrgb/core');
-
         global $user;
 		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
         global $db, $table_prefix;
 
-		//global $phpbb_container;
-        //$language->add_lang('acp/common');
-
+        //$language->add_lang('core', 'ukrgb/core');
 
 
         $this->tpl_name = 'core_body';
