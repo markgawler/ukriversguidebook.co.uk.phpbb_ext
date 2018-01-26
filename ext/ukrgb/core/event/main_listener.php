@@ -34,6 +34,7 @@ class main_listener implements EventSubscriberInterface
 				'core.approve_posts_after' => 'coreApprovePostsAfter',
 				'core.move_topics_before_query' => 'moveTopicsBeforeQuery',
                 'core.viewtopic_modify_post_action_conditions' => 'modify_post_action_conditions',
+                'core.posting_modify_cannot_edit_conditions' => 'modify_post_action_conditions',
                 'core.permissions' => 'core_permissions'
 			);
 		}
@@ -255,9 +256,6 @@ class main_listener implements EventSubscriberInterface
             'lang_set' => 'core',
 		);
 		$event['lang_set_ext'] = $lang_set_ext;
-		
-		//$this->user->add_lang_ext('','ucp');
-		//$this->language->
 	}
 	
 

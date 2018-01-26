@@ -50,9 +50,6 @@ class main_module
 		global $phpbb_root_path, $phpbb_admin_path, $phpEx;
         global $db, $table_prefix;
 
-        //$language->add_lang('core', 'ukrgb/core');
-
-
         $this->tpl_name = 'core_body';
 
         $this->page_title = $language->lang('ACP_UKRGB_CORE_TITLE');

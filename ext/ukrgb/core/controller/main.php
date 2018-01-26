@@ -200,7 +200,9 @@ class main
 	 */
 	public function handle($name)
 	{
-	    error_log(' Handler: ' . $name);
+        $this->user->add_lang(array('ucp'));
+
+        //error_log(' Handler: ' . $name);
 		switch ($name) {
 			case "facebook":
 				return $this->authenticate($name);
