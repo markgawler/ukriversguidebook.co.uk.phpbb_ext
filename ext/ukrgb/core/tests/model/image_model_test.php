@@ -137,7 +137,7 @@ class image_model_test extends \phpbb_database_test_case
         $image->store_upload_data();
 
         $img_data = $image->get_all_image_data();
-        $this->assertTrue($img_data['poster_id'] === 77, 'Asserting that image data is "poster_id: 99"');
+        $this->assertTrue($img_data['poster_id'] === 77, 'Asserting that image data is "poster_id: 77"');
         $this->assertTrue($img_data['upload_time'] === 15155834859777, 'Asserting that image data is "upload_time: 1515583485923"');
         $this->assertTrue($img_data['in_post'] === 0, 'Asserting that image data is "in_post: False"');
 

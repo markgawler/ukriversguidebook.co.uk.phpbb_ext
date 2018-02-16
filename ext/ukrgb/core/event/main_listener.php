@@ -308,7 +308,7 @@ class main_listener implements EventSubscriberInterface
                 $user_id = $matches[1][$key];
                 $image = new \ukrgb\core\model\image(
                     $this->db, $this->ukrgb_images_table, $file_key, $data['forum_id'], $data['topic_id'], $data['post_id'],0, $user_id);
-                $image->store_data();
+                $image->store_forum_data();
             }
         }
 	}

@@ -174,65 +174,51 @@ class image
         return $this->is_new;
     }
 
-
     /**
+     * Store upload data, upload_time and poster_id
      */
     public function store_upload_data()
     {
-        if ($this->is_new) {
-            $data = array(
-                'file_key' => $this->file_key,
-                'upload_time' => $this->upload_time,
-                'poster_id' => $this->poster_id,
-            );
-            $sql = 'INSERT INTO ' . $this->ukrgb_images_table . ' ' . $this->db->sql_build_array('INSERT', $data);
-        } else {
-            $data = array(
-                'upload_time' => (int) $this->upload_time,
-                'poster_id' => $this->poster_id,
-            );
-            $select_data = array('file_key' => $this->file_key);
-            $sql = 'UPDATE ' . $this->ukrgb_images_table . ' SET ' . $this->db->sql_build_array('UPDATE', $data) . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
-        }
-        $this->db->sql_query($sql);
-        $this->is_new = false;
+        $this->store(array(
+            'upload_time' => (int) $this->upload_time,
+            'poster_id' => $this->poster_id,
+        ));
     }
 
     /**
+     * Store forum data, post_id, topic_id, forum_id and poster_id
      */
     public function store_forum_data()
     {
-        $data = array (
+        $this->store(array (
             'in_post' => $this->in_post,
             'post_id' => $this->post_id,
             'topic_id' => $this->topic_id,
             'forum_id' => $this->forum_id,
             'poster_id' => $this->poster_id,
-
-        );
-        if ($this->is_new) {
-            $sql = 'INSERT INTO ' . $this->ukrgb_images_table . ' ' . $this->db->sql_build_array('INSERT', array_merge(array('file_key' => $this->file_key),$data));
-        } else {
-            $select_data = array('file_key' => $this->file_key);
-            $sql = 'UPDATE ' . $this->ukrgb_images_table . ' SET ' . $this->db->sql_build_array('UPDATE', $data) . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
-        }
-        $this->db->sql_query($sql);
-        $this->is_new = false;
+        ));
     }
 
     /**
+     * Store all data, will overwrite with defaults if values if not set.
      */
     public function store_data()
     {
-        $data = array (
+        $this->store(array(
             'in_post' => $this->in_post,
             'post_id' => $this->post_id,
             'topic_id' => $this->topic_id,
             'forum_id' => $this->forum_id,
             'poster_id' => $this->poster_id,
             'upload_time' => $this->upload_time,
+        ));
+    }
 
-        );
+    /**
+     * @param $data array
+     */
+    protected function store($data)
+    {
         if ($this->is_new) {
             $sql = 'INSERT INTO ' . $this->ukrgb_images_table . ' ' . $this->db->sql_build_array('INSERT', array_merge(array('file_key' => $this->file_key),$data));
         } else {
@@ -255,7 +241,6 @@ class image
         $this->db->sql_freeresult($result);
         return $row;
     }
-
 
     /**
      * @return array of data
