@@ -40,4 +40,7 @@ $lang = array_merge($lang, array(
 	'LOG_UKRGB_OAUTH_REG'			=> '<strong>User Registered using "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
 	'LOG_UKRGB_OAUTH_LINK'			=> '<strong>User account Linked to "%1$s"</strong><br />» Name "%2$s", Email: “%3$s”, Provider Id: “%4$s”',
 
+    'ACP_UKRGB_FB_PAGE_TOKEN_UPD'	=> 'Page Token Updated',
+
+
 ));
