@@ -81,7 +81,9 @@ class main_listener implements EventSubscriberInterface
 		if (!defined('ADMIN_START'))
 		{
 			$this->load_banner($event);
-			$this->template->assign_vars(array('U_UKRGB_USER_ID' => $this->user->data['user_id'],
+			$this->template->assign_vars(array(
+			    'U_UKRGB_USER_ID' => $this->user->data['user_id'],
+                'UKRGB_FB_APPID' => $this->config['ukrgb_fb_appid'],
 			));
 		}
 	}
