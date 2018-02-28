@@ -50,7 +50,6 @@ $lang = array_merge($lang, array(
 	'ACP_UKRGB_FBPT_SCOPE'			=> 'Scope',
 	'ACP_UKRGB_FBPT_ERROR'			=> 'Error',
 	
-	'ACP_UKRGB_FB_PAGE_TOKEN_UPD'	=> 'Page Token Updated',
 	'APC_UKRGB_BAD_REQUEST'			=> 'Bad Request',
 	'APC_NOT_PAGE_MGR'				=> 'Unauthorised, you are not in the Page Managers group',
 	'ACP_UKRGB_INFO'				=> 'Information',
