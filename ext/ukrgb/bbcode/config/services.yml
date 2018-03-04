@@ -1,0 +1,7 @@
+services:
+     ukrgb.bbcode.listener:       # name of the service you want to register
+        class: ukrgb\bbcode\event\main_listener
+        arguments:
+            - '@language'
+        tags:
+            - { name: event.listener }
