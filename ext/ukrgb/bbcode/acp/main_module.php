@@ -55,6 +55,7 @@ class main_module
 
 		$this->page_title = $language->lang('ACP_UKRGB_BBCODE_TITLE');
 
+		$fix_all = $request->is_set_post('fix_all');
 		$submit = $request->is_set_post('submit');
 		$hidden_fields = array();
 
@@ -63,37 +64,94 @@ class main_module
         $post_id = '';
         $post_text = '';
         $new_text = '';
+        $updated_posts = 0;
         switch ($mode) {
             case 'settings':
-                if ($submit and !check_form_key('ukrgb/bbcode')) {
-                    trigger_error('FORM_INVALID');
-                } else {
-                    $post_id = $request->variable('post_id', '');
-                    if ($post_id != '') {
-                        $post_data = $this->get_post($post_id);
+                if ($submit) {
+                    if (!check_form_key('ukrgb/bbcode')) {
+                        trigger_error('FORM_INVALID');
+                    } else {
+                        $post_id = $request->variable('post_id', '');
+                        if ($post_id != '') {
+                            $post_data = $this->get_post($post_id);
+                            if ($post_data) {
+                                $post_data['post_id'] = $post_id;
+                                $post_text = $post_data['post_text'];
+                                $new_text = $this->modify_post($post_data);
+                            } else {
+                                $post_text = 'Invalid post ID';
+                            }
+                        }
+                    }
+                }
+                if ($fix_all) {
+                    if (!check_form_key('ukrgb/bbcode')) {
+                        trigger_error('FORM_INVALID');
+                    } else {
+                        $columns = 'post_id, forum_id, topic_id, poster_id, post_subject, post_text, post_username, bbcode_uid, bbcode_bitfield, enable_bbcode, enable_smilies, enable_magic_url';
+                        $sql = 'SELECT ' . $columns . ' FROM ' . $this->post_table . " WHERE `post_text` LIKE  '%youtube%' OR `post_text` LIKE '%vimeo%' OR `post_text` LIKE '%youtu.be%' ";
+                        $result = $db->sql_query($sql);
 
-                        $post_text = $post_data['post_text'];
-                        decode_message($post_text, $post_data['bbcode_uid']);
-                        $pattern = '/(\[youtube\])([0-9a-zA-Z\-_]+)(\[\/youtube\])/i';
-                        $replacement = 'https://www.youtube.com/watch?v=$2';
-                        $new_text = preg_replace($pattern, $replacement, $post_text);
-
-                        $this->update_post($post_id,$post_data['forum_id'],$post_data['topic_id'],$post_data['post_subject'],$new_text,$post_data['post_username'], $post_data['poster_id']);
+                        while ($row = $db->sql_fetchrow($result))
+                        {
+                            //error_log($row['post_text']);
+                            $new_text = $this->modify_post($row);
+                            if ($new_text != '') {
+                                $updated_posts += 1;
+                            }
+                        }
+                        $post_text = '';
+                        $new_text = '';
 
                     }
                 }
-
                 $template->assign_vars(array(
                     'UKRGB_ACP_MODE'	=> $mode,
                     'UKRGB_BBCODE_POST_ID' => $post_id,
                     'UKRGB_BBCODE_EDIT_POST_TEXT' => $post_text,
                     'UKRGB_BBCODE_NEW_POST_TEXT' => $new_text,
+                    'UKRGB_BBCODE_UPD_COUNT' => $updated_posts,
                     'S_HIDDEN_FIELDS'	=> build_hidden_fields($hidden_fields),
 				));
 			break;
 		}
 	}
 
+    /**
+     * @param $post_data array
+     * post_id
+     * forum_id
+     * topic_id
+     * post_text
+     * post_subject
+     * post_subject
+     * poster_id
+     * @return string - modified post text
+     */
+    protected function modify_post ($post_data){
+        $post_text = $post_data['post_text'];
+        decode_message($post_text, $post_data['bbcode_uid']);
+        $pattern = array(
+            '/(\[youtube\])([0-9a-zA-Z\-_]+)(\[\/youtube\])/i',
+            '/(\[vimeo\])([0-9]+)(\[\/vimeo\])/i',
+            '/(\[url\]|)https?\:\/\/www\.youtube\.com\/[a-z]+\?v\=([0-9a-zA-Z\-_]+)(\[\/url\]|)/i',
+            '/(\[url\]|)https?\:\/\/vimeo\.com\/([0-9]+)(\[\/url\]|)/i',
+            '/(\[url\]|)https?\:\/\/youtu\.be\/([0-9a-zA-Z\-_]+)(\[\/url\]|)/i');
+        $replacement = array(
+            'https://www.youtube.com/watch?v=$2',
+            'https://vimeo.com/$2',
+            'https://www.youtube.com/watch?v=$2',
+            'https://vimeo.com/$2',
+            'https://www.youtube.com/watch?v=$2');
+
+        $count = 0;
+        $new_text = preg_replace($pattern, $replacement, $post_text, -1, $count);
+        if ($count > 0) {
+            return $this->update_post($post_data['post_id'], $post_data['forum_id'], $post_data['topic_id'], $post_data['post_subject'], $new_text, $post_data['post_subject'], $post_data['poster_id']);
+        } else {
+            return '';
+        }
+    }
 
     /**
      * @param $post_id
@@ -107,8 +165,6 @@ class main_module
         $row = $this->db->sql_fetchrow($result);
         $this->db->sql_freeresult($result);
 
-        //var_dump($row);
-        //die();
         return $row;
     }
 
@@ -116,24 +172,27 @@ class main_module
     public function update_post($post_id, $forum_id, $topic_id, $subject, $post_text, $username, $poster_id)
     {
         global $phpbb_root_path, $phpEx;
+        if (!function_exists('submit_post')) {
+            /** @noinspection PhpIncludeInspection */
+            include($phpbb_root_path . 'includes/functions_posting.' . $phpEx);
+        }
+        if (!class_exists('parse_message'))
+        {
+            /** @noinspection PhpIncludeInspection */
+            include($phpbb_root_path . 'includes/message_parser.' . $phpEx);
+        }
 
-        include($phpbb_root_path . 'includes/functions_posting.' . $phpEx);
+
         $message = utf8_normalize_nfc($post_text);
-        $uid = $bitfield = $options = ''; // will be modified by generate_text_for_storage
         $allow_bbcode = $allow_urls = true;
         $allow_smilies = false;
-        $this-> my_generate_text_for_storage($message, $uid, $bitfield, $options, $allow_bbcode, $allow_urls, $allow_smilies);
 
+        $message_parser = new \parse_message($message);
+        $message_parser->parse($allow_bbcode, $allow_urls, $allow_smilies, true, false, true, true, true, 'edit');
 
-
-        var_dump($message);
-        var_dump($uid);
-        var_dump($bitfield);
-        var_dump($options);
-        var_dump($allow_bbcode);
-        var_dump($allow_urls);
-        var_dump($allow_smilies);
-        //die();
+        $message = $message_parser->message;
+        $uid = $message_parser->bbcode_uid;
+        $bitfield = $message_parser->bbcode_bitfield;
 
         $data = array(
             'poster_id' => $poster_id,
@@ -175,28 +234,7 @@ class main_module
         );
         $poll = '';
         submit_post('edit', $subject, $username, POST_NORMAL, $poll, $data);
+        return $message;
     }
 
-
-    function my_generate_text_for_storage(&$text, &$uid, &$bitfield, &$flags, $allow_bbcode = false, $allow_urls = false, $allow_smilies = false, $allow_img_bbcode = true, $allow_flash_bbcode = true, $allow_quote_bbcode = true, $allow_url_bbcode = true, $mode = 'post')
-    {
-        global $phpbb_root_path, $phpEx;
-
-        $uid = $bitfield = '';
-        $flags = (($allow_bbcode) ? OPTION_FLAG_BBCODE : 0) + (($allow_smilies) ? OPTION_FLAG_SMILIES : 0) + (($allow_urls) ? OPTION_FLAG_LINKS : 0);
-
-        if (!class_exists('parse_message'))
-        {
-            include($phpbb_root_path . 'includes/message_parser.' . $phpEx);
-        }
-
-        $message_parser = new \parse_message($text);
-        $message_parser->parse($allow_bbcode, $allow_urls, $allow_smilies, $allow_img_bbcode, $allow_flash_bbcode, $allow_quote_bbcode, $allow_url_bbcode, true, $mode);
-
-        $text = $message_parser->message;
-        $uid = $message_parser->bbcode_uid;
-
-        $bitfield = $message_parser->bbcode_bitfield;
-        return $message_parser->warn_msg;
-    }
 }

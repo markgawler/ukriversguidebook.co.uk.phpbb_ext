@@ -33,4 +33,15 @@
 	</fieldset>
 </form>
 
+<form id="acp_board_fix_all" method="post" action="{U_ACTION}">
+	<fieldset>
+		<p class="buttons">{L_APC_UKRGB_BBCODE_ALL}
+			<input class="button" type="submit" id="fix-all" name="fix_all" value="{L_SUBMIT}" />&nbsp;
+		</p>
+		<p>{L_APC_UKRGB_BBCODE_UPD_COUNT_MSG}: {UKRGB_BBCODE_UPD_COUNT}</p>
+
+		{S_HIDDEN_FIELDS}
+		{S_FORM_TOKEN}
+	</fieldset>
+</form>
 <!-- INCLUDE overall_footer.html -->
