@@ -134,7 +134,7 @@ class main_module
         $pattern = array(
             '/(\[youtube\])([0-9a-zA-Z\-_]+)(\[\/youtube\])/i',
             '/(\[vimeo\])([0-9]+)(\[\/vimeo\])/i',
-            '/(\[url\]|)https?\:\/\/www\.youtube\.com\/[a-z]+\?v\=([0-9a-zA-Z\-_]+)(\[\/url\]|)/i',
+            '/(\[url\]|)https?\:\/\/www\.youtube\.com\/[a-z]+\?v\=([0-9a-zA-Z\-_]+)(?:\&(amp;)?feature\=youtu\.be)?(\[\/url\]|)/i',
             '/(\[url\]|)https?\:\/\/vimeo\.com\/([0-9]+)(\[\/url\]|)/i',
             '/(\[url\]|)https?\:\/\/youtu\.be\/([0-9a-zA-Z\-_]+)(\[\/url\]|)/i');
         $replacement = array(
@@ -143,7 +143,7 @@ class main_module
             'https://www.youtube.com/watch?v=$2',
             'https://vimeo.com/$2',
             'https://www.youtube.com/watch?v=$2');
-
+//&feature=youtu.be
         $count = 0;
         $new_text = preg_replace($pattern, $replacement, $post_text, -1, $count);
         if ($count > 0) {
@@ -167,7 +167,6 @@ class main_module
 
         return $row;
     }
-
 
     public function update_post($post_id, $forum_id, $topic_id, $subject, $post_text, $username, $poster_id)
     {
