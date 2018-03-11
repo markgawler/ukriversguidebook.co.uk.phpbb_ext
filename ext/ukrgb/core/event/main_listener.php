@@ -35,7 +35,8 @@ class main_listener implements EventSubscriberInterface
 				'core.move_topics_before_query' => 'moveTopicsBeforeQuery',
                 'core.viewtopic_modify_post_action_conditions' => 'modify_post_action_conditions',
                 'core.posting_modify_cannot_edit_conditions' => 'modify_post_action_conditions',
-                'core.permissions' => 'core_permissions'
+                'core.permissions' => 'core_permissions',
+                'core.posting_modify_message_text' => 'modify_deprecated_bbcodes'
 			);
 		}
 	}
@@ -271,45 +272,66 @@ class main_listener implements EventSubscriberInterface
 	
 	
 	public function coreSubmitPostEnd($event)
-	{
-		// Facebook Post
-	    $visibility = $event['post_visibility'];
-        $data= $event['data'];
+    {
+        // Facebook Post
+        $visibility = $event['post_visibility'];
+        $data = $event['data'];
         if ($visibility == ITEM_APPROVED) {
-		 	$mode = $event['mode'];
-		 	//error_log("Posting Mode:" . $mode);
+            $mode = $event['mode'];
+            //error_log("Posting Mode:" . $mode);
 
-		 	switch ($mode) {
-		 		case 'post':
-		 		case 'edit':
-		 			$this->post(
+            switch ($mode) {
+                case 'post':
+                case 'edit':
+                    $this->post(
                         $data['forum_id'],
                         $data['topic_id'],
                         $data['post_id'],
                         $data['message'],
                         $mode);
-					break;
+                    break;
                 case 'reply':
                     break;
-				default:
-					error_log('Unhandled Posting mode: ' . $mode);
-			}
-		}
+                default:
+                    error_log('Unhandled Posting mode: ' . $mode);
+            }
+        }
 
 
-		// Image tracking
+        // Image tracking
 
         $postText = $data['message'];
         strip_bbcode($postText);
         preg_match_all('#https://media\.ukriversguidebook\.co\.uk/uploads/([0-9]+)/([0-9]+-[0-9]+)\.png#', $postText, $matches);
 
-        if (count($matches[0]) >0) {
+        if (count($matches[0]) > 0) {
             foreach ($matches[2] as $key => $file_key) {
                 $user_id = $matches[1][$key];
                 $image = new \ukrgb\core\model\image(
-                    $this->db, $this->ukrgb_images_table, $file_key, $data['forum_id'], $data['topic_id'], $data['post_id'],0, $user_id);
+                    $this->db, $this->ukrgb_images_table, $file_key, $data['forum_id'], $data['topic_id'], $data['post_id'], 0, $user_id);
                 $image->store_forum_data();
             }
+        }
+
+    }
+
+    /**
+     * @param \Symfony\Component\EventDispatcher\Event $event
+     */
+    public function modify_deprecated_bbcodes($event)
+    {
+        $pattern = array(
+            '/(\[youtube\])([0-9a-zA-Z\-_]+)(\[\/youtube\])/i',
+            '/(\[vimeo\])([0-9]+)(\[\/vimeo\])/i');
+        $replacement = array(
+            'https://www.youtube.com/watch?v=$2',
+            'https://vimeo.com/$2');
+
+        $message = $event['message_parser']->message;
+        $count = 0;
+        $new_text = preg_replace($pattern, $replacement, $message, -1, $count);
+        if ($count != 0){
+            $event['message_parser']->message = $new_text;
         }
 	}
 	

@@ -143,7 +143,7 @@ class main_module
             'https://www.youtube.com/watch?v=$2',
             'https://vimeo.com/$2',
             'https://www.youtube.com/watch?v=$2');
-//&feature=youtu.be
+
         $count = 0;
         $new_text = preg_replace($pattern, $replacement, $post_text, -1, $count);
         if ($count > 0) {
