@@ -316,6 +316,8 @@ class main_listener implements EventSubscriberInterface
     }
 
     /**
+     * Replace youtube and vimeo bbcodes when a post is submitted
+     *
      * @param \Symfony\Component\EventDispatcher\Event $event
      */
     public function modify_deprecated_bbcodes($event)
