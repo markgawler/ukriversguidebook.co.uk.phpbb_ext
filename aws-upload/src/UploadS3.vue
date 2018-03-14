@@ -137,7 +137,7 @@ export default {
 
     insertBBCode (imgUri) {
       const el = document.getElementById('message')
-      const bbCode = '[img]https://' + appConfig.domain + '/' + imgUri + '[/img]\n'
+      const bbCode = '\n[img]https://' + appConfig.domain + '/' + imgUri + '[/img]\n'
 
       let text = el.value
       el.value = text + bbCode
