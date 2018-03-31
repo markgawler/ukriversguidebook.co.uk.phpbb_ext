@@ -55,7 +55,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] === 0, 'Asserting that image data is "forum_id: 0"');
         $this->assertTrue($img_data['topic_id'] === 0, 'Asserting that image data is "topic_id: 0 "');
         $this->assertTrue($img_data['post_id'] === 0, 'Asserting that image data is "post_id: 0 "');
-        $this->assertTrue($img_data['in_post'] === 0, 'Asserting that image data is "in_post: 0"');
         $this->assertTrue($img_data['poster_id'] === 0, 'Asserting that image data is "poster_id: 0"');
         $this->assertTrue($img_data['upload_time'] === 0, 'Asserting that image data is "upload_time: 0"');
     }
@@ -70,7 +69,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] === 77, 'Asserting that image data is "forum_id: 77"');
         $this->assertTrue($img_data['topic_id'] === 123456, 'Asserting that image data is "topic_id: 123456 "');
         $this->assertTrue($img_data['post_id'] === 654321, 'Asserting that image data is "post_id: 654321 "');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: 1"');
         $this->assertTrue($img_data['poster_id'] === 0, 'Asserting that image data is "poster_id: 0"');
         $this->assertTrue($img_data['upload_time'] === 0, 'Asserting that image data is "upload_time: 0"');
     }
@@ -84,7 +82,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] === 0, 'Asserting that image data is "forum_id: 0"');
         $this->assertTrue($img_data['topic_id'] === 0, 'Asserting that image data is "topic_id: 0 "');
         $this->assertTrue($img_data['post_id'] === 0, 'Asserting that image data is "post_id: 0 "');
-        $this->assertTrue($img_data['in_post'] === 0, 'Asserting that image data is "in_post:0 "');
         $this->assertTrue($img_data['poster_id'] === 46, 'Asserting that image data is "poster_id: 46"');
         $this->assertTrue($img_data['upload_time'] === 33333333, 'Asserting that image data is "upload_time: 33333333"');
 
@@ -113,7 +110,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['post_id'] === 8765432, 'Asserting that image data is "post_id: 8765432"');
         $this->assertTrue($img_data['topic_id'] === 23456, 'Asserting that image data is "topic_id: 23456"');
         $this->assertTrue($img_data['forum_id'] === 43, 'Asserting that image data is "forum_id: 43"');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True"');
 
 
         // Insert
@@ -123,7 +119,6 @@ class image_model_test extends \phpbb_database_test_case
         $img_data = $image->get_all_image_data();
         $this->assertTrue($img_data['poster_id'] === 99, 'Asserting that image data is "poster_id: 99"');
         $this->assertTrue($img_data['upload_time'] === 1515583485923, 'Asserting that image data is "upload_time: 1515583485923"');
-        $this->assertTrue($img_data['in_post'] === 0, 'Asserting that image data is "in_post: False"');
 
     }
 
@@ -139,7 +134,6 @@ class image_model_test extends \phpbb_database_test_case
         $img_data = $image->get_all_image_data();
         $this->assertTrue($img_data['poster_id'] === 77, 'Asserting that image data is "poster_id: 77"');
         $this->assertTrue($img_data['upload_time'] === 15155834859777, 'Asserting that image data is "upload_time: 1515583485923"');
-        $this->assertTrue($img_data['in_post'] === 0, 'Asserting that image data is "in_post: False"');
 
 
         // Insert new reusing object
@@ -149,7 +143,6 @@ class image_model_test extends \phpbb_database_test_case
         $img_data = $image->get_all_image_data();
         $this->assertTrue($img_data['poster_id'] === 99, 'Asserting that image data is "poster_id: 99"');
         $this->assertTrue($img_data['upload_time'] === 1515583485923, 'Asserting that image data is "upload_time: 1515583485923"');
-        $this->assertTrue($img_data['in_post'] === 0, 'Asserting that image data is "in_post: False"');
 
     }
 
@@ -164,7 +157,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] === 12, 'Asserting that image data is "forum_id: 12"');
         $this->assertTrue($img_data['topic_id'] === 121212, 'Asserting that image data is "topic_id: 121212 "');
         $this->assertTrue($img_data['post_id'] === 2121212121, 'Asserting that image data is "post_id: 2121212121 "');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True" (1)');
 
 
         // Insert new reusing object
@@ -175,7 +167,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] === 23, 'Asserting that image data is "forum_id: 23"');
         $this->assertTrue($img_data['topic_id'] === 232323, 'Asserting that image data is "topic_id: 232323 "');
         $this->assertTrue($img_data['post_id'] === 3434343434, 'Asserting that image data is "post_id: 3434343434 "');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True" (2)');
 
     }
 
@@ -190,7 +181,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] == 44, 'Asserting that image data is "forum_id: 44"');
         $this->assertTrue($img_data['topic_id'] == 5555555, 'Asserting that image data is "topic_id: 5555555 "');
         $this->assertTrue($img_data['post_id'] == 45454545, 'Asserting that image data is "post_id: 45454545 "');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True"');
         $this->assertTrue($img_data['poster_id'] === 1234, 'Asserting that image data is "poster_id: 1234"');
         $this->assertTrue($img_data['upload_time'] === 1515404083, 'Asserting that image data is "upload_time: 1515404083"');
     }
@@ -208,7 +198,6 @@ class image_model_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] == 43, 'Asserting that image data is "forum_id: 43"');
         $this->assertTrue($img_data['topic_id'] == 23456, 'Asserting that image data is "topic_id: 5555555 "');
         $this->assertTrue($img_data['post_id'] ==  8765432, 'Asserting that image data is "post_id: 45454545 "');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True"');
         $this->assertTrue($img_data['poster_id'] === 4321, 'Asserting that image data is "poster_id: 4321"');
         $this->assertTrue($img_data['upload_time'] === 1515406683, 'Asserting that image data is "upload_time: 1515406683"');
     }

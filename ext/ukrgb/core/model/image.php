@@ -68,8 +68,6 @@ class image
      */
     protected $poster_id;
 
-    protected $in_post;
-
     protected $is_new;
     /**
      * Constructor for ukrgb Image
@@ -106,15 +104,6 @@ class image
         $this->upload_time = $this->set_value($upload_time,$img_data['upload_time'],0,$is_new);
         $this->poster_id = $this->set_value($poster_id,$img_data['poster_id'],0,$is_new);
 
-        if (empty($forum_id) && empty($post_id) && empty($topic_id) && $is_new) {
-            $this-> in_post = false;
-        } else {
-            if ($is_new){
-                $this-> in_post = true;
-            } else {
-                $this->in_post = ($img_data['in_post'] === 1);
-            }
-        }
     }
 
     private function set_value($param_val, $db_val, $default_val, $is_new)
@@ -153,7 +142,6 @@ class image
         $this->forum_id = $forum_id;
         $this->topic_id = $topic_id;
         $this->post_id = $post_id;
-        $this->in_post = ($forum_id || $topic_id || $post_id);
         $this->store_forum_data();
     }
 
@@ -163,7 +151,7 @@ class image
     */
     public function is_in_post()
     {
-        return ($this->in_post);
+        return ($this->post_id != 0);
     }
 
     /**
@@ -191,7 +179,6 @@ class image
     public function store_forum_data()
     {
         $this->store(array (
-            'in_post' => $this->in_post,
             'post_id' => $this->post_id,
             'topic_id' => $this->topic_id,
             'forum_id' => $this->forum_id,
@@ -205,7 +192,6 @@ class image
     public function store_data()
     {
         $this->store(array(
-            'in_post' => $this->in_post,
             'post_id' => $this->post_id,
             'topic_id' => $this->topic_id,
             'forum_id' => $this->forum_id,
@@ -261,7 +247,7 @@ class image
     public function get_forum_data()
     {
         $select_data = array('file_key' => $this->file_key);
-        $sql = 'SELECT post_id,forum_id,topic_id,in_post FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
+        $sql = 'SELECT post_id,forum_id,topic_id FROM ' . $this->ukrgb_images_table . ' WHERE ' . $this->db->sql_build_array('SELECT', $select_data);
         $result = $this->db->sql_query($sql);
         $row = $this->db->sql_fetchrow($result);
         $this->db->sql_freeresult($result);

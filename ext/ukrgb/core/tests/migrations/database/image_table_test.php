@@ -41,7 +41,7 @@ class image_table_test extends \phpbb_database_test_case
 
     public function test_image_table_columns()
     {
-        $colums = array('file_key','poster_id','upload_time', 'post_id', 'topic_id', 'forum_id', 'in_post');
+        $colums = array('file_key','poster_id','upload_time', 'post_id', 'topic_id', 'forum_id');
         foreach ($colums as $c) {
             $this->assertTrue($this->db_tools->sql_column_exists($this->table_prefix . 'ukrgb_images', $c), 'Asserting that column "' . $c . '" exists');
         }

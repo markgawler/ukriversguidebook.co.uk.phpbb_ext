@@ -107,7 +107,6 @@ class image_orphan_test extends \phpbb_database_test_case
         $this->assertTrue($img_data['forum_id'] == 43, 'Asserting that image data is "forum_id: 43"');
         $this->assertTrue($img_data['topic_id'] == 23456, 'Asserting that image data is "topic_id: 5555555 "');
         $this->assertTrue($img_data['post_id'] ==  8765432, 'Asserting that image data is "post_id: 45454545 "');
-        $this->assertTrue($img_data['in_post'] === 1, 'Asserting that image data is "in_post: True"');
         $this->assertTrue($img_data['poster_id'] === 1234, 'Asserting that image data is "poster_id: 1234"');
         $this->assertTrue($img_data['upload_time'] === $time_stamp, 'Asserting that image data is "upload_time: ' . $time_stamp);
     }
