@@ -74,7 +74,7 @@ class image_client
         try
         {
             $result = $this->util_aws_sqs->receive_message();
-            if (count($result->get('Messages')) > 0)
+            if (!empty($result->get('Messages')))
             {
                 $message = $result->get('Messages')[0];
                 $sentTime = (int) json_decode($message['Attributes']['SentTimestamp'])/1000;
