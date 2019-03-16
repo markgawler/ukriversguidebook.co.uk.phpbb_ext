@@ -326,7 +326,7 @@ class main
 					'name' =>  $data['username'],
 					'username' =>  $data['username'],
 					'password' => $data['new_password'],
-					'email' => $data['email'],	
+					'email' => $data['email'],
 			);
 					
 			if ($this->config['new_member_post_limit'])
@@ -518,7 +518,7 @@ class main
 		if (!$row)
 		{
 		    // Link or register
-			if (!empty($result['email']) && $result['verified'])
+			if (!empty($result['email']))
 			{
 				// user not logged in, is the email already registered
 				$users = $this->get_user_by_email($result['email']);
@@ -568,7 +568,7 @@ class main
 			}
 			else 
 			{
-			    error_log("fail condition authenticate");
+			    //error_log("fail condition authenticate");
 				// Fail conditions
 				if (empty($result['email']))
 				{
@@ -581,7 +581,6 @@ class main
 			}
 		}
 
-		error_log("assign var");
 		$this->template->assign_vars(array(
 				'MESSAGE_TITLE' =>  $this->user->lang($msg_title),
 				'MESSAGE_TEXT' =>  $this->user->lang($error_msg),
@@ -739,14 +738,14 @@ class main
      */
     protected function perform_auth_login($service)
 	{
-	    error_log("perform_auth_login");
+	    //error_log("perform_auth_login");
 		if (!($service instanceof \OAuth\OAuth2\Service\Facebook))
 		{
 			throw new \exception('AUTH_PROVIDER_OAUTH_ERROR_INVALID_SERVICE_TYPE');
 		}
 		// This was a callback request, get the token
 		$token = $service->requestAccessToken($this->request->variable('code', ''));
-        $res = json_decode($service->request('/me?fields=first_name,name,email,verified,id'), true);
+        $res = json_decode($service->request('/me?fields=first_name,name,email,id'), true);
         return $res;
 	}
 
